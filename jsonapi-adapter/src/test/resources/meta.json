@@ -1,0 +1,14 @@
+{
+  "number": 1.5,
+  "string": "value",
+  "boolean": true,
+  "array": [
+    "one",
+    "two",
+    "three"
+  ],
+  "null": null,
+  "nested": {
+    "foo": "bar"
+  }
+}

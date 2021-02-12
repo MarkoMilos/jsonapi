@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "type": "type",
+      "id": "1"
+    },
+    {
+      "type": "type",
+      "id": "2"
+    },
+    {
+      "type": "type",
+      "id": "3"
+    }
+  ],
+  "links": {
+    "self": "self"
+  },
+  "meta": {
+    "name": "value"
+  }
+}

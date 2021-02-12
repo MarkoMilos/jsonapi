@@ -1,0 +1,17 @@
+{
+  "type": "articles",
+  "id": "1",
+  "attributes": {
+    "title": "Title1",
+    "headline": "Headline1"
+  },
+  "custom_name": "ignored",
+  "custom_object": {
+    "name": "ignored"
+  },
+  "custom_array": [
+    {
+      "name": "ignored"
+    }
+  ]
+}

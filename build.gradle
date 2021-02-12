@@ -1,0 +1,37 @@
+buildscript {
+  ext.versions = [
+    'kotlin' : '1.4.10',
+    'moshi'  : '1.11.0',
+    'junit'  : '4.13',
+    'assertj': '3.17.2'
+  ]
+
+  ext.deps = [
+    'kotlinStdlib'        : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
+    'moshi'               : "com.squareup.moshi:moshi:${versions.moshi}",
+    'moshi_kotlin_codegen': "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
+    'junit'               : "junit:junit:${versions.junit}",
+    'assertj'             : "org.assertj:assertj-core:${versions.assertj}"
+  ]
+
+  repositories {
+    mavenCentral()
+    jcenter()
+    google()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+  }
+}
+
+allprojects {
+  repositories {
+    mavenCentral()
+    jcenter()
+    google()
+  }
+}
+
+task clean(type: Delete) {
+  delete rootProject.buildDir
+}

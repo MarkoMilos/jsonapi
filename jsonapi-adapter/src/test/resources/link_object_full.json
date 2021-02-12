@@ -1,0 +1,16 @@
+{
+  "href": "href",
+  "rel": "rel",
+  "describedby": {
+    "href": "href"
+  },
+  "title": "title",
+  "type": "type",
+  "hreflang": [
+    "en",
+    "es"
+  ],
+  "meta": {
+    "name": "value"
+  }
+}

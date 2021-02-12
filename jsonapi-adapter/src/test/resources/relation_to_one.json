@@ -1,0 +1,15 @@
+{
+  "data": {
+    "type": "type",
+    "id": "1",
+    "meta": {
+      "name": "value"
+    }
+  },
+  "links": {
+    "self": "self"
+  },
+  "meta": {
+    "name": "value"
+  }
+}
