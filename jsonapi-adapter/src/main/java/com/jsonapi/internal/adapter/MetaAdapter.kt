@@ -3,7 +3,7 @@ package com.jsonapi.internal.adapter
 import com.jsonapi.Meta
 import com.squareup.moshi.*
 
-class MetaAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
+internal class MetaAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
   
   private val mapAdapter: JsonAdapter<Map<String, Any?>> = moshi.adapter(
     Types.newParameterizedType(Map::class.java, String::class.java, Any::class.java)

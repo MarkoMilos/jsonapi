@@ -7,7 +7,7 @@ import com.jsonapi.Meta
 import com.squareup.moshi.*
 import com.squareup.moshi.JsonReader.Token
 
-class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
+internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
   
   private val linkAdapter: JsonAdapter<Link> = moshi.adapter(Link::class.java)
   private val metaAdapter: JsonAdapter<Meta> = moshi.adapter(Meta::class.java)

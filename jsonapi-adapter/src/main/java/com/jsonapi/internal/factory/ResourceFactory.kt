@@ -8,7 +8,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
-class ResourceFactory(
+internal class ResourceFactory(
   private val types: List<Type>,
   private val typeNames: List<String>,
   private val allowUnregisteredTypes: Boolean

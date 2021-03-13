@@ -10,7 +10,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 
-class DocumentAdapter(
+internal class DocumentAdapter(
   private val dataAdapter: JsonAdapter<Document.Data<*>>,
   private val errorsAdapter: JsonAdapter<Document.Errors>
 ) : JsonAdapter<Document<*>>() {

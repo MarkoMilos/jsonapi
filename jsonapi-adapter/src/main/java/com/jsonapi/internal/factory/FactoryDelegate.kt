@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonAdapter.Factory
 import com.squareup.moshi.Moshi
 import java.lang.reflect.Type
 
-interface FactoryDelegate {
+internal interface FactoryDelegate {
   
   fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi, parent: Factory): JsonAdapter<*>?
   

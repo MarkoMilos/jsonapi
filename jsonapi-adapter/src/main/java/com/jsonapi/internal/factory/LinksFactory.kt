@@ -10,7 +10,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
-class LinksFactory : FactoryDelegate {
+internal class LinksFactory : FactoryDelegate {
   
   override fun create(
     type: Type,

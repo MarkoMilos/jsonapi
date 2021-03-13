@@ -7,7 +7,7 @@ import com.squareup.moshi.Moshi
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
-class DataFactory : FactoryDelegate {
+internal class DataFactory : FactoryDelegate {
   
   override fun create(
     type: Type,

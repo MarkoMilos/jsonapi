@@ -8,7 +8,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
-class RelationFactory : FactoryDelegate {
+internal class RelationFactory : FactoryDelegate {
   
   override fun create(
     type: Type,

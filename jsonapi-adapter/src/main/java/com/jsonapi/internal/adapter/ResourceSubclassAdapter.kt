@@ -5,7 +5,7 @@ import com.jsonapi.internal.*
 import com.squareup.moshi.*
 import java.lang.reflect.Type
 
-class ResourceSubclassAdapter<T : Resource>(
+internal class ResourceSubclassAdapter<T : Resource>(
   private val moshi: Moshi,
   private val delegateAdapter: JsonAdapter<T>,
   private val resourceType: Type,

@@ -11,7 +11,7 @@ import com.squareup.moshi.Types
 import java.lang.reflect.Type
 import com.jsonapi.Type as TypeAnnotation
 
-class ResourceSubclassFactory(
+internal class ResourceSubclassFactory(
   private val typeNames: List<String>,
   private val allowUnregisteredTypes: Boolean,
   private val strictTypes: Boolean

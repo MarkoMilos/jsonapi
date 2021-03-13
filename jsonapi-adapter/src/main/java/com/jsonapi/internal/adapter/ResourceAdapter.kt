@@ -8,7 +8,7 @@ import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import java.lang.reflect.Type
 
-class ResourceAdapter constructor(
+internal class ResourceAdapter constructor(
   private val types: List<Type>,
   private val typeNames: List<String>,
   private val typeAdapters: List<JsonAdapter<Any>>,

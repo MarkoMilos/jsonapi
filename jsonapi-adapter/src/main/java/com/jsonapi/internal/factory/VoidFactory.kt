@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import java.lang.reflect.Type
 
-class VoidFactory : FactoryDelegate {
+internal class VoidFactory : FactoryDelegate {
   
   override fun create(
     type: Type,

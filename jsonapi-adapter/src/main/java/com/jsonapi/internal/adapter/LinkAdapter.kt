@@ -10,7 +10,7 @@ import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 
-class LinkAdapter(moshi: Moshi) : JsonAdapter<Link>() {
+internal class LinkAdapter(moshi: Moshi) : JsonAdapter<Link>() {
   
   private val linkObjectAdapter: JsonAdapter<LinkObject> = moshi.adapter(LinkObject::class.java)
   

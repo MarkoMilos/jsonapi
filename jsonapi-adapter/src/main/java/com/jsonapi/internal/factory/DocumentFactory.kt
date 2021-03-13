@@ -9,7 +9,7 @@ import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
-class DocumentFactory : FactoryDelegate {
+internal class DocumentFactory : FactoryDelegate {
   
   override fun create(
     type: Type,

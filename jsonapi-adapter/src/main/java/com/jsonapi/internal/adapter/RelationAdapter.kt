@@ -11,7 +11,7 @@ import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 
-class RelationAdapter(moshi: Moshi) : JsonAdapter<Relation>() {
+internal class RelationAdapter(moshi: Moshi) : JsonAdapter<Relation>() {
   
   private val toOneAdapter = moshi.adapter(ToOne::class.java)
   private val toManyAdapter = moshi.adapter(ToMany::class.java)
