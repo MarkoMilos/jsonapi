@@ -92,7 +92,7 @@ sealed class Document<T> {
   fun asDataOrThrow(): Data<T> {
     return when (this) {
       is Data -> this
-      is Errors -> throw JsonApiErrorsException(errors)
+      is Errors -> throw JsonApiErrorsException(this)
     }
   }
   
@@ -128,7 +128,7 @@ sealed class Document<T> {
   fun getNonNull(): T {
     return when (this) {
       is Data -> data ?: throw NullPointerException("Resource(s) for this document is null")
-      is Errors -> throw JsonApiErrorsException(errors)
+      is Errors -> throw JsonApiErrorsException(this)
     }
   }
   
@@ -144,7 +144,7 @@ sealed class Document<T> {
   fun getOrThrow(): T? {
     return when (this) {
       is Data -> data
-      is Errors -> throw JsonApiErrorsException(errors)
+      is Errors -> throw JsonApiErrorsException(this)
     }
   }
   
@@ -189,7 +189,7 @@ sealed class Document<T> {
   /** Throws [JsonApiErrorsException] if this document is [Errors]. */
   fun throwIfErrors() {
     if (this is Errors) {
-      throw JsonApiErrorsException(errors)
+      throw JsonApiErrorsException(this)
     }
   }
   

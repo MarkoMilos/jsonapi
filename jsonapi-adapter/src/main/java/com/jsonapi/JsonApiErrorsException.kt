@@ -1,5 +1,5 @@
 package com.jsonapi
 
-class JsonApiErrorsException(
-  val errors: List<Error> = emptyList()
-) : Exception()
+import com.jsonapi.Document.Errors
+
+class JsonApiErrorsException(val errors: Errors) : Exception()
