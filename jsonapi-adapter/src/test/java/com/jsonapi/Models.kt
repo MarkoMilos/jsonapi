@@ -1,8 +1,5 @@
 package com.jsonapi
 
-import com.jsonapi.annotation.Relationship
-import com.jsonapi.annotation.Type
-import com.jsonapi.model.Resource
 import com.squareup.moshi.JsonClass
 
 /** Class that does not extend from Resource */

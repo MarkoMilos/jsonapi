@@ -1,9 +1,5 @@
 package com.jsonapi;
 
-import com.jsonapi.annotation.Relationship;
-import com.jsonapi.annotation.Type;
-import com.jsonapi.model.Document;
-import com.jsonapi.model.Resource;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;

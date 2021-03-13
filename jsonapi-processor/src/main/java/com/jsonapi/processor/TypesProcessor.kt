@@ -1,7 +1,7 @@
 package com.jsonapi.processor
 
 import com.google.auto.service.AutoService
-import com.jsonapi.annotation.Type
+import com.jsonapi.Type
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeSpec

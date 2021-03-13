@@ -1,12 +1,11 @@
 package com.jsonapi
 
-import com.jsonapi.factory.*
-import com.jsonapi.model.Resource
+import com.jsonapi.internal.factory.*
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import java.lang.reflect.Type
-import com.jsonapi.annotation.Type as TypeAnnotation
+import com.jsonapi.Type as TypeAnnotation
 
 class JsonApiFactory private constructor(
   types: List<Type>,

@@ -1,7 +1,5 @@
 package com.jsonapi
 
-import com.jsonapi.annotation.Type
-import com.jsonapi.model.Resource
 import org.junit.Test
 
 class JsonApiFactoryBuilderTest {
