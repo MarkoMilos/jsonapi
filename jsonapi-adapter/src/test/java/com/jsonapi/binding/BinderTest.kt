@@ -21,6 +21,15 @@ class BinderTest {
   
   @Before
   fun setup() {
+    author1 = Person("people", "1", "Name1", "Surname1", "@twitter1")
+    author2 = Person("people", "2", "Name2", "Surname2", "@twitter2")
+    
+    comment1 = Comment("comments", "1", "Comment1", author2)
+    comment1.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "2")))
+    
+    comment2 = Comment("comments", "2", "Comment2", author1)
+    comment2.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "1")))
+    
     article1 = Article("articles", "1", "Title1")
     article1.relationships = mapOf(
       "author" to ToOne(ResourceIdentifier("people", "1")),
@@ -38,24 +47,6 @@ class BinderTest {
       "author" to ToOne(ResourceIdentifier("people", "2")),
       "related" to ToMany(listOf(ResourceIdentifier("articles", "1")))
     )
-    
-    author1 = Person("Name1", "Surname1", "@twitter1")
-    author1.id = "1"
-    author1.type = "people"
-    
-    author2 = Person("Name2", "Surname2", "@twitter2")
-    author2.id = "2"
-    author2.type = "people"
-    
-    comment1 = Comment("Comment1", null)
-    comment1.id = "1"
-    comment1.type = "comments"
-    comment1.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "2")))
-    
-    comment2 = Comment("Comment2", null)
-    comment2.id = "2"
-    comment2.type = "comments"
-    comment2.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "1")))
   }
   
   @Test

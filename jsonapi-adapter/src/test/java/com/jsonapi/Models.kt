@@ -5,7 +5,6 @@ import com.jsonapi.annotation.Type
 import com.jsonapi.model.Resource
 import com.squareup.moshi.JsonClass
 
-// TODO remove from here and add to tests directly
 /** Class that does not extend from Resource */
 @JsonClass(generateAdapter = true)
 class NotAResource
@@ -31,8 +30,8 @@ class ValidResourceSubclass : ValidResource()
 @JsonClass(generateAdapter = true)
 @Type("articles")
 open class Article(
-  type: String = "",
-  id: String = "",
+  type: String?,
+  id: String?,
   var title: String? = "",
   @Relationship("author") val author: Person? = null,
   @Relationship("comments") val comments: List<Comment>? = null,
@@ -45,25 +44,27 @@ open class Article(
 
 @JsonClass(generateAdapter = true)
 class SpecialArticle(
-  type: String = "",
-  id: String = "",
+  type: String?,
+  id: String?,
   title: String? = "",
   val headline: String,
 ) : Article(type, id, title)
 
-// TODO move away from data classes and create only class for this
-//  so that we can use type and id in constructor -> Person("1","people", "name"...)
 @JsonClass(generateAdapter = true)
 @Type("people")
-data class Person(
+class Person(
+  type: String?,
+  id: String?,
   val firstName: String,
   val lastName: String,
   val twitter: String
-) : Resource()
+) : Resource(type, id)
 
 @JsonClass(generateAdapter = true)
 @Type("comments")
-data class Comment(
+class Comment(
+  type: String?,
+  id: String?,
   val body: String,
   @Relationship("author") val author: Person?
-) : Resource()
+) : Resource(type, id)

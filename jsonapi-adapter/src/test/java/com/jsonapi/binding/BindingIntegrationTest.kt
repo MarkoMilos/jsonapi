@@ -9,21 +9,11 @@ class BindingIntegrationTest {
   
   @Test
   fun `unbind followed by bind reverts primary resource to initial state`() {
-    val author1 = Person("Name1", "Surname1", "@twitter1")
-    author1.type = "people"
-    author1.id = "1"
+    val author1 = Person("people", "1", "Name1", "Surname1", "@twitter1")
+    val author2 = Person("people", "2", "Name2", "Surname2", "@twitter2")
     
-    val author2 = Person("Name2", "Surname2", "@twitter2")
-    author2.type = "people"
-    author2.id = "2"
-    
-    val comment1 = Comment("Comment1", author2)
-    comment1.type = "comments"
-    comment1.id = "1"
-    
-    val comment2 = Comment("Comment2", author1)
-    comment2.type = "comments"
-    comment2.id = "2"
+    val comment1 = Comment("comments", "1", "Comment1", author2)
+    val comment2 = Comment("comments", "2", "Comment2", author1)
     
     val article2 = Article("articles", "2", "Title2", author2, null)
     val article1 = Article("articles", "1", "Title1", author1, listOf(comment1, comment2), listOf(article2))
@@ -39,7 +29,7 @@ class BindingIntegrationTest {
     assertThat(document.data?.relatedArticles).isNull()
     
     // relationship resources
-    assertThat(document.included).containsExactlyInAnyOrder(article2, author1, author2, comment1, comment2)
+    assertThat(document.included).containsExactlyInAnyOrder(author1, author2, comment1, comment2, article2)
     assertThat(article2.author).isNull()
     assertThat(article2.comments).isNull()
     assertThat(comment1.author).isNull()

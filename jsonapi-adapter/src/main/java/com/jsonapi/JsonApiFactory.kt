@@ -40,9 +40,7 @@ class JsonApiFactory private constructor(
     private val types = mutableListOf<Type>()
     private val typeNames = mutableListOf<String>()
     private var allowUnregisteredTypes = false
-    
-    // TODO consider changing this to true as default
-    private var strictTypes = false
+    private var strictTypes = true
     
     fun addType(type: Class<out Resource>) = apply {
       types.add(type)

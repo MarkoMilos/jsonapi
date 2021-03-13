@@ -232,13 +232,13 @@ class ResourceSubclassAdapterTest {
   
   @Test(expected = JsonApiException::class)
   fun `throw when serializing resource without type`() {
-    val article = Article(id = "1")
+    val article = Article(type = null, id = "1")
     articleAdapter.toJson(article)
   }
   
   @Test(expected = JsonApiException::class)
   fun `throw when serializing resource without id or lid`() {
-    val article = Article(type = "articles")
+    val article = Article(type = "articles", id = null)
     articleAdapter.toJson(article)
   }
 }

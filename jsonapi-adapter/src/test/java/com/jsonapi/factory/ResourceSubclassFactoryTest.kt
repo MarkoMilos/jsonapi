@@ -31,7 +31,7 @@ class ResourceSubclassFactoryTest {
   
   @Test
   fun `returns null when type does not inherit from Resource`() {
-    val type = NotAResour::class.java
+    val type = NotAResource::class.java
     val adapter = resourceFactory.create(type, mutableSetOf(), moshi, factory)
     assertThat(adapter).isNull()
   }

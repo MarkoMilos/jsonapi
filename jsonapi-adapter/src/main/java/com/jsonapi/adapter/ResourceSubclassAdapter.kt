@@ -146,7 +146,7 @@ class ResourceSubclassAdapter<T : Resource>(
         "Expected resource type name is one of $typeNames "
           + "but was '$type' "
           + "on path [$path]."
-          + "\nRegister this type or use allowUnregisteredTypes(true)."
+          + "\nRegister this type or use allowUnregisteredTypes(true) on JsonApiFactory.Builder."
       )
     }
     
