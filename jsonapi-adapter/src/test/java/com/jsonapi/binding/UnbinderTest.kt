@@ -26,28 +26,27 @@ class UnbinderTest {
   
   @Before
   fun setup() {
-    author1 = Person("John", "Doe", "@johndoe")
+    author1 = Person("Name1", "Surname1", "@twitter1")
     author1.type = "people"
     author1.id = "1"
     
-    author2 = Person("Siri", "Tailor", "@siritailor")
+    author2 = Person("Name2", "Surname2", "@twitter2")
     author2.type = "people"
     author2.id = "2"
     
-    comment1 = Comment("First comment", author2)
+    comment1 = Comment("Comment1", author2)
     comment1.type = "comments"
     comment1.id = "1"
     
-    comment2 = Comment("Thanks for commenting", author1)
+    comment2 = Comment("Comment2", author1)
     comment2.type = "comments"
     comment2.id = "2"
     
-    article1 = Article("articles", "1", "Article 1 title", author1, listOf(comment1, comment2))
-    article2 = Article("articles", "2", "Article 2 title", author2, null)
+    article1 = Article("articles", "1", "Title1", author1, listOf(comment1, comment2))
+    article2 = Article("articles", "2", "Title2", author2, null)
     
     article1RelationshipRequirements = Consumer<Article> { article ->
       assertThat(article.relationships)
-        .isNotNull
         .containsOnlyKeys("author", "comments")
         .containsExactly(
           entry("author", Relation.ToOne(ResourceIdentifier("people", "1"))),
@@ -64,7 +63,6 @@ class UnbinderTest {
     
     article2RelationshipRequirements = Consumer { article ->
       assertThat(article.relationships)
-        .isNotNull
         .containsOnlyKeys("author")
         .containsExactly(entry("author", Relation.ToOne(ResourceIdentifier("people", "2"))))
     }
@@ -203,18 +201,6 @@ class UnbinderTest {
     
     assertThat(document.data).isEqualTo(articleA)
     assertThat(document.included).containsExactly(articleB, articleC)
-  }
-  
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when single resource document is not valid`() {
-    val document = Document.Data(NotAResource())
-    document.unbind()
-  }
-  
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when resource collection document is not valid`() {
-    val document = Document.Data(listOf(ValidResource(), NotAResource()))
-    document.unbind()
   }
   
   @Test(expected = IllegalArgumentException::class)

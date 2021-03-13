@@ -50,9 +50,9 @@ public class JavaTest {
 
     assertThat(deserialized).isNotNull().isInstanceOfSatisfying(Document.Data.class, data -> {
       assertThat(data.getData()).isNotNull().isInstanceOfSatisfying(JavaArticle.class, article -> {
-        assertThat(article.title).isEqualTo("Title");
+        assertThat(article.title).isEqualTo("Title1");
         assertThat(article.author).isNotNull();
-        assertThat(article.author.getId()).isEqualTo("9");
+        assertThat(article.author.getId()).isEqualTo("1");
       });
     });
   }

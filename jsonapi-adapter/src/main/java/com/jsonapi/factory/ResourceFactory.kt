@@ -27,7 +27,7 @@ class ResourceFactory(
     val typeAdapters = mutableListOf<JsonAdapter<Any>>()
     types.forEach { typeAdapters.add(moshi.adapter(it)) }
     
-    // if unregistered types are allowed request adapter for Resource type but skip past this factory to
+    // if unregistered types are allowed request adapter for Resource type but skip past parent factory to
     // avoid infinite loop. This way adapter for type can be safely use within ResourceAdapter as default
     val defaultResourceAdapter: JsonAdapter<Any>? =
       if (allowUnregisteredTypes) moshi.nextAdapter(parent, type, annotations) else null

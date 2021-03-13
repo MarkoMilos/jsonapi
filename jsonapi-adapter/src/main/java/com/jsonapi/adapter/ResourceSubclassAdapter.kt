@@ -13,7 +13,7 @@ class ResourceSubclassAdapter<T : Resource>(
   private val delegateAdapter: JsonAdapter<T>,
   private val resourceType: Type,
   private val annotatedTypeName: String,
-  private val strictTypeChecking: Boolean,
+  private val strictTypes: Boolean,
   private val typeNames: List<String>,
   private val allowUnregisteredTypes: Boolean
 ) : JsonAdapter<T>() {
@@ -49,13 +49,13 @@ class ResourceSubclassAdapter<T : Resource>(
     reader.beginObject()
     while (reader.hasNext()) {
       when (reader.nextName()) {
-        KEY_TYPE -> type = stringAdapter.fromJson(reader)
-        KEY_ID -> id = stringAdapter.fromJson(reader)
-        KEY_LID -> lid = stringAdapter.fromJson(reader)
-        KEY_ATTRIBUTES -> resource = delegateAdapter.fromJson(reader)
-        KEY_RELATIONSHIPS -> relationships = relationshipAdapter.fromJson(reader)
-        KEY_LINKS -> links = linksAdapter.fromJson(reader)
-        KEY_META -> meta = metaAdapter.fromJson(reader)
+        NAME_TYPE -> type = stringAdapter.fromJson(reader)
+        NAME_ID -> id = stringAdapter.fromJson(reader)
+        NAME_LID -> lid = stringAdapter.fromJson(reader)
+        NAME_ATTRIBUTES -> resource = delegateAdapter.fromJson(reader)
+        NAME_RELATIONSHIPS -> relationships = relationshipAdapter.fromJson(reader)
+        NAME_LINKS -> links = linksAdapter.fromJson(reader)
+        NAME_META -> meta = metaAdapter.fromJson(reader)
         else -> reader.skipValue() // ignore non standard names (skip value)
       }
     }
@@ -111,18 +111,18 @@ class ResourceSubclassAdapter<T : Resource>(
     // serialize values
     writer
       .beginObject()
-      .name(KEY_TYPE).value(type)
-      .name(KEY_ID).value(id)
-      .name(KEY_LID).value(lid)
+      .name(NAME_TYPE).value(type)
+      .name(NAME_ID).value(id)
+      .name(NAME_LID).value(lid)
       .apply {
         if (attributes != "{}") {
-          name(KEY_ATTRIBUTES)
+          name(NAME_ATTRIBUTES)
           delegateAdapter.toJson(writer, value)
         }
       }
-      .name(KEY_RELATIONSHIPS).apply { relationshipAdapter.toJson(writer, relationships) }
-      .name(KEY_LINKS).apply { linksAdapter.toJson(writer, links) }
-      .name(KEY_META).apply { metaAdapter.toJson(writer, meta) }
+      .name(NAME_RELATIONSHIPS).apply { relationshipAdapter.toJson(writer, relationships) }
+      .name(NAME_LINKS).apply { linksAdapter.toJson(writer, links) }
+      .name(NAME_META).apply { metaAdapter.toJson(writer, meta) }
       .endObject()
     
     // assign back all resource values that were set to null
@@ -151,13 +151,13 @@ class ResourceSubclassAdapter<T : Resource>(
     }
     
     // when strict type checking is enabled type needs to match annotated value for target class
-    if (strictTypeChecking && annotatedTypeName != type) {
+    if (strictTypes && annotatedTypeName != type) {
       throw JsonApiException(
         "Expected type name '$annotatedTypeName' "
           + "for ${resourceType.typeName} "
           + "but was '$type' "
           + "on path [$path]."
-          + "\nTo disable strict type checking use strictTypeChecking(false)."
+          + "\nTo disable strict types use strictTypes(false) on JsonApiFactory.Builder."
       )
     }
   }

@@ -1,16 +1,16 @@
-package com.jsonapi
+package com.jsonapi.adapter
 
+import com.jsonapi.*
 import com.jsonapi.JsonFile.*
 import com.jsonapi.TestUtils.moshi
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class ResourceSubclassAdapterTest {
   
-  private val articleAdapter: JsonAdapter<Article> = moshi.adapter(Article::class.java)
-  private val specialArticleAdapter: JsonAdapter<SpecialArticle> = moshi.adapter(SpecialArticle::class.java)
+  private val articleAdapter = moshi.adapter(Article::class.java)
+  private val specialArticleAdapter = moshi.adapter(SpecialArticle::class.java)
   
   @Test
   fun `deserialize null`() {
@@ -56,72 +56,69 @@ class ResourceSubclassAdapterTest {
       assertThat(it.relationships).hasSize(2)
       assertThat(it.links).isNotNull
       assertThat(it.meta).isNotNull
-      assertThat(it.title).isEqualTo("Title")
-      assertThat(it.headline).isEqualTo("Headline")
+      assertThat(it.title).isEqualTo("Title1")
+      assertThat(it.headline).isEqualTo("Headline1")
     }
   }
   
   @Test
   fun `deserialize unregistered resource when unregistered types are allowed`() {
-    val factory = JsonApiFactory.Builder()
-      .allowUnregisteredTypes(true)
-      .build()
-    val moshi = Moshi.Builder()
-      .add(factory)
-      .build()
+    // unregistered types are allowed and Article type is not registered
+    val factory = JsonApiFactory.Builder().allowUnregisteredTypes(true).build()
+    val moshi = Moshi.Builder().add(factory).build()
     val adapter = moshi.adapter(Article::class.java)
-    val deserialized = adapter.fromJson(read(RESOURCE_UNKNOWN_TYPE))
+    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE))
     assertThat(deserialized).isNotNull
     assertThat(deserialized).isInstanceOfSatisfying(Article::class.java) {
-      assertThat(it.type).isEqualTo("unknown")
+      assertThat(it.type).isEqualTo("articles")
       assertThat(it.id).isEqualTo("1")
-      assertThat(it.relationships).hasSize(1)
+      assertThat(it.relationships).hasSize(2)
       assertThat(it.links).isNotNull
       assertThat(it.meta).isNotNull
-      assertThat(it.title).isNullOrEmpty()
+      assertThat(it.title).isEqualTo("Title1")
     }
   }
   
   @Test(expected = JsonApiException::class)
   fun `throw on deserializing unregistered resource when unregistered types are not allowed`() {
-    articleAdapter.fromJson(read(RESOURCE_UNKNOWN_TYPE))
+    // unregistered types are not allowed and Article type is not registered
+    val factory = JsonApiFactory.Builder().allowUnregisteredTypes(false).build()
+    val moshi = Moshi.Builder().add(factory).build()
+    val adapter = moshi.adapter(Article::class.java)
+    adapter.fromJson(read(RESOURCE_ARTICLE))
   }
   
   @Test
   fun `deserialize resource of non matching type when strict type checking is disabled`() {
+    // strict types are disabled and both Article and Comment types are registered
     val factory = JsonApiFactory.Builder()
-      .strictTypeChecking(false)
+      .strictTypes(false)
       .addType(Article::class.java)
       .addType(Comment::class.java)
       .build()
-    val moshi = Moshi.Builder()
-      .add(factory)
-      .build()
-    // use article adapter to deserialize comment json
+    val moshi = Moshi.Builder().add(factory).build()
     val adapter = moshi.adapter(Article::class.java)
+    // use article adapter to deserialize comment json resource
     val deserialized = adapter.fromJson(read(RESOURCE_COMMENT))
     assertThat(deserialized).isNotNull
     assertThat(deserialized).isInstanceOfSatisfying(Article::class.java) {
       assertThat(it.type).isEqualTo("comments")
       assertThat(it.id).isEqualTo("1")
-      assertThat(it.relationships).hasSize(1)
-      assertThat(it.links).isNotNull
-      assertThat(it.meta).isNotNull
       assertThat(it.title).isNullOrEmpty()
     }
   }
   
   @Test(expected = JsonApiException::class)
   fun `throw on deserializing non matching type when strict type checking is enabled`() {
+    // strict types are enabled and both Article and Comment types are registered
     val factory = JsonApiFactory.Builder()
-      .strictTypeChecking(true)
+      .strictTypes(true)
       .addType(Article::class.java)
       .addType(Comment::class.java)
       .build()
-    val moshi = Moshi.Builder()
-      .add(factory)
-      .build()
+    val moshi = Moshi.Builder().add(factory).build()
     val adapter = moshi.adapter(Article::class.java)
+    // use article adapter to deserialize comment json resource
     adapter.fromJson(read(RESOURCE_COMMENT))
   }
   
@@ -132,10 +129,10 @@ class ResourceSubclassAdapterTest {
     assertThat(deserialized).isInstanceOfSatisfying(Article::class.java) {
       assertThat(it.type).isEqualTo("articles")
       assertThat(it.id).isEqualTo("1")
-      assertThat(it.relationships).hasSize(2)
-      assertThat(it.links).isNotNull
-      assertThat(it.meta).isNotNull
-      assertThat(it.title).isEqualTo("Title")
+      assertThat(it.relationships).isNull()
+      assertThat(it.links).isNull()
+      assertThat(it.meta).isNull()
+      assertThat(it.title).isEqualTo("Title1")
     }
   }
   
@@ -183,50 +180,65 @@ class ResourceSubclassAdapterTest {
   
   @Test
   fun `serialize unregistered resource when unregistered types are allowed`() {
-    val factory = JsonApiFactory.Builder()
-      .allowUnregisteredTypes(true)
-      .build()
-    val moshi = Moshi.Builder()
-      .add(factory)
-      .build()
+    // unregistered types are allowed and Article type is not registered
+    val factory = JsonApiFactory.Builder().allowUnregisteredTypes(true).build()
+    val moshi = Moshi.Builder().add(factory).build()
     val adapter = moshi.adapter(Article::class.java)
-    val article = Article("unregistered", "1", "Title")
+    val article = Article("articles", "1", "Title")
     val serialized = adapter.toJson(article)
-    assertThat(serialized).isEqualTo("""{"type":"unregistered","id":"1","attributes":{"title":"Title"}}""")
+    assertThat(serialized).isEqualTo("""{"type":"articles","id":"1","attributes":{"title":"Title"}}""")
   }
   
   @Test(expected = JsonApiException::class)
   fun `throw on serializing unregistered type when unregistered types are not allowed`() {
-    val article = Article("unregistered", "1", "Title")
-    articleAdapter.toJson(article)
+    // unregistered types are not allowed and Article type is not registered
+    val factory = JsonApiFactory.Builder().allowUnregisteredTypes(false).build()
+    val moshi = Moshi.Builder().add(factory).build()
+    val adapter = moshi.adapter(Article::class.java)
+    val article = Article("articles", "1", "Title")
+    adapter.toJson(article)
   }
   
   @Test
   fun `serialize resource of non matching type when strict type checking is disabled`() {
+    // strict types are disabled and Article and Comment types are registered
     val factory = JsonApiFactory.Builder()
-      .allowUnregisteredTypes(true)
-      .strictTypeChecking(false)
+      .strictTypes(false)
+      .addType(Article::class.java)
+      .addType(Comment::class.java)
       .build()
-    val moshi = Moshi.Builder()
-      .add(factory)
-      .build()
+    val moshi = Moshi.Builder().add(factory).build()
     val adapter = moshi.adapter(Article::class.java)
-    val article = Article("non-matching-type", "1", "Title")
+    // provide incorrect type value to article resource
+    val article = Article("comments", "1", "Title")
     val serialized = adapter.toJson(article)
-    assertThat(serialized).isEqualTo("""{"type":"non-matching-type","id":"1","attributes":{"title":"Title"}}""")
+    assertThat(serialized).isEqualTo("""{"type":"comments","id":"1","attributes":{"title":"Title"}}""")
   }
   
   @Test(expected = JsonApiException::class)
   fun `throw on serializing non matching type when strict type checking is enabled`() {
+    // strict types are enabled and Article type is registered
     val factory = JsonApiFactory.Builder()
-      .allowUnregisteredTypes(true)
-      .strictTypeChecking(true)
+      .strictTypes(true)
+      .addType(Article::class.java)
+      .addType(Comment::class.java)
       .build()
-    val moshi = Moshi.Builder()
-      .add(factory)
-      .build()
+    val moshi = Moshi.Builder().add(factory).build()
     val adapter = moshi.adapter(Article::class.java)
-    val article = Article("non-matching-type", "1", "Title")
+    // provide incorrect type value to article resource
+    val article = Article("comments", "1", "Title")
     adapter.toJson(article)
+  }
+  
+  @Test(expected = JsonApiException::class)
+  fun `throw when serializing resource without type`() {
+    val article = Article(id = "1")
+    articleAdapter.toJson(article)
+  }
+  
+  @Test(expected = JsonApiException::class)
+  fun `throw when serializing resource without id or lid`() {
+    val article = Article(type = "articles")
+    articleAdapter.toJson(article)
   }
 }

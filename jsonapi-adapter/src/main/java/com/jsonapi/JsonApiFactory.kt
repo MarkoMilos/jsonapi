@@ -12,16 +12,18 @@ class JsonApiFactory private constructor(
   types: List<Type>,
   typeNames: List<String>,
   allowUnregisteredTypes: Boolean,
-  strictTypeChecking: Boolean
+  strictTypes: Boolean
 ) : JsonAdapter.Factory {
   
   private val factoryDelegates = listOf(
     DocumentFactory(),
+    DataFactory(),
     ResourceFactory(types, typeNames, allowUnregisteredTypes),
-    ResourceSubclassFactory(typeNames, allowUnregisteredTypes, strictTypeChecking),
+    ResourceSubclassFactory(typeNames, allowUnregisteredTypes, strictTypes),
     RelationFactory(),
     LinksFactory(),
-    MetaFactory()
+    MetaFactory(),
+    VoidFactory()
   )
   
   override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi): JsonAdapter<*>? {
@@ -38,7 +40,9 @@ class JsonApiFactory private constructor(
     private val types = mutableListOf<Type>()
     private val typeNames = mutableListOf<String>()
     private var allowUnregisteredTypes = false
-    private var strictTypeChecking = false
+    
+    // TODO consider changing this to true as default
+    private var strictTypes = false
     
     fun addType(type: Class<out Resource>) = apply {
       types.add(type)
@@ -56,9 +60,8 @@ class JsonApiFactory private constructor(
       allowUnregisteredTypes = allow
     }
     
-    // TODO rename to strictTypes
-    fun strictTypeChecking(enabled: Boolean) = apply {
-      strictTypeChecking = enabled
+    fun strictTypes(enabled: Boolean) = apply {
+      strictTypes = enabled
     }
     
     fun build(): JsonAdapter.Factory {
@@ -91,7 +94,7 @@ class JsonApiFactory private constructor(
         }
       }
       
-      return JsonApiFactory(types, typeNames, allowUnregisteredTypes, strictTypeChecking)
+      return JsonApiFactory(types, typeNames, allowUnregisteredTypes, strictTypes)
     }
   }
 }

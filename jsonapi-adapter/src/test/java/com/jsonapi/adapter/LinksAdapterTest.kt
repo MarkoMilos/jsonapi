@@ -6,14 +6,13 @@ import com.jsonapi.model.Link.LinkObject
 import com.jsonapi.model.Link.LinkURI
 import com.jsonapi.model.Links
 import com.jsonapi.read
-import com.squareup.moshi.JsonAdapter
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.junit.Test
 
 class LinksAdapterTest {
   
-  private val adapter: JsonAdapter<Links> = moshi.adapter(Links::class.java)
+  private val adapter = moshi.adapter(Links::class.java)
   
   @Test
   fun `deserialize null`() {

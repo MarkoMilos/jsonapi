@@ -2,7 +2,6 @@ package com.jsonapi
 
 import java.io.File
 
-// TODO simplify content of complex json to match naming and values from simple versions
 enum class JsonFile(val fileName: String) {
   DOCUMENT_NULL_DATA("document_null_data.json"),
   DOCUMENT_EMPTY_COLLECTION("document_empty_collection.json"),
@@ -11,8 +10,8 @@ enum class JsonFile(val fileName: String) {
   DOCUMENT_ARTICLE_COLLECTION("document_article_collection.json"),
   DOCUMENT_ARTICLE_COLLECTION_SIMPLE("document_article_collection_simple.json"),
   DOCUMENT_META("document_meta.json"),
-  DOCUMENT_ERROR_SINGLE("document_error_single.json"),
-  DOCUMENT_ERROR_MULTIPLE("document_error_multiple.json"),
+  DOCUMENT_ERROR("document_error.json"),
+  DOCUMENT_ERROR_SIMPLE("document_error_simple.json"),
   RESOURCE_ARTICLE("resource_article.json"),
   RESOURCE_COMMENT("resource_comment.json"),
   RESOURCE_NO_ATTRIBUTES("resource_no_attributes.json"),

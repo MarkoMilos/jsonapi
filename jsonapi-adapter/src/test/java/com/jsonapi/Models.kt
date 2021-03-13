@@ -51,6 +51,8 @@ class SpecialArticle(
   val headline: String,
 ) : Article(type, id, title)
 
+// TODO move away from data classes and create only class for this
+//  so that we can use type and id in constructor -> Person("1","people", "name"...)
 @JsonClass(generateAdapter = true)
 @Type("people")
 data class Person(

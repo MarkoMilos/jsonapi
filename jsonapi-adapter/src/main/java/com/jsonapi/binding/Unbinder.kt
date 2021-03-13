@@ -25,16 +25,9 @@ internal class Unbinder(
     
     // transform data (primary resource) to list of resources
     primaryResources = when (data) {
-      null -> emptyList()
       is Resource -> listOf(data)
-      is Collection<*> -> {
-        if (data.isResourceCollection()) {
-          data.filterIsInstance<Resource>()
-        } else {
-          throw IllegalArgumentException(EXCEPTION_MSG_INVALID_DOCUMENT)
-        }
-      }
-      else -> throw IllegalArgumentException(EXCEPTION_MSG_INVALID_DOCUMENT)
+      is Collection<*> -> data.filterIsInstance<Resource>()
+      else -> emptyList()
     }
     
     // transform included to mutable list or create new one if there are no included
@@ -109,7 +102,10 @@ internal class Unbinder(
           if (value.isResourceCollection()) {
             value as Collection<Resource>
           } else {
-            throw IllegalArgumentException(EXCEPTION_MSG_INVALID_RELATIONSHIP)
+            throw IllegalArgumentException(
+              "Collection annotated with @Relationship(\"$name\") contains non Resource values.\n"
+                + "Field type for to-many relations should be List<T> where T is a Resource (or subclass)."
+            )
           }
           
           // this is to many relation, there will be multiple resource identifiers
@@ -130,7 +126,12 @@ internal class Unbinder(
           // set this field to null
           field.set(resource, null)
         }
-        else -> throw IllegalArgumentException(EXCEPTION_MSG_INVALID_RELATIONSHIP)
+        else -> throw IllegalArgumentException(
+          "Unsupported type [${value.javaClass.simpleName}] annotated with @Relationship(\"$name\").\n"
+            + "Field annotated with @Relationship should be:\n"
+            + " - Resource (or subclass) for to-one relations\n"
+            + " - List<T> where T is a Resource (or subclass) for to-many relations"
+        )
       }
     }
     

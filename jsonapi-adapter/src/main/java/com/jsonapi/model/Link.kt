@@ -5,16 +5,18 @@ package com.jsonapi.model
  *  - [LinkURI] - which holds an uri string whose value is a URI-reference
  *  - [LinkObject] - a link object which holds href as URI-reference together with other information
  * [per specification](https://jsonapi.org/format/1.1/#document-links-link-object)
+ *
+ * @see LinkURI
+ * @see LinkObject
  */
 sealed class Link {
-  /** Holds [uri] string whose value is a URI-reference */
-  data class LinkURI(
-    /**
-     * String whose value is a URI-reference [RFC3986 Section 4.1](https://tools.ietf.org/html/rfc3986#section-4.1)
-     * pointing to the link’s target.
-     */
-    val uri: String
-  ) : Link()
+  /**
+   * Holds [uri] string whose value is a URI-reference.
+   *
+   * @param uri String whose value is a URI-reference
+   * [RFC3986 Section 4.1](https://tools.ietf.org/html/rfc3986#section-4.1) pointing to the link’s target.
+   */
+  data class LinkURI(val uri: String) : Link()
   
   /**
    * A “link object” is an object that represents a [web link](https://tools.ietf.org/html/rfc8288).
@@ -24,37 +26,31 @@ sealed class Link {
    *
    * A link object MAY also contain any of the following members: `rel`, `describedby`, `title`, `type`, `hreflang`,
    * `meta`.
+   *
+   * @param href String whose value is a URI-reference [RFC3986 Section 4.1](https://tools.ietf.org/html/rfc3986#section-4.1)
+   * pointing to the link’s target.
+   * @param rel String indicating the link’s relation type. The string MUST be a valid link relation type.
+   * @param describedby Link to a description document (e.g. OpenAPI or JSON Schema) for the link target.
+   * @param title String which serves as a label for the destination of a link such that it can be used
+   * as a human-readable identifier (e.g., a menu entry).
+   * @param type String indicating the media type of the link’s target.
+   * @param hreflang An array of strings indicating the language(s) of the link’s target.
+   * An array with multiple values (size > 1) indicates that the link’s target is available in multiple languages.
+   * Each string MUST be a valid language tag [RFC5646](https://tools.ietf.org/html/rfc5646).
+   * Note: this data structure deviates from specification. This value is specified as either string or array
+   * of strings but this data structure defines `hreflang` as array of strings in both cases and it respects
+   * specification by doing the following:
+   *  * deserialization: single string values will be deserialized as list with 1 item
+   *  * serialization: `hreflang` list with 1 item will be serialized as json string instead array
+   * @param meta Meta object containing non-standard meta-information about the link.
    */
   data class LinkObject @JvmOverloads constructor(
-    /**
-     * String whose value is a URI-reference [RFC3986 Section 4.1](https://tools.ietf.org/html/rfc3986#section-4.1)
-     * pointing to the link’s target.
-     */
     val href: String,
-    /** String indicating the link’s relation type. The string MUST be a valid link relation type. */
     val rel: String? = null,
-    /** Link to a description document (e.g. OpenAPI or JSON Schema) for the link target. */
     val describedby: Link? = null,
-    /**
-     * String which serves as a label for the destination of a link such that it can be used
-     * as a human-readable identifier (e.g., a menu entry)
-     */
     val title: String? = null,
-    /** String indicating the media type of the link’s target. */
     val type: String? = null,
-    /**
-     * An array of strings indicating the language(s) of the link’s target.
-     * An array with multiple values (size > 1) indicates that the link’s target is available in multiple languages.
-     * Each string MUST be a valid language tag [RFC5646](https://tools.ietf.org/html/rfc5646).
-     *
-     * Note: this data structure deviates from specification. This value is specified as either string or array
-     * of strings but this data structure defines hreflang as array of strings in both cases and it respects
-     * specification by doing the following:
-     *  * deserialization: single string values will be deserialized as list with 1 item
-     *  * serialization: hreflang list with 1 item will be serialized as json string instead array
-     */
     val hreflang: List<String>? = null,
-    /** Meta object containing non-standard meta-information about the link. */
     val meta: Meta? = null
   ) : Link()
   

@@ -19,21 +19,21 @@ class LinksFactoryTest {
   fun `returns LinksAdapter when type is Links`() {
     val type = Links::class.java
     val adapter = linksFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull.isInstanceOf(LinksAdapter::class.java)
+    assertThat(adapter).isInstanceOf(LinksAdapter::class.java)
   }
   
   @Test
   fun `returns LinkAdapter when type is Link`() {
     val type = Link::class.java
     val adapter = linksFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull.isInstanceOf(LinkAdapter::class.java)
+    assertThat(adapter).isInstanceOf(LinkAdapter::class.java)
   }
   
   @Test
   fun `returns LinkObjectAdapter when type is LinkObject`() {
     val type = LinkObject::class.java
     val adapter = linksFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull.isInstanceOf(LinkObjectAdapter::class.java)
+    assertThat(adapter).isInstanceOf(LinkObjectAdapter::class.java)
   }
   
   @Test

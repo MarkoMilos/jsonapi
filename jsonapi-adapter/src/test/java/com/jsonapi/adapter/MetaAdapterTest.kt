@@ -4,7 +4,6 @@ import com.jsonapi.JsonFile.META
 import com.jsonapi.TestUtils.moshi
 import com.jsonapi.model.Meta
 import com.jsonapi.read
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
@@ -15,7 +14,7 @@ class MetaAdapterTest {
   @JsonClass(generateAdapter = true)
   data class NestedMetaObject(val foo: String)
   
-  private val adapter: JsonAdapter<Meta> = moshi.adapter(Meta::class.java)
+  private val adapter = moshi.adapter(Meta::class.java)
   
   @Test
   fun `deserialize null`() {

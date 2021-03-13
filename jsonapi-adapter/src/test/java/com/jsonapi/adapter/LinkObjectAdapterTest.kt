@@ -5,13 +5,12 @@ import com.jsonapi.JsonFile.*
 import com.jsonapi.TestUtils.moshi
 import com.jsonapi.model.Link.LinkObject
 import com.jsonapi.read
-import com.squareup.moshi.JsonAdapter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class LinkObjectAdapterTest {
   
-  private val adapter: JsonAdapter<LinkObject> = moshi.adapter(LinkObject::class.java)
+  private val adapter = moshi.adapter(LinkObject::class.java)
   
   @Test
   fun `deserialize null`() {

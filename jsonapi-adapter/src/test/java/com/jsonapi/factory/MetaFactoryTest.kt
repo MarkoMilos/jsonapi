@@ -15,7 +15,7 @@ class MetaFactoryTest {
   fun `returns adapter when type is Meta`() {
     val type = Meta::class.java
     val adapter = metaFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull.isInstanceOf(MetaAdapter::class.java)
+    assertThat(adapter).isInstanceOf(MetaAdapter::class.java)
   }
   
   @Test

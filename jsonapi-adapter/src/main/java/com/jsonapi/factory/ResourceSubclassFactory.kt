@@ -14,7 +14,7 @@ import com.jsonapi.annotation.Type as TypeAnnotation
 class ResourceSubclassFactory(
   private val typeNames: List<String>,
   private val allowUnregisteredTypes: Boolean,
-  private val strictTypeChecking: Boolean
+  private val strictTypes: Boolean
 ) : FactoryDelegate {
   
   override fun create(
@@ -49,7 +49,7 @@ class ResourceSubclassFactory(
       delegateAdapter,
       type,
       typeAnnotation.name,
-      strictTypeChecking,
+      strictTypes,
       typeNames,
       allowUnregisteredTypes
     )

@@ -21,7 +21,7 @@ class BinderTest {
   
   @Before
   fun setup() {
-    article1 = Article("articles", "1", "Article 1")
+    article1 = Article("articles", "1", "Title1")
     article1.relationships = mapOf(
       "author" to ToOne(ResourceIdentifier("people", "1")),
       "comments" to ToMany(
@@ -33,26 +33,26 @@ class BinderTest {
       "related" to ToMany(listOf(ResourceIdentifier("articles", "2")))
     )
     
-    article2 = Article("articles", "2", "Article 2")
+    article2 = Article("articles", "2", "Title2")
     article2.relationships = mapOf(
       "author" to ToOne(ResourceIdentifier("people", "2")),
       "related" to ToMany(listOf(ResourceIdentifier("articles", "1")))
     )
     
-    author1 = Person("John", "Doe", "@johndoe")
+    author1 = Person("Name1", "Surname1", "@twitter1")
     author1.id = "1"
     author1.type = "people"
     
-    author2 = Person("Siri", "Tailor", "@siritailor")
+    author2 = Person("Name2", "Surname2", "@twitter2")
     author2.id = "2"
     author2.type = "people"
     
-    comment1 = Comment("First comment", null)
+    comment1 = Comment("Comment1", null)
     comment1.id = "1"
     comment1.type = "comments"
     comment1.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "2")))
     
-    comment2 = Comment("Thanks for commenting", null)
+    comment2 = Comment("Comment2", null)
     comment2.id = "2"
     comment2.type = "comments"
     comment2.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "1")))
@@ -101,22 +101,12 @@ class BinderTest {
   
   @Test(expected = JsonApiException::class)
   fun `throws when incorrect type is bound to relationship field`() {
+    // Within included provide Resource that will match relationship entry.
+    // Doing so Binder will try to bind matched Resource value to annotated Person field.
     val document = Document.Data(
       data = article1,
       included = listOf(Resource(id = "1", type = "people"))
     )
-    document.bind()
-  }
-  
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when single resource document is not valid`() {
-    val document = Document.Data(NotAResource())
-    document.bind()
-  }
-  
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when resource collection document is not valid`() {
-    val document = Document.Data(listOf(ValidResource(), NotAResource()))
     document.bind()
   }
 }

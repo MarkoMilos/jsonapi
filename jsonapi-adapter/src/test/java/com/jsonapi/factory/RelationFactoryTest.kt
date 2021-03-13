@@ -15,7 +15,7 @@ class RelationFactoryTest {
   fun `returns adapter when type is a Relation`() {
     val type = Relation::class.java
     val adapter = relationFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull.isInstanceOf(RelationAdapter::class.java)
+    assertThat(adapter).isInstanceOf(RelationAdapter::class.java)
   }
   
   @Test

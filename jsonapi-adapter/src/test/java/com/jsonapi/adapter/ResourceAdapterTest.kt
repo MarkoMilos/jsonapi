@@ -5,14 +5,13 @@ import com.jsonapi.JsonFile.RESOURCE_ARTICLE
 import com.jsonapi.JsonFile.RESOURCE_UNKNOWN_TYPE
 import com.jsonapi.TestUtils.moshi
 import com.jsonapi.model.Resource
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class ResourceAdapterTest {
   
-  private val adapter: JsonAdapter<Resource> = moshi.adapter(Resource::class.java)
+  private val adapter = moshi.adapter(Resource::class.java)
   
   @Test
   fun `deserialize null`() {

@@ -12,14 +12,13 @@ class ResourceSubclassFactoryTest {
   private val resourceFactory = ResourceSubclassFactory(
     typeNames = emptyList(),
     allowUnregisteredTypes = false,
-    strictTypeChecking = false
+    strictTypes = false
   )
   
   @Test
   fun `returns adapter when type inherits directly from Resource`() {
     val type = ValidResource::class.java
     val adapter = resourceFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull
     assertThat(adapter).isInstanceOf(ResourceSubclassAdapter::class.java)
   }
   
@@ -27,13 +26,12 @@ class ResourceSubclassFactoryTest {
   fun `returns adapter when type inherits indirectly from Resource`() {
     val type = ValidResourceSubclass::class.java
     val adapter = resourceFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull
     assertThat(adapter).isInstanceOf(ResourceSubclassAdapter::class.java)
   }
   
   @Test
   fun `returns null when type does not inherit from Resource`() {
-    val type = NotAResource::class.java
+    val type = NotAResour::class.java
     val adapter = resourceFactory.create(type, mutableSetOf(), moshi, factory)
     assertThat(adapter).isNull()
   }

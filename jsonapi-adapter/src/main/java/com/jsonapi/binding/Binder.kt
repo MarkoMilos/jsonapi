@@ -21,18 +21,11 @@ internal class Binder(document: Document.Data<*>) {
   private val resources: List<Resource>
   
   init {
-    // primary resource(s) from document
+    // transform data (primary resource) to list of resources
     val primaryResources = when (val data = document.data) {
       is Resource -> listOf(data)
-      is Collection<*> -> {
-        if (data.isResourceCollection()) {
-          data.filterIsInstance<Resource>()
-        } else {
-          throw IllegalArgumentException(EXCEPTION_MSG_INVALID_DOCUMENT)
-        }
-      }
-      null -> emptyList()
-      else -> throw IllegalArgumentException(EXCEPTION_MSG_INVALID_DOCUMENT)
+      is Collection<*> -> data.filterIsInstance<Resource>()
+      else -> emptyList()
     }
     
     // included resources from document defaulting to empty list if there are none

@@ -30,6 +30,8 @@ import com.squareup.moshi.JsonClass
  *
  * It is possible to pass `type` and `id` to super constructor.
  *
+ * The following example is in Java to show both implementation.
+ *
  * **Java**
  * ```
  * @Type(name = "articles")
@@ -48,12 +50,12 @@ import com.squareup.moshi.JsonClass
  *
  *  @param type The `type` member is used to describe resource objects that share common attributes and relationships.
  *  The values of type members **MUST** adhere to the same constraints as
- *  [member names](https://jsonapi.org/format/1.1/#document-member-names)
- *  @param id Unique identifier of the resource
- *  @param lid Unique identifier of the resource (by `type` *locally*). **MAY** be included if `id` is omitted
- *  @param relationships a relationships map describing relationships between the resource and other resources
- *  @param links a [Links] object containing links related to the resource
- *  @param meta a [Meta] object containing non-standard meta-information about the resource
+ *  [member names](https://jsonapi.org/format/1.1/#document-member-names).
+ *  @param id Unique identifier of the resource.
+ *  @param lid Unique identifier of the resource (by `type` *locally*). **MAY** be included if `id` is omitted.
+ *  @param relationships a relationships map describing relationships between the resource and other resources.
+ *  @param links a [Links] object containing links related to the resource.
+ *  @param meta a [Meta] object containing non-standard meta-information about the resource.
  */
 @JsonClass(generateAdapter = true)
 open class Resource @JvmOverloads constructor(
@@ -68,8 +70,10 @@ open class Resource @JvmOverloads constructor(
   /**
    * Creates [ResourceIdentifier] from this resource.
    *
-   * Note that resource needs to have a valid type and id (or lid in case when id is omitted).
+   * Note that resource needs to have a valid `type` and `id` (or `lid` in case when `id` is omitted).
    * Otherwise this will throw.
+   *
+   * @see ResourceIdentifier
    */
   fun identifier(): ResourceIdentifier {
     return ResourceIdentifier(type ?: "", id, lid, meta)

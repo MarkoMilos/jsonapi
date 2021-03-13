@@ -14,12 +14,12 @@ import com.squareup.moshi.JsonClass
  * A “resource identifier object” **MAY** also include a meta member, whose value is a meta object that
  * contains non-standard meta-information.
  *
- *  @param type The `type` member is used to describe resource objects that share common attributes and relationships.
- *  The values of type members **MUST** adhere to the same constraints as
- *  [member names](https://jsonapi.org/format/1.1/#document-member-names)
- *  @param id Unique identifier of the resource
- *  @param lid Unique identifier of the resource (by `type` *locally*). **MUST** be included if `id` is omitted
- *  @param meta a [Meta] object containing non-standard meta-information about a resource identifier
+ * @param type The `type` member is used to describe resource objects that share common attributes and relationships.
+ * The values of type members **MUST** adhere to the same constraints as
+ * [member names](https://jsonapi.org/format/1.1/#document-member-names).
+ * @param id Unique identifier of the resource.
+ * @param lid Unique identifier of the resource (by `type` *locally*). **MUST** be included if `id` is omitted.
+ * @param meta a [Meta] object containing non-standard meta-information about a resource identifier.
  */
 @JsonClass(generateAdapter = true)
 class ResourceIdentifier @JvmOverloads constructor(

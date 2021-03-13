@@ -15,7 +15,6 @@ class ResourceFactoryTest {
   fun `returns adapter when type is Resource`() {
     val type = Resource::class.java
     val adapter = resourceFactory.create(type, mutableSetOf(), moshi, factory)
-    assertThat(adapter).isNotNull
     assertThat(adapter).isInstanceOf(ResourceAdapter::class.java)
   }
   

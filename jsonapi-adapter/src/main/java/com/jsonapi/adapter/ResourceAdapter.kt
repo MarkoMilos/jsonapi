@@ -1,7 +1,7 @@
 package com.jsonapi.adapter
 
 import com.jsonapi.JsonApiException
-import com.jsonapi.KEY_TYPE
+import com.jsonapi.NAME_TYPE
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
@@ -15,7 +15,7 @@ class ResourceAdapter constructor(
   private val defaultResourceAdapter: JsonAdapter<Any>?
 ) : JsonAdapter<Any>() {
   
-  private val memberNameOptions = JsonReader.Options.of(KEY_TYPE)
+  private val memberNameOptions = JsonReader.Options.of(NAME_TYPE)
   private val typeNameOptions = JsonReader.Options.of(*typeNames.toTypedArray())
   
   override fun fromJson(reader: JsonReader): Any? {

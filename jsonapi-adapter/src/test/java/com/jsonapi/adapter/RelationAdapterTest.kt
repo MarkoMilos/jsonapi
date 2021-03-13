@@ -9,13 +9,12 @@ import com.jsonapi.model.Relation.ToMany
 import com.jsonapi.model.Relation.ToOne
 import com.jsonapi.model.ResourceIdentifier
 import com.jsonapi.read
-import com.squareup.moshi.JsonAdapter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class RelationAdapterTest {
   
-  private val adapter: JsonAdapter<Relation> = moshi.adapter(Relation::class.java)
+  private val adapter = moshi.adapter(Relation::class.java)
   
   @Test
   fun `deserialize empty ToOne relation`() {

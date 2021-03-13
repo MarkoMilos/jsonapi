@@ -5,14 +5,14 @@
     "last": "http://example.com/articles?page[offset]=10"
   },
   "meta": {
-    "meta_key": "Meta value"
+    "name": "value"
   },
   "data": {
     "type": "articles",
     "id": "1",
     "attributes": {
-      "title": "Title",
-      "heading": "Heading"
+      "title": "Title1",
+      "headline": "Headline1"
     },
     "relationships": {
       "author": {
@@ -22,7 +22,7 @@
         },
         "data": {
           "type": "people",
-          "id": "9"
+          "id": "1"
         }
       },
       "comments": {
@@ -33,11 +33,11 @@
         "data": [
           {
             "type": "comments",
-            "id": "5"
+            "id": "1"
           },
           {
             "type": "comments",
-            "id": "12"
+            "id": "2"
           }
         ]
       }
@@ -49,21 +49,21 @@
   "included": [
     {
       "type": "people",
-      "id": "9",
+      "id": "1",
       "attributes": {
-        "firstName": "Dan",
-        "lastName": "Gebhardt",
-        "twitter": "dgeb"
+        "firstName": "Name1",
+        "lastName": "Surname1",
+        "twitter": "@twitter1"
       },
       "links": {
-        "self": "http://example.com/people/9"
+        "self": "http://example.com/people/1"
       }
     },
     {
       "type": "comments",
-      "id": "5",
+      "id": "1",
       "attributes": {
-        "body": "First!"
+        "body": "Comment1"
       },
       "relationships": {
         "author": {
@@ -74,25 +74,25 @@
         }
       },
       "links": {
-        "self": "http://example.com/comments/5"
+        "self": "http://example.com/comments/1"
       }
     },
     {
       "type": "comments",
-      "id": "12",
+      "id": "2",
       "attributes": {
-        "body": "I like XML better"
+        "body": "Comment2"
       },
       "relationships": {
         "author": {
           "data": {
             "type": "people",
-            "id": "9"
+            "id": "1"
           }
         }
       },
       "links": {
-        "self": "http://example.com/comments/12"
+        "self": "http://example.com/comments/2"
       }
     }
   ]

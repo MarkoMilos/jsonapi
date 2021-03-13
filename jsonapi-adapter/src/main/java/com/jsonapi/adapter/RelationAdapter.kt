@@ -1,7 +1,7 @@
 package com.jsonapi.adapter
 
 import com.jsonapi.JsonApiException
-import com.jsonapi.KEY_DATA
+import com.jsonapi.NAME_DATA
 import com.jsonapi.model.Relation
 import com.jsonapi.model.Relation.ToMany
 import com.jsonapi.model.Relation.ToOne
@@ -35,7 +35,7 @@ class RelationAdapter(moshi: Moshi) : JsonAdapter<Relation>() {
     peaked.beginObject()
     // find if this is relation to-one or to-many
     while (peaked.hasNext()) {
-      if (peaked.nextName() == KEY_DATA) {
+      if (peaked.nextName() == NAME_DATA) {
         relationToMany = peaked.peek() == Token.BEGIN_ARRAY
       }
       peaked.skipValue()
@@ -69,7 +69,7 @@ class RelationAdapter(moshi: Moshi) : JsonAdapter<Relation>() {
       writer.serializeNulls = true
       writer
         .beginObject()
-        .name(KEY_DATA)
+        .name(NAME_DATA)
         .nullValue()
         .endObject()
       writer.serializeNulls = wasSerializeNulls
