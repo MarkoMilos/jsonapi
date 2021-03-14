@@ -137,17 +137,12 @@ class ResourceSubclassAdapterTest {
   }
   
   @Test(expected = JsonApiException::class)
-  fun `throw when resource does not have type`() {
+  fun `throw when deserializing resource without type`() {
     articleAdapter.fromJson("""{"id":"1"}""")
   }
   
   @Test(expected = JsonApiException::class)
-  fun `throw when resource does not have id or lid`() {
-    articleAdapter.fromJson("""{"type":"articles"}""")
-  }
-  
-  @Test(expected = JsonApiException::class)
-  fun `throw when resource is not an json object`() {
+  fun `throw when deserializing resource that is not an json object`() {
     articleAdapter.fromJson("[]")
   }
   
@@ -233,12 +228,6 @@ class ResourceSubclassAdapterTest {
   @Test(expected = JsonApiException::class)
   fun `throw when serializing resource without type`() {
     val article = Article(type = null, id = "1")
-    articleAdapter.toJson(article)
-  }
-  
-  @Test(expected = JsonApiException::class)
-  fun `throw when serializing resource without id or lid`() {
-    val article = Article(type = "articles", id = null)
     articleAdapter.toJson(article)
   }
 }

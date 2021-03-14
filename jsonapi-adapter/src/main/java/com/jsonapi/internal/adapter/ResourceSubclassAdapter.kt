@@ -59,7 +59,6 @@ internal class ResourceSubclassAdapter<T : Resource>(
     reader.endObject()
     
     validateType(type, reader.path)
-    validateIdentifier(id, lid, reader.path)
     
     // If 'attributes' key is not found for this resource
     // ensure that default instance of target class is created
@@ -69,6 +68,7 @@ internal class ResourceSubclassAdapter<T : Resource>(
     // Assign values from structure to deserialized resource
     resource?.type = type
     resource?.id = id
+    resource?.lid = lid
     resource?.relationships = relationships
     resource?.links = links
     resource?.meta = meta
@@ -82,7 +82,6 @@ internal class ResourceSubclassAdapter<T : Resource>(
     }
     
     validateType(value.type, writer.path)
-    validateIdentifier(value.id, value.lid, writer.path)
     
     // capture resource values
     val type = value.type
@@ -155,16 +154,6 @@ internal class ResourceSubclassAdapter<T : Resource>(
           + "but was '$type' "
           + "on path [$path]."
           + "\nTo disable strict types use strictTypes(false) on JsonApiFactory.Builder."
-      )
-    }
-  }
-  
-  private fun validateIdentifier(id: String?, lid: String?, path: String = "") {
-    if (id.isNullOrEmpty() && lid.isNullOrEmpty()) {
-      throw JsonApiException(
-        "Resource MUST contain an 'id' member except when it represents a new resource to be created."
-          + " In this case, a 'lid' member MUST be included that identifies the new resource."
-          + " Was: id=[$id], lid=[$lid] on path [$path]."
       )
     }
   }
