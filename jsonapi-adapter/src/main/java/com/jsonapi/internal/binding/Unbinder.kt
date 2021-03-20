@@ -57,6 +57,17 @@ internal class Unbinder(
     assignIncluded(includedToAssign)
   }
   
+  /** Clear included field from document by assigning null. */
+  fun removeIncluded() {
+    assignIncluded(null)
+  }
+  
+  /** Assign unbound resources to document included field. */
+  fun assignIncluded() {
+    val includedToAssign = if (includedResources.isNotEmpty()) includedResources else null
+    assignIncluded(includedToAssign)
+  }
+  
   private fun unbindIncluded() {
     val previousSize = includedResources.size
     // create a copy of list because we are iteration on collection

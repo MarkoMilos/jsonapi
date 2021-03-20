@@ -4,7 +4,7 @@ import com.jsonapi.Document
 import com.jsonapi.JsonApiException
 import com.jsonapi.internal.NAME_DATA
 import com.jsonapi.internal.bind
-import com.jsonapi.internal.unbind
+import com.jsonapi.internal.binding.Unbinder
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
@@ -38,16 +38,26 @@ internal class DataAdapter(
     }
     
     if (value.data == null && value.meta == null) {
-      // serialize null data document as {"data":null} since it is a valid document per specification
+      // Serialize null data document as {"data":null} since it is a valid document per specification
       val wasSerializeNulls = writer.serializeNulls
       writer.serializeNulls = true
       writer.beginObject().name(NAME_DATA).nullValue().endObject()
       writer.serializeNulls = wasSerializeNulls
     } else {
-      // unbind resources of this document and use delegated adapter for serialization
-      // after serialization bind document back since it may be used by calling code
-      value.unbind()
+      // Transform document for serialization by unbinding relationship fields
+      val unbinder = Unbinder(value)
+      unbinder.unbind()
+      // When included needs to be omitted from serialization remove them from the document
+      if (value.serializationRules?.serializeIncluded == false) {
+        unbinder.removeIncluded()
+      }
+      // Serialize transformed document with delegate adapter
       delegateAdapter.toJson(writer, value)
+      // When included were omitted for serialization assign them back to the document
+      if (value.serializationRules?.serializeIncluded == false) {
+        unbinder.assignIncluded()
+      }
+      // Bind document back so that primary resource(s) are not changed
       value.bind()
     }
   }

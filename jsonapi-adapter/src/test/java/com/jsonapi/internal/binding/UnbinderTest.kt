@@ -190,6 +190,21 @@ class UnbinderTest {
     assertThat(document.included).containsExactly(articleB, articleC)
   }
   
+  @Test
+  fun `remove and assign included properly sets included field for document`() {
+    val document = Document.Data(article1)
+    val unbinder = Unbinder(document)
+    
+    unbinder.unbind()
+    assertThat(document.included).containsExactlyInAnyOrder(author1, author2, comment1, comment2)
+    
+    unbinder.removeIncluded()
+    assertThat(document.included).isNull()
+    
+    unbinder.assignIncluded()
+    assertThat(document.included).containsExactlyInAnyOrder(author1, author2, comment1, comment2)
+  }
+  
   @Test(expected = IllegalArgumentException::class)
   fun `throw when ToOne relationship field is not a Resource`() {
     // valid resource class with invalid relationship type

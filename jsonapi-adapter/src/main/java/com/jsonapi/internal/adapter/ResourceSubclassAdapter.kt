@@ -102,6 +102,7 @@ internal class ResourceSubclassAdapter<T : Resource>(
     // Improvement possible:
     // this implementation requires double serialization just to check for empty objects
     // and to omit 'attributes' object from serialized resource when it is empty
+    // alternatively we could check if all declared fields are null via reflection
     val attributes = delegateAdapter.toJson(value)
     
     // serialize values

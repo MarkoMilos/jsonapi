@@ -2,6 +2,7 @@ package com.jsonapi
 
 import com.jsonapi.Document.Data
 import com.jsonapi.Document.Errors
+import com.jsonapi.internal.serialization.SerializationRules
 import com.squareup.moshi.JsonClass
 
 /**
@@ -54,8 +55,12 @@ sealed class Document<T> {
     val data: T? = null,
     val included: List<Resource>? = null,
     val links: Links? = null,
-    val meta: Meta? = null,
-  ) : Document<T>()
+    val meta: Meta? = null
+  ) : Document<T>() {
+    
+    @Transient internal var serializationRules: SerializationRules? = null
+    
+  }
   
   /**
    * [Document] subtype for documents containing `errors` member.

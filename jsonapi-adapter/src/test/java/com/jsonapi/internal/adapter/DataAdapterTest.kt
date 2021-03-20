@@ -73,7 +73,10 @@ class DataAdapterTest {
   @Test
   fun `deserialize single resource document`() {
     val deserialized = articleAdapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE))
-    assertThat(deserialized).hasNoNullFieldsOrProperties()
+    assertThat(deserialized?.data).isNotNull
+    assertThat(deserialized?.included).isNotNull
+    assertThat(deserialized?.links).isNotNull
+    assertThat(deserialized?.meta).isNotNull
   }
   
   @Test
@@ -107,8 +110,10 @@ class DataAdapterTest {
   @Test
   fun `deserialize resource collection document`() {
     val deserialized = articleCollectionAdapter.fromJson(read(DOCUMENT_ARTICLE_COLLECTION))
-    assertThat(deserialized).hasNoNullFieldsOrProperties()
     assertThat(deserialized?.data).asList().isNotEmpty
+    assertThat(deserialized?.included).isNotNull
+    assertThat(deserialized?.links).isNotNull
+    assertThat(deserialized?.meta).isNotNull
   }
   
   @Test
