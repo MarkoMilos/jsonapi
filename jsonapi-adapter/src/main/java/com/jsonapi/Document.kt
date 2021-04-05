@@ -38,7 +38,8 @@ class Document<T> @JvmOverloads constructor(
   val included: List<Resource>? = null,
   val errors: List<Error>? = null,
   val links: Links? = null,
-  val meta: Meta? = null
+  val meta: Meta? = null,
+  val jsonapi: JsonApi? = null
 ) {
   
   @Transient internal var serializationRules: SerializationRules? = null
@@ -177,6 +178,7 @@ class Document<T> @JvmOverloads constructor(
     private var errors: List<Error>? = null
     private var links: Links? = null
     private var meta: Meta? = null
+    private var jsonapi: JsonApi? = null
     private var serializeIncluded: Boolean = true
     
     fun data(data: T) = apply {
@@ -199,6 +201,10 @@ class Document<T> @JvmOverloads constructor(
       this.meta = meta
     }
     
+    fun jsonapi(jsonapi: JsonApi) = apply {
+      this.jsonapi = jsonapi
+    }
+    
     /**
      * Determines weather the included member should be serialized.
      *
@@ -218,7 +224,7 @@ class Document<T> @JvmOverloads constructor(
      * coexist within the same document.
      */
     fun build(): Document<T> {
-      val document = Document(data, included, errors, links, meta)
+      val document = Document(data, included, errors, links, meta, jsonapi)
       document.serializationRules = SerializationRules(serializeIncluded)
       return document
     }

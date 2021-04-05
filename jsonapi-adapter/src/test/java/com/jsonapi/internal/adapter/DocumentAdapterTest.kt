@@ -90,6 +90,7 @@ class DocumentAdapterTest {
     assertThat(deserialized?.included).isNotNull
     assertThat(deserialized?.links).isNotNull
     assertThat(deserialized?.meta).isNotNull
+    assertThat(deserialized?.jsonapi).isNotNull
     assertThat(deserialized?.errors).isNull()
   }
   
@@ -126,6 +127,7 @@ class DocumentAdapterTest {
     assertThat(deserialized?.included).isNotNull
     assertThat(deserialized?.links).isNotNull
     assertThat(deserialized?.meta).isNotNull
+    assertThat(deserialized?.jsonapi).isNotNull
     assertThat(deserialized?.errors).isNull()
   }
   

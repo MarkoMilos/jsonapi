@@ -1,4 +1,14 @@
 {
+  "jsonapi": {
+    "version": "1.1",
+    "ext": [
+      "https://jsonapi.org/ext/atomic"
+    ],
+    "profile": [
+      "http://example.com/profiles/flexible-pagination",
+      "http://example.com/profiles/resource-versioning"
+    ]
+  },
   "links": {
     "self": "http://example.com/articles",
     "next": "http://example.com/articles?page[offset]=2",
