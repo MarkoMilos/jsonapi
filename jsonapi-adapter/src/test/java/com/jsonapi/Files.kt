@@ -7,6 +7,7 @@ enum class JsonFile(val fileName: String) {
   DOCUMENT_EMPTY_COLLECTION("document_empty_collection.json"),
   DOCUMENT_ARTICLE_SINGLE("document_article_single.json"),
   DOCUMENT_ARTICLE_SINGLE_SIMPLE("document_article_single_simple.json"),
+  DOCUMENT_ARTICLE_SINGLE_SIMPLE_NO_INCLUDED("document_article_single_simple_no_included.json"),
   DOCUMENT_ARTICLE_COLLECTION("document_article_collection.json"),
   DOCUMENT_ARTICLE_COLLECTION_SIMPLE("document_article_collection_simple.json"),
   DOCUMENT_META("document_meta.json"),

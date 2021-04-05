@@ -22,10 +22,7 @@ class DocumentFactoryTest {
   
   @Test
   fun `returns null when type is not Document`() {
-    // This adapter should not register for Document.Data type (or any other subtypes)
-    // therefore it should return null here
-    val type =
-      Types.newParameterizedTypeWithOwner(Document::class.java, Document.Data::class.java, ValidResource::class.java)
+    val type = ValidResource::class.java
     val adapter = documentFactory.create(type, mutableSetOf(), moshi, factory)
     assertThat(adapter).isNull()
   }

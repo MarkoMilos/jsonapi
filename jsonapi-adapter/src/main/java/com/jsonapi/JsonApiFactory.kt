@@ -16,7 +16,6 @@ class JsonApiFactory private constructor(
   
   private val factoryDelegates = listOf(
     DocumentFactory(),
-    DataFactory(),
     ResourceFactory(types, typeNames, allowUnregisteredTypes),
     ResourceSubclassFactory(typeNames, allowUnregisteredTypes, strictTypes),
     RelationFactory(),

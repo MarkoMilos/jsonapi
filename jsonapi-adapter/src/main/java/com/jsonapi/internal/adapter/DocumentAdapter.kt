@@ -6,13 +6,13 @@ import com.jsonapi.internal.NAME_DATA
 import com.jsonapi.internal.NAME_ERRORS
 import com.jsonapi.internal.NAME_META
 import com.jsonapi.internal.bind
+import com.jsonapi.internal.binding.Unbinder
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 
 internal class DocumentAdapter(
-  private val dataAdapter: JsonAdapter<Document.Data<*>>,
-  private val errorsAdapter: JsonAdapter<Document.Errors>
+  private val delegateAdapter: JsonAdapter<Document<*>>
 ) : JsonAdapter<Document<*>>() {
   
   override fun fromJson(reader: JsonReader): Document<*>? {
@@ -32,6 +32,8 @@ internal class DocumentAdapter(
     var errorsFound = false
     
     // Peak json reader so that we can search trough name/values without consuming anything
+    // We need to scan json and not the deserialized object since json could have a top level member
+    // with null value (e.g. data document {"data":null} which is valid per specification)
     val peaked = reader.peekJson()
     peaked.setFailOnUnknown(false)
     peaked.beginObject()
@@ -57,19 +59,56 @@ internal class DocumentAdapter(
       throw JsonApiException("The members data and errors MUST NOT coexist in the same document.")
     }
     
-    return if (errorsFound) {
-      errorsAdapter.fromJson(reader)
-    } else {
-      // use delegated data adapter to parse the content, also bind resources of returned document value
-      dataAdapter.fromJson(reader)?.apply { bind() }
-    }
+    val document = delegateAdapter.fromJson(reader)
+    document?.bind()
+    return document
   }
   
   override fun toJson(writer: JsonWriter, value: Document<*>?) {
-    when (value) {
-      is Document.Data -> dataAdapter.toJson(writer, value)
-      is Document.Errors -> errorsAdapter.toJson(writer, value)
-      null -> writer.nullValue()
+    // Serialize null value as null
+    if (value == null) {
+      writer.nullValue()
+      return
+    }
+    
+    // Serialize null data document as {"data":null} since it is a valid document per specification
+    if (!value.hasErrors() && !value.hasData() && !value.hasMeta()) {
+      writer.beginObject()
+      
+      // Serialize data top-level member with null value (it is required to enable null serialization)
+      val wasSerializeNulls = writer.serializeNulls
+      writer.serializeNulls = true
+      writer.name(NAME_DATA).nullValue()
+      writer.serializeNulls = wasSerializeNulls
+      
+      // Serialize anything else that this document might have
+      val token = writer.beginFlatten()
+      delegateAdapter.toJson(writer, value)
+      writer.endFlatten(token)
+      
+      writer.endObject()
+      return
+    }
+    
+    if (value.hasData()) {
+      // Transform document with data for serialization by unbinding relationship fields
+      val unbinder = Unbinder(value)
+      unbinder.unbind()
+      // When included needs to be omitted from serialization remove them from the document
+      if (value.serializationRules?.serializeIncluded == false) {
+        unbinder.removeIncluded()
+      }
+      // Serialize transformed document with delegate adapter
+      delegateAdapter.toJson(writer, value)
+      // When included were omitted for serialization assign them back to the document
+      if (value.serializationRules?.serializeIncluded == false) {
+        unbinder.assignIncluded()
+      }
+      // Bind document back so that primary resource(s) are not changed
+      value.bind()
+    } else {
+      // There is no data, there is nothing to transform, delegate adapter can perform serialization
+      delegateAdapter.toJson(writer, value)
     }
   }
 }

@@ -12,7 +12,7 @@ import java.lang.reflect.Field
  * [Relation] holds resource identifier(s) that are used to match correct resource value. If resource value is
  * found within this document it is assigned to field via reflection.
  */
-internal class Binder(document: Document.Data<*>) {
+internal class Binder(document: Document<*>) {
   
   /** All resources of this document (primary and included) */
   private val resources: List<Resource>

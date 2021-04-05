@@ -10,7 +10,7 @@ import com.jsonapi.internal.isResourceCollection
  * For each unbound value [Relation] is created ans stored in relationship map of that resource.
  */
 internal class Unbinder(
-  private val document: Document.Data<*>
+  private val document: Document<*>
 ) {
   
   private val primaryResources: List<Resource>

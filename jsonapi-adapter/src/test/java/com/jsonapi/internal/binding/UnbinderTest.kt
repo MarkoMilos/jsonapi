@@ -1,7 +1,6 @@
 package com.jsonapi.internal.binding
 
 import com.jsonapi.*
-import com.jsonapi.Document
 import com.jsonapi.internal.unbind
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
@@ -57,14 +56,14 @@ class UnbinderTest {
   
   @Test
   fun `set included to null for null data document`() {
-    val document = Document.Data(data = null, included = listOf(author1))
+    val document = Document(data = null, included = listOf(author1))
     document.unbind()
     assertThat(document.included).isNull()
   }
   
   @Test
   fun `unbind primary resource for single resource document`() {
-    val document = Document.Data(article1)
+    val document = Document(article1)
     document.unbind()
     assertThat(document.data).isNotNull
     assertThat(document.data?.author).isNull()
@@ -73,7 +72,7 @@ class UnbinderTest {
   
   @Test
   fun `unbind primary resources for resource collection document`() {
-    val document = Document.Data(listOf(article1, article2))
+    val document = Document(listOf(article1, article2))
     document.unbind()
     assertThat(document.data).containsExactly(article1, article2)
     assertThat(article1.author).isNull()
@@ -84,14 +83,14 @@ class UnbinderTest {
   
   @Test
   fun `set primary resource relationships map for single resource document`() {
-    val document = Document.Data(article1)
+    val document = Document(article1)
     document.unbind()
     assertThat(article1).satisfies(article1RelationshipRequirements)
   }
   
   @Test
   fun `set primary resources relationships map for resource collection document`() {
-    val document = Document.Data(listOf(article1, article2))
+    val document = Document(listOf(article1, article2))
     document.unbind()
     assertThat(document.data).containsExactly(article1, article2)
     assertThat(article1).satisfies(article1RelationshipRequirements)
@@ -100,21 +99,21 @@ class UnbinderTest {
   
   @Test
   fun `set included for single resource document`() {
-    val document = Document.Data(article1)
+    val document = Document(article1)
     document.unbind()
     assertThat(document.included).containsExactlyInAnyOrder(author1, author2, comment1, comment2)
   }
   
   @Test
   fun `set included for resource collection document`() {
-    val document = Document.Data(listOf(article1, article2))
+    val document = Document(listOf(article1, article2))
     document.unbind()
     assertThat(document.included).containsExactlyInAnyOrder(author1, author2, comment1, comment2)
   }
   
   @Test
   fun `unbind included for single resource document`() {
-    val document = Document.Data(article1)
+    val document = Document(article1)
     document.unbind()
     assertThat(document.included).contains(comment1, comment2)
     assertThat(comment1.author).isNull()
@@ -123,7 +122,7 @@ class UnbinderTest {
   
   @Test
   fun `unbind included for resource collection document`() {
-    val document = Document.Data(listOf(article1, article2))
+    val document = Document(listOf(article1, article2))
     document.unbind()
     assertThat(document.included).contains(comment1, comment2)
     assertThat(comment1.author).isNull()
@@ -132,7 +131,7 @@ class UnbinderTest {
   
   @Test
   fun `set included relationships map for single resource document`() {
-    val document = Document.Data(article1)
+    val document = Document(article1)
     document.unbind()
     assertThat(document.included).contains(comment1, comment2)
     assertThat(comment1.relationships)
@@ -143,7 +142,7 @@ class UnbinderTest {
   
   @Test
   fun `set included relationships map for resource collection document`() {
-    val document = Document.Data(listOf(article1, article2))
+    val document = Document(listOf(article1, article2))
     document.unbind()
     assertThat(document.included).contains(comment1, comment2)
     assertThat(comment1.relationships)
@@ -156,7 +155,7 @@ class UnbinderTest {
   fun `set relationships map to null when resource has no relations`() {
     val article = Article("articles", "1", "title")
     article.relationships = emptyMap()
-    val document = Document.Data(article)
+    val document = Document(article)
     document.unbind()
     assertThat(document.data!!.relationships).isNull()
   }
@@ -164,7 +163,7 @@ class UnbinderTest {
   @Test
   fun `set included to null when there are no relations`() {
     val article = Article("articles", "1", "title")
-    val document = Document.Data(data = article, included = emptyList())
+    val document = Document(data = article, included = emptyList())
     document.unbind()
     assertThat(document.included).isNull()
   }
@@ -183,7 +182,7 @@ class UnbinderTest {
     articleB.relatedArticles = listOf(articleA, articleC)
     articleC.relatedArticles = listOf(articleA, articleB)
     
-    val document = Document.Data(articleA)
+    val document = Document(articleA)
     document.unbind()
     
     assertThat(document.data).isEqualTo(articleA)
@@ -192,7 +191,7 @@ class UnbinderTest {
   
   @Test
   fun `remove and assign included properly sets included field for document`() {
-    val document = Document.Data(article1)
+    val document = Document(article1)
     val unbinder = Unbinder(document)
     
     unbinder.unbind()
@@ -212,7 +211,7 @@ class UnbinderTest {
       @Relationship("bar") var bar: String? = "bar is invalid relationship value"
     }
     
-    Document.Data(Foo()).unbind()
+    Document(Foo()).unbind()
   }
   
   @Test(expected = IllegalArgumentException::class)
@@ -222,6 +221,6 @@ class UnbinderTest {
       @Relationship("bar") var bar: List<Any> = listOf(ValidResource(), NotAResource(), "Dinosaur")
     }
     
-    Document.Data(Foo()).unbind()
+    Document(Foo()).unbind()
   }
 }

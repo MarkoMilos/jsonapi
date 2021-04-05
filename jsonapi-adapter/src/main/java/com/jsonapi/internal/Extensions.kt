@@ -8,11 +8,11 @@ import com.squareup.moshi.Types
 import java.lang.reflect.Field
 import java.lang.reflect.Type
 
-internal fun Document.Data<*>.bind() {
+internal fun Document<*>.bind() {
   Binder(this).bind()
 }
 
-internal fun Document.Data<*>.unbind() {
+internal fun Document<*>.unbind() {
   Unbinder(this).unbind()
 }
 

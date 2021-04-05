@@ -55,13 +55,12 @@ public class JavaTest {
   public void deserializeDocumentJava() throws IOException {
     Document<JavaArticle> deserialized = adapter.fromJson(FilesKt.read(JsonFile.DOCUMENT_ARTICLE_SINGLE, false));
 
-    assertThat(deserialized).isNotNull().isInstanceOfSatisfying(Document.Data.class, data -> {
+    assertThat(deserialized).isNotNull().isInstanceOfSatisfying(Document.class, data ->
       assertThat(data.getData()).isNotNull().isInstanceOfSatisfying(JavaArticle.class, article -> {
         assertThat(article.title).isEqualTo("Title1");
         assertThat(article.author).isNotNull();
         assertThat(article.author.getId()).isEqualTo("1");
-      });
-    });
+      }));
   }
 
   @Test
@@ -74,7 +73,7 @@ public class JavaTest {
 
     JavaArticle article = new JavaArticle("articles", "1", "Title1", author1, List.of(comment1, comment2));
 
-    Document<JavaArticle> document = new Document.Data<>(article);
+    Document<JavaArticle> document = new Document<>(article);
 
     String serialized = adapter.toJson(document);
     String expected = FilesKt.read(JsonFile.DOCUMENT_ARTICLE_SINGLE_SIMPLE, true);

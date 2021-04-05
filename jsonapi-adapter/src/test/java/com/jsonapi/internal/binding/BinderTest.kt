@@ -1,7 +1,6 @@
 package com.jsonapi.internal.binding
 
 import com.jsonapi.*
-import com.jsonapi.Document
 import com.jsonapi.Relation.ToMany
 import com.jsonapi.Relation.ToOne
 import com.jsonapi.internal.bind
@@ -50,7 +49,7 @@ class BinderTest {
   
   @Test
   fun `bind primary resource for single resource document`() {
-    val document = Document.Data(
+    val document = Document(
       data = article1,
       included = listOf(author1, author2, comment1, comment2)
     )
@@ -62,7 +61,7 @@ class BinderTest {
   
   @Test
   fun `bind primary resource for resource collection document`() {
-    val document = Document.Data(
+    val document = Document(
       data = listOf(article1, article2),
       included = listOf(author1, author2, comment1, comment2)
     )
@@ -79,7 +78,7 @@ class BinderTest {
   
   @Test
   fun `bind included resources`() {
-    val document = Document.Data(
+    val document = Document(
       data = article1,
       included = listOf(author1, author2, comment1, comment2, article2)
     )
@@ -93,7 +92,7 @@ class BinderTest {
   fun `throws when incorrect type is bound to relationship field`() {
     // Within included provide Resource that will match relationship entry.
     // Doing so Binder will try to bind matched Resource value to annotated Person field.
-    val document = Document.Data(
+    val document = Document(
       data = article1,
       included = listOf(Resource(id = "1", type = "people"))
     )

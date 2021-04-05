@@ -22,7 +22,7 @@ class BindingIntegrationTest {
     val article2 = Article("articles", "2", "Title2", author2, null)
     val article1 = Article("articles", "1", "Title1", author1, listOf(comment1, comment2), listOf(article2))
     
-    val document = Document.data(article1)
+    val document = Document(article1)
     
     document.unbind()
     
