@@ -32,35 +32,45 @@ internal class ResourceAdapter constructor(
     // Find type adapter and deserialize resource
     val peeked = reader.peekJson()
     peeked.setFailOnUnknown(false)
-    val typeNameIndex = peeked.use { typeNameIndex(it) }
-    return if (typeNameIndex != -1) {
-      typeAdapters[typeNameIndex].fromJson(reader)
-    } else {
-      defaultResourceAdapter!!.fromJson(reader)
-    }
+    val adapter = peeked.use { findAdapter(it) }
+    return adapter.fromJson(reader)
   }
   
-  private fun typeNameIndex(reader: JsonReader): Int {
+  private fun findAdapter(reader: JsonReader): JsonAdapter<Any> {
     reader.beginObject()
     while (reader.hasNext()) {
+      // Find 'type' member
       if (reader.selectName(memberNameOptions) == -1) {
         reader.skipName()
         reader.skipValue()
         continue
       }
+      // Check if type member value is within options
       val typeNameIndex = reader.selectString(typeNameOptions)
-      if (typeNameIndex == -1 && defaultResourceAdapter == null) {
+      return if (typeNameIndex != -1) {
+        // Type member value found withing options, return corresponding registered type adapter
+        typeAdapters[typeNameIndex]
+      } else if (typeNameIndex == -1 && defaultResourceAdapter != null) {
+        if (reader.peek() == Token.STRING) {
+          // Type member value is a string but not found within options.
+          // Configured default adapter can be used.
+          defaultResourceAdapter
+        } else {
+          // Type member value is not a string
+          throw JsonApiException("The value of top level member 'type' MUST be string.")
+        }
+      } else {
+        // Type not found within options and default adapter is not configured
         throw JsonApiException(
           "Expected one of "
-            + typeNames
-            + " for member 'type' but found '"
-            + runCatching { reader.nextString() }.getOrDefault("null")
-            + "'. Register this type or use allowUnregisteredTypes(true)."
+              + typeNames
+              + " for member 'type' but found '"
+              + runCatching { reader.nextString() }.getOrDefault("null")
+              + "'. Register this type or use allowUnregisteredTypes(true)."
         )
       }
-      return typeNameIndex
     }
-    
+    // Top level member type not found for this resource json
     throw JsonApiException(
       "Resource object MUST contain top-level member 'type' but it was not found on path ${reader.path}"
     )
@@ -80,9 +90,9 @@ internal class ResourceAdapter constructor(
     } else {
       defaultResourceAdapter ?: throw JsonApiException(
         "Type '${value.javaClass}' not found in registered types."
-          + "\nRegister this type or use allowUnregisteredTypes(true)."
-          + "\nRegistered types: "
-          + types.joinToString("\n  * ", "\n  * ")
+            + "\nRegister this type or use allowUnregisteredTypes(true)."
+            + "\nRegistered types: "
+            + types.joinToString("\n  * ", "\n  * ")
       )
     }
     adapter.toJson(writer, value)

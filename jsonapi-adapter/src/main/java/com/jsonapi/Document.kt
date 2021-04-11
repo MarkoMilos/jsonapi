@@ -171,6 +171,17 @@ class Document<T> @JvmOverloads constructor(
     }
   }
   
+  /**
+   * Builder for creating instance of [Document].
+   *
+   * Example:
+   * ```
+   *  Document.with(article)
+   *    .links(...)
+   *    .meta(...)
+   *    .build()
+   * ```
+   */
   class Builder<T> {
     
     private var data: T? = null

@@ -4,7 +4,6 @@ import com.jsonapi.*
 import com.jsonapi.JsonFile.RESOURCE_ARTICLE
 import com.jsonapi.JsonFile.RESOURCE_UNKNOWN_TYPE
 import com.jsonapi.TestUtils.moshi
-import com.jsonapi.Resource
 import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -36,11 +35,10 @@ class ResourceAdapterTest {
       .build()
     val adapter = moshi.adapter(Resource::class.java)
     val deserialized = adapter.fromJson(read(RESOURCE_UNKNOWN_TYPE))
-    assertThat(deserialized).isNotNull
     assertThat(deserialized).isInstanceOfSatisfying(Resource::class.java) {
       assertThat(it.type).isEqualTo("unknown")
       assertThat(it.id).isEqualTo("1")
-      assertThat(it.relationships).isNotNull.hasSize(1)
+      assertThat(it.relationships).hasSize(1)
       assertThat(it.links).isNotNull
       assertThat(it.meta).isNotNull
     }
@@ -48,6 +46,13 @@ class ResourceAdapterTest {
   
   @Test(expected = JsonApiException::class)
   fun `throw on deserializing unregistered resource when unregistered types are not allowed`() {
+    val factory = JsonApiFactory.Builder()
+      .allowUnregisteredTypes(false)
+      .build()
+    val moshi: Moshi = Moshi.Builder()
+      .add(factory)
+      .build()
+    val adapter = moshi.adapter(Resource::class.java)
     adapter.fromJson(read(RESOURCE_UNKNOWN_TYPE))
   }
   
@@ -95,6 +100,13 @@ class ResourceAdapterTest {
   
   @Test(expected = JsonApiException::class)
   fun `throw on serializing unregistered type when unregistered types are not allowed`() {
+    val factory = JsonApiFactory.Builder()
+      .allowUnregisteredTypes(false)
+      .build()
+    val moshi: Moshi = Moshi.Builder()
+      .add(factory)
+      .build()
+    val adapter = moshi.adapter(Resource::class.java)
     val resource: Resource = ValidResource()
     adapter.toJson(resource)
   }

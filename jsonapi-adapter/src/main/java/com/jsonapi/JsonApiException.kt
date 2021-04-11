@@ -1,5 +1,9 @@
 package com.jsonapi
 
+/**
+ * Exception indicating either unrecoverable mismatch from JSON:API specification found during processing
+ * or violation of predefined and/or configured constraints.
+ */
 class JsonApiException : RuntimeException {
   constructor() : super()
   constructor(message: String) : super(message)
