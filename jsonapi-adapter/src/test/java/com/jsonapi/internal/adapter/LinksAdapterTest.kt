@@ -24,7 +24,7 @@ class LinksAdapterTest {
   fun `deserialize links`() {
     val deserialized = adapter.fromJson(read(LINKS))
     assertThat(deserialized).isNotNull
-    assertThat(deserialized?.linksMap).containsExactly(
+    assertThat(deserialized?.members).containsExactly(
       entry("self", LinkURI("self")),
       entry("related", LinkObject("href"))
     )
@@ -33,7 +33,7 @@ class LinksAdapterTest {
   @Test
   fun `skip entries with null values`() {
     val deserialized = adapter.fromJson(read(LINKS))
-    assertThat(deserialized?.linksMap).doesNotContainKey("null_link")
+    assertThat(deserialized?.members).doesNotContainKey("null_link")
   }
   
   @Test

@@ -63,10 +63,10 @@ internal class ResourceAdapter constructor(
         // Type not found within options and default adapter is not configured
         throw JsonApiException(
           "Expected one of "
-              + typeNames
-              + " for member 'type' but found '"
-              + runCatching { reader.nextString() }.getOrDefault("null")
-              + "'. Register this type or use allowUnregisteredTypes(true)."
+            + typeNames
+            + " for member 'type' but found '"
+            + runCatching { reader.nextString() }.getOrDefault("null")
+            + "'. Register this type or use allowUnregisteredTypes(true)."
         )
       }
     }
@@ -90,9 +90,9 @@ internal class ResourceAdapter constructor(
     } else {
       defaultResourceAdapter ?: throw JsonApiException(
         "Type '${value.javaClass}' not found in registered types."
-            + "\nRegister this type or use allowUnregisteredTypes(true)."
-            + "\nRegistered types: "
-            + types.joinToString("\n  * ", "\n  * ")
+          + "\nRegister this type or use allowUnregisteredTypes(true)."
+          + "\nRegistered types: "
+          + types.joinToString("\n  * ", "\n  * ")
       )
     }
     adapter.toJson(writer, value)

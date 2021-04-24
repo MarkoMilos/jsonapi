@@ -42,7 +42,7 @@ internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
       .beginObject()
       .apply {
         // deserialize all map entries as name value pairs
-        value.linksMap.forEach { entry ->
+        value.members.forEach { entry ->
           name(entry.key)
           linkAdapter.toJson(this, entry.value)
         }

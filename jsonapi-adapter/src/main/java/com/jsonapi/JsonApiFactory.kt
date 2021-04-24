@@ -47,9 +47,9 @@ class JsonApiFactory private constructor(
   )
   
   override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi): JsonAdapter<*>? {
-    // iterate over factory delegates until first one that resolves for [type, annotations] is found
-    // in that case delegate factory will return non-null adapter
-    // if none of the delegates return non-null adapter this factory does not apply (returns null)
+    // Iterate over factory delegates until first one that resolves for [type, annotations] is found
+    // In that case delegate factory will return non-null adapter
+    // If none of the delegates return non-null adapter this factory does not apply (returns null)
     return factoryDelegates
       .asSequence()
       .map { it.create(type, annotations, moshi, this) }
@@ -124,21 +124,21 @@ class JsonApiFactory private constructor(
      */
     fun build(): JsonAdapter.Factory {
       types.forEach {
-        // get and assert that Type annotation is present on target resource type
+        // Get and assert that Type annotation is present on target resource type
         val typeAnnotation = Types.getRawType(it).getAnnotation(TypeAnnotation::class.java)
           ?: throw JsonApiException("Provided type '$it' is not annotated with @Type.")
         
-        // assert that valid type name is provided with @Type annotation
+        // Assert that valid type name is provided with @Type annotation
         if (typeAnnotation.name.isBlank()) {
           throw JsonApiException(
             "For type '"
-                + it
-                + "' value provided with @Type annotation was blank.\n"
-                + "The values of type members MUST adhere to the same constraints as member names per specification."
+              + it
+              + "' value provided with @Type annotation was blank.\n"
+              + "The values of type members MUST adhere to the same constraints as member names per specification."
           )
         }
         
-        // get assigned type name from annotation and add it to names list only
+        // Get assigned type name from annotation and add it to names list only
         // if not already in use by another type, throw if name is in use
         val typeName = typeAnnotation.name
         if (!typeNames.contains(typeName)) {
@@ -146,8 +146,8 @@ class JsonApiFactory private constructor(
         } else {
           throw JsonApiException(
             "Name '$typeName' "
-                + "for type '$it' "
-                + "is already registered for type '${types[typeNames.indexOf(typeName)]}'."
+              + "for type '$it' "
+              + "is already registered for type '${types[typeNames.indexOf(typeName)]}'."
           )
         }
       }

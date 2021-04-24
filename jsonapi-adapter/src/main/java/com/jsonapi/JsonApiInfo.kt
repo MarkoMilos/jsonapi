@@ -16,7 +16,7 @@ import com.squareup.moshi.JsonClass
  * @param meta contains non-standard meta-information.
  */
 @JsonClass(generateAdapter = true)
-data class JsonApi(
+data class JsonApiInfo(
   val version: String? = null,
   val ext: List<String>? = null,
   val profile: List<String>? = null,

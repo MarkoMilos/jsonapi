@@ -1,17 +1,24 @@
 buildscript {
   ext.versions = [
-    'kotlin' : '1.4.31',
-    'moshi'  : '1.11.0',
-    'junit'  : '4.13.2',
-    'assertj': '3.19.0'
+    'kotlin'         : '1.4.32',
+    'moshi'          : '1.12.0',
+    'javapoet'       : '1.13.0',
+    'autoservice'    : '1.0',
+    'junit'          : '4.13.2',
+    'assertj'        : '3.19.0',
+    'compile_testing': '0.19'
   ]
 
   ext.deps = [
     'kotlinStdlib'        : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
     'moshi'               : "com.squareup.moshi:moshi:${versions.moshi}",
+    'moshi_kotlin_reflect': "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
     'moshi_kotlin_codegen': "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
+    'javapoet'            : "com.squareup:javapoet:${versions.javapoet}",
+    'autoservice'         : "com.google.auto.service:auto-service:${versions.autoservice}",
     'junit'               : "junit:junit:${versions.junit}",
-    'assertj'             : "org.assertj:assertj-core:${versions.assertj}"
+    'assertj'             : "org.assertj:assertj-core:${versions.assertj}",
+    'compile_testing'     : "com.google.testing.compile:compile-testing:${versions.compile_testing}"
   ]
 
   repositories {
@@ -19,6 +26,7 @@ buildscript {
     jcenter()
     google()
   }
+
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
   }

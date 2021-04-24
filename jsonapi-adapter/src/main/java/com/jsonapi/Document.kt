@@ -29,6 +29,7 @@ import com.squareup.moshi.JsonClass
  * @param errors an array of [Error] objects
  * @param links a links object related to the primary data
  * @param meta a meta object that contains non-standard meta-information
+ * @param jsonapi includes information about JSON:API implementation
  *
  * @see Builder
  */
@@ -39,7 +40,7 @@ class Document<T> @JvmOverloads constructor(
   val errors: List<Error>? = null,
   val links: Links? = null,
   val meta: Meta? = null,
-  val jsonapi: JsonApi? = null
+  val jsonapi: JsonApiInfo? = null
 ) {
   
   @Transient internal var serializationRules: SerializationRules? = null
@@ -176,7 +177,7 @@ class Document<T> @JvmOverloads constructor(
    *
    * Example:
    * ```
-   *  Document.with(article)
+   *  Document.with(resource)
    *    .links(...)
    *    .meta(...)
    *    .build()
@@ -189,7 +190,7 @@ class Document<T> @JvmOverloads constructor(
     private var errors: List<Error>? = null
     private var links: Links? = null
     private var meta: Meta? = null
-    private var jsonapi: JsonApi? = null
+    private var jsonapi: JsonApiInfo? = null
     private var serializeIncluded: Boolean = true
     
     fun data(data: T) = apply {
@@ -212,7 +213,7 @@ class Document<T> @JvmOverloads constructor(
       this.meta = meta
     }
     
-    fun jsonapi(jsonapi: JsonApi) = apply {
+    fun jsonapi(jsonapi: JsonApiInfo) = apply {
       this.jsonapi = jsonapi
     }
     

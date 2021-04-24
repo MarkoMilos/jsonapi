@@ -10,9 +10,9 @@ import com.squareup.moshi.Types
  * Any members MAY be specified within meta objects.
  */
 @JsonClass(generateAdapter = true)
-class Meta(
-  val members: Map<String, Any?>
-) {
+class Meta constructor(val members: Map<String, Any?>) {
+  
+  constructor(vararg members: Pair<String, Any?>) : this(mapOf(*members))
   
   /** Returns true if this meta has members, false otherwise */
   fun isEmpty() = members.isEmpty()
