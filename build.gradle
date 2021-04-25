@@ -6,7 +6,9 @@ buildscript {
     'autoservice'    : '1.0',
     'junit'          : '4.13.2',
     'assertj'        : '3.19.0',
-    'compile_testing': '0.19'
+    'compile_testing': '0.19',
+    'spotless'       : '5.7.0',
+    'ktlint'         : '0.41.0'
   ]
 
   ext.deps = [
@@ -25,10 +27,12 @@ buildscript {
     mavenCentral()
     jcenter()
     google()
+    gradlePluginPortal()
   }
 
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+    classpath "com.diffplug.spotless:spotless-plugin-gradle:${versions.spotless}"
   }
 }
 
@@ -40,6 +44,32 @@ allprojects {
   }
 }
 
-task clean(type: Delete) {
-  delete rootProject.buildDir
+apply plugin: "com.diffplug.spotless"
+spotless {
+  kotlin {
+    target "**/*.kt"
+    targetExclude "**/gen/**/*.*", "**/generated/**/*.*"
+    targetExclude "$buildDir/**/*.kt"
+    targetExclude "bin/**/*.kt"
+    // This should all come from editorconfig which is not currently supported
+    // Related issue: https://github.com/diffplug/spotless/issues/142
+    ktlint(versions.ktlint).userData([
+      "indent_size"             : "2",
+      "continuation_indent_size": "2"
+    ])
+    trimTrailingWhitespace()
+    endWithNewline()
+  }
+  java {
+    target "**/src/**/*.java"
+    googleJavaFormat("1.7")
+    removeUnusedImports()
+    trimTrailingWhitespace()
+    endWithNewline()
+  }
+  groovyGradle {
+    target "**/*.gradle"
+    trimTrailingWhitespace()
+    endWithNewline()
+  }
 }

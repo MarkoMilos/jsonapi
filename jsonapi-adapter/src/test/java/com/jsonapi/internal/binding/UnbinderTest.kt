@@ -37,7 +37,8 @@ class UnbinderTest {
         .containsExactly(
           entry("author", Relation.ToOne(ResourceIdentifier("people", "1"))),
           entry(
-            "comments", Relation.ToMany(
+            "comments",
+            Relation.ToMany(
               listOf(
                 ResourceIdentifier("comments", "1"),
                 ResourceIdentifier("comments", "2")
