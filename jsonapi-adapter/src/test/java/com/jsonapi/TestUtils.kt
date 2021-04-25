@@ -8,7 +8,7 @@ object TestUtils {
     .addType(Article::class.java)
     .addType(Comment::class.java)
     .build()
-  
+
   val moshi: Moshi = Moshi.Builder()
     .add(factory)
     .build()

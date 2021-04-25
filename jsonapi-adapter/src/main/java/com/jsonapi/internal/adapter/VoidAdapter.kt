@@ -10,7 +10,7 @@ internal class VoidAdapter : JsonAdapter<Nothing>() {
     reader.skipValue()
     return null
   }
-  
+
   override fun toJson(writer: JsonWriter, value: Nothing?) {
     writer.nullValue()
   }

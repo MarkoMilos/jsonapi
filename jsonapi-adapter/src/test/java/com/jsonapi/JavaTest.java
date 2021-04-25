@@ -43,17 +43,15 @@ public class JavaTest {
     .addType(Comment.class)
     .build();
 
-  private final Moshi moshi = new Moshi.Builder()
-    .add(factory)
-    .build();
+  private final Moshi moshi = new Moshi.Builder().add(factory).build();
 
-  private final JsonAdapter<Document<JavaArticle>> adapter = moshi.adapter(
-    Types.newParameterizedType(Document.class, JavaArticle.class)
-  );
+  private final JsonAdapter<Document<JavaArticle>> adapter =
+    moshi.adapter(Types.newParameterizedType(Document.class, JavaArticle.class));
 
   @Test
   public void deserializeDocumentJava() throws IOException {
-    Document<JavaArticle> deserialized = adapter.fromJson(FilesKt.read(JsonFile.DOCUMENT_ARTICLE_SINGLE, false));
+    Document<JavaArticle> deserialized =
+      adapter.fromJson(FilesKt.read(JsonFile.DOCUMENT_ARTICLE_SINGLE, false));
 
     assertThat(deserialized).isNotNull().isInstanceOfSatisfying(Document.class, data ->
       assertThat(data.getData()).isNotNull().isInstanceOfSatisfying(JavaArticle.class, article -> {
@@ -71,7 +69,8 @@ public class JavaTest {
     Comment comment1 = new Comment("comments", "1", "Comment1", author2);
     Comment comment2 = new Comment("comments", "2", "Comment2", author1);
 
-    JavaArticle article = new JavaArticle("articles", "1", "Title1", author1, List.of(comment1, comment2));
+    JavaArticle article =
+      new JavaArticle("articles", "1", "Title1", author1, List.of(comment1, comment2));
 
     Document<JavaArticle> document = new Document<>(article);
 

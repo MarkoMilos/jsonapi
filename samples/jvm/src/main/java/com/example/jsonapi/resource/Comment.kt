@@ -11,7 +11,7 @@ class Comment(
   val body: String,
   @Relationship("author") val author: Person?
 ) : Resource(type, id) {
-  
+
   override fun toString(): String {
     return "$body from $author"
   }

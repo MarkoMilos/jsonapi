@@ -18,10 +18,10 @@ sealed class Relation {
    *   - **related**: a related resource link
    */
   abstract val links: Links?
-  
+
   /** Non-standard meta-information about the relationship. */
   abstract val meta: Meta?
-  
+
   @JsonClass(generateAdapter = true)
   data class ToOne @JvmOverloads constructor(
     /**
@@ -36,7 +36,7 @@ sealed class Relation {
     override val links: Links? = null,
     override val meta: Meta? = null
   ) : Relation()
-  
+
   @JsonClass(generateAdapter = true)
   data class ToMany @JvmOverloads constructor(
     /**
@@ -51,7 +51,7 @@ sealed class Relation {
     override val links: Links? = null,
     override val meta: Meta? = null
   ) : Relation()
-  
+
   /** Returns true if this relation has a resource linkage (data), false otherwise. */
   fun hasData() = when (this) {
     is ToOne -> data != null

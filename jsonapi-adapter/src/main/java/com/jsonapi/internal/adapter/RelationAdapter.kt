@@ -12,21 +12,21 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 
 internal class RelationAdapter(moshi: Moshi) : JsonAdapter<Relation>() {
-  
+
   private val toOneAdapter = moshi.adapter(ToOne::class.java)
   private val toManyAdapter = moshi.adapter(ToMany::class.java)
-  
+
   override fun fromJson(reader: JsonReader): Relation {
     if (reader.peek() != Token.BEGIN_OBJECT) {
       // The value of the relationships key MUST be an object
       throw JsonApiException(
-        "The value of the relationships key MUST be an object (a “relationships object”) but "
-          + reader.peek()
-          + " was found on path: "
-          + reader.path
+        "The value of the relationships key MUST be an object (a “relationships object”) but " +
+          reader.peek() +
+          " was found on path: " +
+          reader.path
       )
     }
-    
+
     var relationToMany = false
     // peak json reader so that we can search trough fields without consuming anything
     val peaked = reader.peekJson()
@@ -53,7 +53,7 @@ internal class RelationAdapter(moshi: Moshi) : JsonAdapter<Relation>() {
     }
     return relation
   }
-  
+
   override fun toJson(writer: JsonWriter, value: Relation?) {
     when (value) {
       is ToOne -> serializeToOneRelation(writer, value)
@@ -61,7 +61,7 @@ internal class RelationAdapter(moshi: Moshi) : JsonAdapter<Relation>() {
       null -> throw JsonApiException("Relation should not be 'null' but 'null' was found on path: ${writer.path}")
     }
   }
-  
+
   private fun serializeToOneRelation(writer: JsonWriter, relation: ToOne) {
     if (relation.data == null && relation.links == null && relation.meta == null) {
       // when all Relation fields are null serialize empty relation as {"data":null}

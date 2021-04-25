@@ -1,8 +1,22 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.*
-import com.jsonapi.internal.*
-import com.squareup.moshi.*
+import com.jsonapi.JsonApiException
+import com.jsonapi.Links
+import com.jsonapi.Meta
+import com.jsonapi.Relation
+import com.jsonapi.Resource
+import com.jsonapi.internal.NAME_ATTRIBUTES
+import com.jsonapi.internal.NAME_ID
+import com.jsonapi.internal.NAME_LID
+import com.jsonapi.internal.NAME_LINKS
+import com.jsonapi.internal.NAME_META
+import com.jsonapi.internal.NAME_RELATIONSHIPS
+import com.jsonapi.internal.NAME_TYPE
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
 internal class ResourceSubclassAdapter<T : Resource>(
@@ -14,25 +28,25 @@ internal class ResourceSubclassAdapter<T : Resource>(
   private val typeNames: List<String>,
   private val allowUnregisteredTypes: Boolean
 ) : JsonAdapter<T>() {
-  
+
   private val linksAdapter = moshi.adapter(Links::class.java)
   private val metaAdapter = moshi.adapter(Meta::class.java)
   private val stringAdapter = moshi.adapter(String::class.java)
   private val relationshipAdapter: JsonAdapter<Map<String, Relation>> = moshi.adapter(
     Types.newParameterizedType(Map::class.java, String::class.java, Relation::class.java)
   )
-  
+
   override fun fromJson(reader: JsonReader): T? {
     // In case of a null value deserialize to null and consume token
     if (reader.peek() == JsonReader.Token.NULL) {
       return reader.nextNull()
     }
-    
+
     // Assert that resource is JSON object
     if (reader.peek() != JsonReader.Token.BEGIN_OBJECT) {
       throw JsonApiException("Resource MUST be a JSON object but found ${reader.peek()} on path ${reader.path}")
     }
-    
+
     // Standard structure of a resource
     var type: String? = null
     var id: String? = null
@@ -41,7 +55,7 @@ internal class ResourceSubclassAdapter<T : Resource>(
     var links: Links? = null
     var meta: Meta? = null
     var resource: T? = null
-    
+
     // Read the resource and delegate attributes parsing to source resource adapter
     reader.beginObject()
     while (reader.hasNext()) {
@@ -57,9 +71,9 @@ internal class ResourceSubclassAdapter<T : Resource>(
       }
     }
     reader.endObject()
-    
+
     validateType(type, reader.path)
-    
+
     // If 'attributes' key is not found for this resource
     // ensure that default instance of target class is created
     if (resource == null) {
@@ -74,15 +88,15 @@ internal class ResourceSubclassAdapter<T : Resource>(
     resource?.meta = meta
     return resource
   }
-  
+
   override fun toJson(writer: JsonWriter, value: T?) {
     if (value == null) {
       writer.nullValue()
       return
     }
-    
+
     validateType(value.type, writer.path)
-    
+
     // capture resource values
     val type = value.type
     val id = value.id
@@ -90,7 +104,7 @@ internal class ResourceSubclassAdapter<T : Resource>(
     val relationships = value.relationships
     val links = value.links
     val meta = value.meta
-    
+
     // set all resource values to null to avoid serialization within attributes
     value.type = null
     value.id = null
@@ -98,13 +112,13 @@ internal class ResourceSubclassAdapter<T : Resource>(
     value.relationships = null
     value.links = null
     value.meta = null
-    
+
     // Improvement possible:
     // this implementation requires double serialization just to check for empty objects
     // and to omit 'attributes' object from serialized resource when it is empty
     // alternatively we could check if all declared fields are null via reflection
     val attributes = delegateAdapter.toJson(value)
-    
+
     // serialize values
     writer
       .beginObject()
@@ -121,7 +135,7 @@ internal class ResourceSubclassAdapter<T : Resource>(
       .name(NAME_LINKS).apply { linksAdapter.toJson(writer, links) }
       .name(NAME_META).apply { metaAdapter.toJson(writer, meta) }
       .endObject()
-    
+
     // assign back all resource values that were set to null
     value.type = type
     value.id = id
@@ -130,31 +144,31 @@ internal class ResourceSubclassAdapter<T : Resource>(
     value.links = links
     value.meta = meta
   }
-  
+
   private fun validateType(type: String?, path: String = "") {
     // type is required, it should not be null or empty
     if (type.isNullOrEmpty()) {
       throw JsonApiException("A resource object MUST contain non-null, non-empty type member.")
     }
-    
+
     // when unregistered types are not allowed type needs to be within registered types list
     if (!allowUnregisteredTypes && !typeNames.contains(type)) {
       throw JsonApiException(
-        "Expected resource type name is one of $typeNames "
-          + "but was '$type' "
-          + "on path [$path]."
-          + "\nRegister this type or use allowUnregisteredTypes(true) on JsonApiFactory.Builder."
+        "Expected resource type name is one of $typeNames " +
+          "but was '$type' " +
+          "on path [$path]." +
+          "\nRegister this type or use allowUnregisteredTypes(true) on JsonApiFactory.Builder."
       )
     }
-    
+
     // when strict type checking is enabled type needs to match annotated value for target class
     if (strictTypes && annotatedTypeName != type) {
       throw JsonApiException(
-        "Expected type name '$annotatedTypeName' "
-          + "for ${resourceType.typeName} "
-          + "but was '$type' "
-          + "on path [$path]."
-          + "\nTo disable strict types use strictTypes(false) on JsonApiFactory.Builder."
+        "Expected type name '$annotatedTypeName' " +
+          "for ${resourceType.typeName} " +
+          "but was '$type' " +
+          "on path [$path]." +
+          "\nTo disable strict types use strictTypes(false) on JsonApiFactory.Builder."
       )
     }
   }

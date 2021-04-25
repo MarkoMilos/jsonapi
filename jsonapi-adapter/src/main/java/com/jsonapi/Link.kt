@@ -17,7 +17,7 @@ sealed class Link {
    * [RFC3986 Section 4.1](https://tools.ietf.org/html/rfc3986#section-4.1) pointing to the link’s target.
    */
   data class LinkURI(val uri: String) : Link()
-  
+
   /**
    * A “link object” is an object that represents a [web link](https://tools.ietf.org/html/rfc8288).
    *
@@ -53,7 +53,7 @@ sealed class Link {
     val hreflang: List<String>? = null,
     val meta: Meta? = null
   ) : Link()
-  
+
   /**
    * Returns string whose value is a URI-reference [RFC3986 Section 4.1](https://tools.ietf.org/html/rfc3986#section-4.1)
    * pointing to the link’s target for given link type.
@@ -67,12 +67,12 @@ sealed class Link {
       is LinkObject -> href
     }
   }
-  
+
   /** If this is instance of [LinkURI] returns it, otherwise return null */
   fun asURI(): LinkURI? {
     return if (this is LinkURI) this else null
   }
-  
+
   /** If this is instance of [LinkObject] returns it, otherwise return null */
   fun asObject(): LinkObject? {
     return if (this is LinkObject) this else null

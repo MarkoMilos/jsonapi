@@ -66,7 +66,7 @@ open class Resource @JvmOverloads constructor(
   var links: Links? = null,
   var meta: Meta? = null
 ) {
-  
+
   /**
    * Creates [ResourceIdentifier] from this resource.
    *
@@ -78,14 +78,14 @@ open class Resource @JvmOverloads constructor(
   fun identifier(): ResourceIdentifier {
     return ResourceIdentifier(type ?: "", id, lid, meta)
   }
-  
+
   override fun equals(other: Any?): Boolean {
-    return (other is Resource)
-      && other.type == this.type
-      && other.id == this.id
-      && other.lid == this.lid
+    return (other is Resource) &&
+      other.type == this.type &&
+      other.id == this.id &&
+      other.lid == this.lid
   }
-  
+
   override fun hashCode(): Int {
     var result = type?.hashCode() ?: 0
     result = 31 * result + (id?.hashCode() ?: 0)

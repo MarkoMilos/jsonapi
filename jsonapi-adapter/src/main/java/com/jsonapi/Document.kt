@@ -42,30 +42,30 @@ class Document<T> @JvmOverloads constructor(
   val meta: Meta? = null,
   val jsonapi: JsonApiInfo? = null
 ) {
-  
+
   @Transient internal var serializationRules: SerializationRules? = null
-  
+
   init {
     if (data != null && errors != null) {
       throw JsonApiException("The members data and errors MUST NOT coexist in the same document.")
     }
   }
-  
+
   /** Returns true if document has non-null `data` member, false otherwise. */
   fun hasData(): Boolean {
     return data != null
   }
-  
+
   /** Returns true if document has errors, false otherwise. */
   fun hasErrors(): Boolean {
     return errors != null
   }
-  
+
   /** Returns true if document has meta, false otherwise. */
   fun hasMeta(): Boolean {
     return meta != null
   }
-  
+
   /**
    * Get primary resource for this document. Throw if document has errors or primary resource is null.
    *
@@ -78,10 +78,10 @@ class Document<T> @JvmOverloads constructor(
     }
     return data ?: throw NullPointerException("Resource(s) for this document is null")
   }
-  
+
   /** Get primary resource for this document. Return null if document has errors. */
   fun getOrNull(): T? = data
-  
+
   /**
    * Get primary resource for this document. Throw is this document is has errors.
    *
@@ -90,7 +90,7 @@ class Document<T> @JvmOverloads constructor(
   fun getOrThrow(): T? {
     return if (errors == null) data else throw JsonApiErrorsException(errors)
   }
-  
+
   /**
    * Get primary resource for this document. Return [default] in case when primary resource is null
    * or this document is has errors.
@@ -98,7 +98,7 @@ class Document<T> @JvmOverloads constructor(
   fun getOrDefault(default: T): T {
     return data ?: default
   }
-  
+
   /**
    * Get primary resource for this document. Return result of [block] in case when primary resource is null
    * or this document is has errors.
@@ -109,69 +109,69 @@ class Document<T> @JvmOverloads constructor(
   fun getOrElse(block: (List<Error>?) -> T): T {
     return data ?: block(errors)
   }
-  
+
   /** Returns errors list if document has errors, otherwise returns empty list. */
   fun errorsOrEmpty(): List<Error> {
     return errors ?: emptyList()
   }
-  
+
   /** Throws [JsonApiErrorsException] if this document is has errors. */
   fun throwIfErrors() {
     if (errors != null) {
       throw JsonApiErrorsException(errors)
     }
   }
-  
+
   companion object {
     /** Creates [Document] from [resource]. */
     @JvmStatic
     fun <T> from(resource: T): Document<T> {
       return Builder<T>().data(resource).build()
     }
-    
+
     /** Creates [Document] from [error]. */
     @JvmStatic
     fun <T> from(error: Error): Document<T> {
       return Builder<T>().errors(listOf(error)).build()
     }
-    
+
     /** Creates [Document] from [errors]. */
     @JvmStatic
     fun <T> from(errors: List<Error>): Document<T> {
       return Builder<T>().errors(errors).build()
     }
-    
+
     /** Creates [Document] from [meta]. */
     @JvmStatic
     fun <T> from(meta: Meta): Document<T> {
       return Builder<T>().meta(meta).build()
     }
-    
+
     /** Creates [Builder] from [resource]. */
     @JvmStatic
     fun <T> with(resource: T): Builder<T> {
       return Builder<T>().data(resource)
     }
-    
+
     /** Creates [Builder] from [error]. */
     @JvmStatic
     fun <T> with(error: Error): Builder<T> {
       return Builder<T>().errors(listOf(error))
     }
-    
+
     /** Creates [Builder] from [errors]. */
     @JvmStatic
     fun <T> with(errors: List<Error>): Builder<T> {
       return Builder<T>().errors(errors)
     }
-    
+
     /** Creates [Builder] from [meta]. */
     @JvmStatic
     fun <T> with(meta: Meta): Builder<T> {
       return Builder<T>().meta(meta)
     }
   }
-  
+
   /**
    * Builder for creating instance of [Document].
    *
@@ -184,7 +184,7 @@ class Document<T> @JvmOverloads constructor(
    * ```
    */
   class Builder<T> {
-    
+
     private var data: T? = null
     private var included: List<Resource>? = null
     private var errors: List<Error>? = null
@@ -192,31 +192,31 @@ class Document<T> @JvmOverloads constructor(
     private var meta: Meta? = null
     private var jsonapi: JsonApiInfo? = null
     private var serializeIncluded: Boolean = true
-    
+
     fun data(data: T) = apply {
       this.data = data
     }
-    
+
     fun included(resources: List<Resource>) = apply {
       this.included = resources
     }
-    
+
     fun errors(errors: List<Error>) = apply {
       this.errors = errors
     }
-    
+
     fun links(links: Links) = apply {
       this.links = links
     }
-    
+
     fun meta(meta: Meta) = apply {
       this.meta = meta
     }
-    
+
     fun jsonapi(jsonapi: JsonApiInfo) = apply {
       this.jsonapi = jsonapi
     }
-    
+
     /**
      * Determines weather the included member should be serialized.
      *
@@ -228,7 +228,7 @@ class Document<T> @JvmOverloads constructor(
     fun serializeIncluded(serializeIncluded: Boolean) = apply {
       this.serializeIncluded = serializeIncluded
     }
-    
+
     /**
      * Build [Document] configured with this builder.
      *

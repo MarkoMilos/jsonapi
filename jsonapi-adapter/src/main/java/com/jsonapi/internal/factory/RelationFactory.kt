@@ -9,7 +9,7 @@ import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
 internal class RelationFactory : FactoryDelegate {
-  
+
   override fun create(
     type: Type,
     annotations: MutableSet<out Annotation>,

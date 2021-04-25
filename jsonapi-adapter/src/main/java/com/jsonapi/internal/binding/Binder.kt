@@ -1,8 +1,11 @@
 package com.jsonapi.internal.binding
 
-import com.jsonapi.*
+import com.jsonapi.Document
+import com.jsonapi.JsonApiException
 import com.jsonapi.Relation.ToMany
 import com.jsonapi.Relation.ToOne
+import com.jsonapi.Relationship
+import com.jsonapi.Resource
 import com.jsonapi.internal.fieldsAnnotatedWith
 import java.lang.reflect.Field
 
@@ -13,10 +16,10 @@ import java.lang.reflect.Field
  * found within this document it is assigned to field via reflection.
  */
 internal class Binder(document: Document<*>) {
-  
+
   /** All resources of this document (primary and included) */
   private val resources: List<Resource>
-  
+
   init {
     // transform data (primary resource) to list of resources
     val primaryResources = when (val data = document.data) {
@@ -24,14 +27,14 @@ internal class Binder(document: Document<*>) {
       is Collection<*> -> data.filterIsInstance<Resource>()
       else -> emptyList()
     }
-    
+
     // included resources from document defaulting to empty list if there are none
     val includedResources = document.included ?: emptyList()
-    
+
     // all resources contained by this document that will be bound upon bind() call
     resources = listOf(primaryResources, includedResources).flatten()
   }
-  
+
   /**
    * Bind `@Relationship` annotated fields of each [Resource] (both primary and included) found in this [Document.Data]
    * to their values.
@@ -40,7 +43,7 @@ internal class Binder(document: Document<*>) {
   fun bind() {
     resources.forEach { bindResource(it) }
   }
-  
+
   /**  Bind `@Relationship` annotated fields of [resource]. */
   private fun bindResource(resource: Resource) {
     // get all @Relationship annotated fields for this resource
@@ -48,11 +51,11 @@ internal class Binder(document: Document<*>) {
     relationshipFields.forEach { field ->
       // name set in annotation
       val name = field.getAnnotation(Relationship::class.java).name
-      
+
       // search for this name in relationship map
       // if not found we cannot match this field, skip it
       val relation = resource.relationships?.get(name) ?: return@forEach
-      
+
       // relation exist in relationship map, bind depending on relation type
       when (relation) {
         is ToOne -> {
@@ -81,7 +84,7 @@ internal class Binder(document: Document<*>) {
       }
     }
   }
-  
+
   /** Assign [value] to [field] via reflection. */
   private fun bindField(field: Field, targetObject: Any, value: Any) {
     try {
@@ -94,10 +97,10 @@ internal class Binder(document: Document<*>) {
       // 3. JSON error - wrong type (resource linkage) is returned under relationship
       // 4. Type registration error - type is registered under wrong type name
       throw JsonApiException(
-        "Cannot bind field ${targetObject.javaClass.simpleName}.${field.name}"
-          + " of ${field.type} "
-          + " to value of type ${value.javaClass.name}."
-          + "\nVerify that type is registered and relationships are set correctly."
+        "Cannot bind field ${targetObject.javaClass.simpleName}.${field.name}" +
+          " of ${field.type} " +
+          " to value of type ${value.javaClass.name}." +
+          "\nVerify that type is registered and relationships are set correctly."
       )
     }
   }

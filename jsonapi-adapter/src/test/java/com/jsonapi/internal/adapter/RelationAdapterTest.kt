@@ -1,17 +1,25 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.*
-import com.jsonapi.JsonFile.*
+import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFile.RELATION_INVALID
+import com.jsonapi.JsonFile.RELATION_TO_MANY
+import com.jsonapi.JsonFile.RELATION_TO_MANY_EMPTY
+import com.jsonapi.JsonFile.RELATION_TO_ONE
+import com.jsonapi.JsonFile.RELATION_TO_ONE_EMPTY
+import com.jsonapi.Meta
+import com.jsonapi.Relation
 import com.jsonapi.Relation.ToMany
 import com.jsonapi.Relation.ToOne
+import com.jsonapi.ResourceIdentifier
 import com.jsonapi.TestUtils.moshi
+import com.jsonapi.read
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class RelationAdapterTest {
-  
+
   private val adapter = moshi.adapter(Relation::class.java)
-  
+
   @Test
   fun `deserialize empty ToOne relation`() {
     val deserialized = adapter.fromJson(read(RELATION_TO_ONE_EMPTY))
@@ -21,7 +29,7 @@ class RelationAdapterTest {
       assertThat(it.meta).isNotNull
     }
   }
-  
+
   @Test
   fun `deserialize non empty ToOne relation`() {
     val deserialized = adapter.fromJson(read(RELATION_TO_ONE))
@@ -31,7 +39,7 @@ class RelationAdapterTest {
       assertThat(it.meta).isNotNull
     }
   }
-  
+
   @Test
   fun `deserialize empty ToMany relation`() {
     val deserialized = adapter.fromJson(read(RELATION_TO_MANY_EMPTY))
@@ -41,7 +49,7 @@ class RelationAdapterTest {
       assertThat(it.meta).isNotNull
     }
   }
-  
+
   @Test
   fun `deserialize non empty ToMany relation`() {
     val deserialized = adapter.fromJson(read(RELATION_TO_MANY))
@@ -51,45 +59,45 @@ class RelationAdapterTest {
       assertThat(it.meta).isNotNull
     }
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw when deserializing non object`() {
     adapter.fromJson("null")
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw when deserializing non valid relation`() {
     adapter.fromJson(read(RELATION_INVALID))
   }
-  
+
   @Test
   fun `serialize empty ToOne relation without links or meta`() {
     val relation = ToOne(data = null)
     val serialized = adapter.toJson(relation)
     assertThat(serialized).isEqualTo("""{"data":null}""")
   }
-  
+
   @Test
   fun `serialize empty ToOne relation with links or meta`() {
     val relation = ToOne(data = null, meta = Meta(mapOf("name" to "value")))
     val serialized = adapter.toJson(relation)
     assertThat(serialized).isEqualTo("""{"meta":{"name":"value"}}""")
   }
-  
+
   @Test
   fun `serialize non empty ToOne relation`() {
     val relation = ToOne(ResourceIdentifier("resource", "1"))
     val serialized = adapter.toJson(relation)
     assertThat(serialized).isEqualTo("""{"data":{"type":"resource","id":"1"}}""")
   }
-  
+
   @Test
   fun `serialize empty ToMany relation`() {
     val relation = ToMany(emptyList())
     val serialized = adapter.toJson(relation)
     assertThat(serialized).isEqualTo("""{"data":[]}""")
   }
-  
+
   @Test
   fun `serialize non empty ToMany relation`() {
     val relation = ToMany(
@@ -101,7 +109,7 @@ class RelationAdapterTest {
     val serialized = adapter.toJson(relation)
     assertThat(serialized).isEqualTo("""{"data":[{"type":"resource","id":"1"},{"type":"resource","id":"2"}]}""")
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw when serializing null as relation`() {
     adapter.toJson(null)

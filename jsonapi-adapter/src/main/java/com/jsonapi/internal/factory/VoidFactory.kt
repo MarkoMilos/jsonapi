@@ -6,7 +6,7 @@ import com.squareup.moshi.Moshi
 import java.lang.reflect.Type
 
 internal class VoidFactory : FactoryDelegate {
-  
+
   override fun create(
     type: Type,
     annotations: MutableSet<out Annotation>,

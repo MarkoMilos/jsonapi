@@ -62,7 +62,7 @@ spotless {
   }
   java {
     target "**/src/**/*.java"
-    googleJavaFormat("1.7")
+    indentWithSpaces(2)
     removeUnusedImports()
     trimTrailingWhitespace()
     endWithNewline()

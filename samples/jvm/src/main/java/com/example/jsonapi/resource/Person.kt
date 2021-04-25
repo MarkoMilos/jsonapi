@@ -11,7 +11,7 @@ class Person(
   val lastName: String,
   val twitter: String
 ) : Resource(type, id) {
-  
+
   override fun toString(): String {
     return "$firstName $lastName (on Twitter: $twitter)"
   }

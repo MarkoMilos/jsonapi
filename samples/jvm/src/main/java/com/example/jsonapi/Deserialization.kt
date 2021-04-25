@@ -13,18 +13,18 @@ fun main() {
   val factory = JsonApiFactory.Builder()
     .addTypes(JsonApi.resources())
     .build()
-  
+
   val moshi = Moshi.Builder()
     .add(factory)
     .addLast(KotlinJsonAdapterFactory())
     .build()
-  
+
   val adapter: JsonAdapter<Document<Article>> = moshi.adapter(
     Types.newParameterizedType(Document::class.java, Article::class.java)
   )
-  
+
   val document = adapter.fromJson(json)
-  
+
   println("DATA:\n${document?.data}\n")
   println("INCLUDED:\n${document?.included?.joinToString("\n")}}\n")
   println("ERRORS: ${document?.errors}\n")

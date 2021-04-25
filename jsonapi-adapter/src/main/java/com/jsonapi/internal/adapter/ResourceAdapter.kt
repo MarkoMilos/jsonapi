@@ -14,28 +14,28 @@ internal class ResourceAdapter constructor(
   private val typeAdapters: List<JsonAdapter<Any>>,
   private val defaultResourceAdapter: JsonAdapter<Any>?
 ) : JsonAdapter<Any>() {
-  
+
   private val memberNameOptions = JsonReader.Options.of(NAME_TYPE)
   private val typeNameOptions = JsonReader.Options.of(*typeNames.toTypedArray())
-  
+
   override fun fromJson(reader: JsonReader): Any? {
     // In case of a null value deserialize to null and consume token
     if (reader.peek() == Token.NULL) {
       return reader.nextNull()
     }
-    
+
     // Assert that resource is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonApiException("Resource MUST be a JSON object but found ${reader.peek()}")
     }
-    
+
     // Find type adapter and deserialize resource
     val peeked = reader.peekJson()
     peeked.setFailOnUnknown(false)
     val adapter = peeked.use { findAdapter(it) }
     return adapter.fromJson(reader)
   }
-  
+
   private fun findAdapter(reader: JsonReader): JsonAdapter<Any> {
     reader.beginObject()
     while (reader.hasNext()) {
@@ -62,11 +62,11 @@ internal class ResourceAdapter constructor(
       } else {
         // Type not found within options and default adapter is not configured
         throw JsonApiException(
-          "Expected one of "
-            + typeNames
-            + " for member 'type' but found '"
-            + runCatching { reader.nextString() }.getOrDefault("null")
-            + "'. Register this type or use allowUnregisteredTypes(true)."
+          "Expected one of " +
+            typeNames +
+            " for member 'type' but found '" +
+            runCatching { reader.nextString() }.getOrDefault("null") +
+            "'. Register this type or use allowUnregisteredTypes(true)."
         )
       }
     }
@@ -75,24 +75,24 @@ internal class ResourceAdapter constructor(
       "Resource object MUST contain top-level member 'type' but it was not found on path ${reader.path}"
     )
   }
-  
+
   override fun toJson(writer: JsonWriter, value: Any?) {
     // Serialize null values as null
     if (value == null) {
       writer.nullValue()
       return
     }
-    
+
     // Find adapter for this type and delegate serialization to it
     val typeIndex = types.indexOf(value.javaClass)
     val adapter = if (typeIndex != -1) {
       typeAdapters[typeIndex]
     } else {
       defaultResourceAdapter ?: throw JsonApiException(
-        "Type '${value.javaClass}' not found in registered types."
-          + "\nRegister this type or use allowUnregisteredTypes(true)."
-          + "\nRegistered types: "
-          + types.joinToString("\n  * ", "\n  * ")
+        "Type '${value.javaClass}' not found in registered types." +
+          "\nRegister this type or use allowUnregisteredTypes(true)." +
+          "\nRegistered types: " +
+          types.joinToString("\n  * ", "\n  * ")
       )
     }
     adapter.toJson(writer, value)

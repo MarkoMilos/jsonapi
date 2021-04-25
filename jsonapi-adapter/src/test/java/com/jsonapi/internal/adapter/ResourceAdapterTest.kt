@@ -1,30 +1,35 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.*
+import com.jsonapi.Article
+import com.jsonapi.JsonApiException
+import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.RESOURCE_ARTICLE
 import com.jsonapi.JsonFile.RESOURCE_UNKNOWN_TYPE
+import com.jsonapi.Resource
 import com.jsonapi.TestUtils.moshi
+import com.jsonapi.ValidResource
+import com.jsonapi.read
 import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class ResourceAdapterTest {
-  
+
   private val adapter = moshi.adapter(Resource::class.java)
-  
+
   @Test
   fun `deserialize null`() {
     val deserialized = adapter.fromJson("null")
     assertThat(deserialized).isNull()
   }
-  
+
   @Test
   fun `deserialize registered resource to registered type`() {
     val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE))
     assertThat(deserialized).isNotNull
     assertThat(deserialized).isInstanceOf(Article::class.java)
   }
-  
+
   @Test
   fun `deserialize unregistered resource to base resource type when unregistered types are allowed`() {
     val factory = JsonApiFactory.Builder()
@@ -43,7 +48,7 @@ class ResourceAdapterTest {
       assertThat(it.meta).isNotNull
     }
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw on deserializing unregistered resource when unregistered types are not allowed`() {
     val factory = JsonApiFactory.Builder()
@@ -55,35 +60,35 @@ class ResourceAdapterTest {
     val adapter = moshi.adapter(Resource::class.java)
     adapter.fromJson(read(RESOURCE_UNKNOWN_TYPE))
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw on deserializing resource with invalid type`() {
     adapter.fromJson("""{"type":null}""")
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw on deserializing resource without top-level member type`() {
     adapter.fromJson("{}")
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw on deserializing resource that is not a json object`() {
     adapter.fromJson("[]")
   }
-  
+
   @Test
   fun `serialize null`() {
     val serialized = adapter.toJson(null)
     assertThat(serialized).isEqualTo("null")
   }
-  
+
   @Test
   fun `serialize registered resource as registered type`() {
     val resource: Resource = Article("articles", "1", "Title")
     val serialized = adapter.toJson(resource)
     assertThat(serialized).isEqualTo("""{"type":"articles","id":"1","attributes":{"title":"Title"}}""")
   }
-  
+
   @Test
   fun `serialize unregistered resource as base resource type when unregistered types are allowed`() {
     val factory = JsonApiFactory.Builder()
@@ -97,7 +102,7 @@ class ResourceAdapterTest {
     val serialized = adapter.toJson(resource)
     assertThat(serialized).isEqualTo("""{"type":"articles","id":"1"}""")
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throw on serializing unregistered type when unregistered types are not allowed`() {
     val factory = JsonApiFactory.Builder()

@@ -12,7 +12,7 @@ class Article(
   @Relationship("author") val author: Person? = null,
   @Relationship("comments") val comments: List<Comment>? = null,
 ) : Resource(type, id) {
-  
+
   override fun toString(): String {
     return "" +
       "Title: $title\n" +

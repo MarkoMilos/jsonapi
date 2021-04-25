@@ -11,28 +11,28 @@ import com.squareup.moshi.Types
  */
 @JsonClass(generateAdapter = true)
 class Meta constructor(val members: Map<String, Any?>) {
-  
+
   constructor(vararg members: Pair<String, Any?>) : this(mapOf(*members))
-  
+
   /** Returns true if this meta has members, false otherwise */
   fun isEmpty() = members.isEmpty()
-  
+
   /** Returns true if meta has member with [name], false otherwise */
   fun has(name: String) = members.containsKey(name)
-  
+
   /** Returns true if meta has non-null member with [name], false otherwise */
   fun hasNonNull(name: String) = members[name] != null
-  
+
   /** Returns value of member with [name], or null if such a name is not present */
   fun get(name: String): Any? {
     return members[name]
   }
-  
+
   /** Returns value of member with [name], or [default] if such a name is not present */
   fun getOrDefault(name: String, default: Any): Any {
     return members[name] ?: default
   }
-  
+
   /**
    * Returns value of member with [name] as the defined type [T].
    * Returns null if such a name is not present or it is not instance of defined type [T].
@@ -41,7 +41,7 @@ class Meta constructor(val members: Map<String, Any?>) {
     val value = members[name]
     return if (value is T) value else null
   }
-  
+
   /**
    * Returns value of member with [name] as the defined type [T].
    * Returns [default] if such a name is not present or it is not instance of defined type [T].
@@ -50,31 +50,31 @@ class Meta constructor(val members: Map<String, Any?>) {
     val value = members[name]
     return if (value is T) value else default
   }
-  
+
   /** Returns [Number] value of member with [name], or null if member is not a [Number] or it is not present */
   fun number(name: String): Number? = member(name)
-  
+
   /** Returns [Number] value of member with [name], or [default] if member is not a [Number] or it is not present */
   fun number(name: String, default: Number): Number = member(name, default)
-  
+
   /** Returns [String] value of member with [name], or null if member is not a [String] or it is not present */
   fun string(name: String): String? = member(name)
-  
+
   /** Returns [String] value of member with [name], or [default] if member is not a [String] or it is not present */
   fun string(name: String, default: String): String = member(name, default)
-  
+
   /** Returns [Boolean] value of member with [name], or null if member is not a [Boolean] or it is not present */
   fun boolean(name: String): Boolean? = member(name)
-  
+
   /** Returns [Boolean] value of member with [name], or [default] if member is not a [Boolean] or it is not present */
   fun boolean(name: String, default: Boolean): Boolean = member(name, default)
-  
+
   /** Returns [List] value of member with [name], or null if member is not a [List] or it is not present */
   fun <T> list(name: String): List<T>? = member(name)
-  
+
   /** Returns [List] value of member with [name], or [default] if member is not a [List] or it is not present */
   fun <T> list(name: String, default: List<T>): List<T> = member(name, default)
-  
+
   /**
    * Maps [Meta] to provided [targetType] ([T]).
    *
@@ -93,7 +93,7 @@ class Meta constructor(val members: Map<String, Any?>) {
     )
     return moshi.adapter(targetType).fromJson(mapAdapter.toJson(members))
   }
-  
+
   /**
    * Maps [Meta] to defined type [T].
    *
@@ -107,7 +107,7 @@ class Meta constructor(val members: Map<String, Any?>) {
   inline fun <reified T> map(configuredMoshi: Moshi? = null): T? {
     return this.map(T::class.java, configuredMoshi)
   }
-  
+
   companion object {
     /**
      * Creates [Meta] instance from provided [value] of type [T].

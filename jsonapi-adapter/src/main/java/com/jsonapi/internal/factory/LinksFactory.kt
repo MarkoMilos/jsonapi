@@ -11,7 +11,7 @@ import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
 internal class LinksFactory : FactoryDelegate {
-  
+
   override fun create(
     type: Type,
     annotations: MutableSet<out Annotation>,

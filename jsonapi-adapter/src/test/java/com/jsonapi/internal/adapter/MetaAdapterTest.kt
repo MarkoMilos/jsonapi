@@ -10,18 +10,18 @@ import org.assertj.core.api.Assertions.entry
 import org.junit.Test
 
 class MetaAdapterTest {
-  
+
   @JsonClass(generateAdapter = true)
   data class NestedMetaObject(val foo: String)
-  
+
   private val adapter = moshi.adapter(Meta::class.java)
-  
+
   @Test
   fun `deserialize null`() {
     val deserialized = adapter.fromJson("null")
     assertThat(deserialized).isNull()
   }
-  
+
   @Test
   fun `deserialize meta`() {
     val deserialized = adapter.fromJson(read(META))
@@ -35,13 +35,13 @@ class MetaAdapterTest {
       entry("nested", mapOf("foo" to "bar"))
     )
   }
-  
+
   @Test
   fun `serialize null`() {
     val serialized = adapter.toJson(null)
     assertThat(serialized).isEqualTo("null")
   }
-  
+
   @Test
   fun `serialize meta`() {
     val metaMap = mapOf(

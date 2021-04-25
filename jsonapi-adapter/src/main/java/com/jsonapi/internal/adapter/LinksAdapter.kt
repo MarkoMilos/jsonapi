@@ -9,15 +9,15 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 
 internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
-  
+
   private val linkAdapter: JsonAdapter<Link> = moshi.adapter(Link::class.java)
-  
+
   override fun fromJson(reader: JsonReader): Links? {
     if (reader.peek() == Token.NULL) {
       // In case of a null value deserialize to null and consume token
       return reader.nextNull()
     }
-    
+
     // deserialize all members of this object to map
     val linksMap = mutableMapOf<String, Link>()
     reader.beginObject()
@@ -31,13 +31,13 @@ internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
     reader.endObject()
     return Links(linksMap)
   }
-  
+
   override fun toJson(writer: JsonWriter, value: Links?) {
     if (value == null) {
       writer.nullValue()
       return
     }
-    
+
     writer
       .beginObject()
       .apply {

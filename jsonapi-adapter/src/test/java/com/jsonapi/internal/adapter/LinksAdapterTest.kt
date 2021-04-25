@@ -11,15 +11,15 @@ import org.assertj.core.api.Assertions.entry
 import org.junit.Test
 
 class LinksAdapterTest {
-  
+
   private val adapter = moshi.adapter(Links::class.java)
-  
+
   @Test
   fun `deserialize null`() {
     val deserialized = adapter.fromJson("null")
     assertThat(deserialized).isNull()
   }
-  
+
   @Test
   fun `deserialize links`() {
     val deserialized = adapter.fromJson(read(LINKS))
@@ -29,19 +29,19 @@ class LinksAdapterTest {
       entry("related", LinkObject("href"))
     )
   }
-  
+
   @Test
   fun `skip entries with null values`() {
     val deserialized = adapter.fromJson(read(LINKS))
     assertThat(deserialized?.members).doesNotContainKey("null_link")
   }
-  
+
   @Test
   fun `serialize null`() {
     val serialized = adapter.toJson(null)
     assertThat(serialized).isEqualTo("null")
   }
-  
+
   @Test
   fun `serialize links`() {
     val linksMap = mapOf(

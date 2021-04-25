@@ -9,7 +9,7 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 internal class DocumentFactory : FactoryDelegate {
-  
+
   override fun create(
     type: Type,
     annotations: MutableSet<out Annotation>,

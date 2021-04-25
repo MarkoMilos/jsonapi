@@ -45,7 +45,7 @@ data class Error @JvmOverloads constructor(
     val pointer: String?,
     val parameter: String?
   )
-  
+
   class Builder {
     private var id: String? = null
     private var links: Links? = null
@@ -55,12 +55,12 @@ data class Error @JvmOverloads constructor(
     private var detail: String? = null
     private var source: Source? = null
     private var meta: Meta? = null
-    
+
     /** Unique identifier for this particular occurrence of the problem. */
     fun id(id: String) = apply {
       this.id = id
     }
-    
+
     /**
      * Links object that MAY contain the following members:
      *   - **about**: a link that leads to further details about this particular occurrence of the problem.
@@ -71,17 +71,17 @@ data class Error @JvmOverloads constructor(
     fun links(links: Links) = apply {
       this.links = links
     }
-    
+
     /** HTTP status code applicable to this problem, expressed as a string value. */
     fun status(status: String) = apply {
       this.status = status
     }
-    
+
     /** Application-specific error code, expressed as a string value. */
     fun code(code: String) = apply {
       this.code = code
     }
-    
+
     /**
      * Short, human-readable summary of the problem that SHOULD NOT change from occurrence to occurrence of the problem,
      * except for purposes of localization.
@@ -89,7 +89,7 @@ data class Error @JvmOverloads constructor(
     fun title(title: String) = apply {
       this.title = title
     }
-    
+
     /**
      * Human-readable explanation specific to this occurrence of the problem that SHOULD NOT change from occurrence
      * to occurrence of the problem, except for purposes of localization.
@@ -97,17 +97,17 @@ data class Error @JvmOverloads constructor(
     fun detail(detail: String) = apply {
       this.detail = detail
     }
-    
+
     /** Contains references to the source of the error. */
     fun source(source: Source) = apply {
       this.source = source
     }
-    
+
     /** Non-standard meta-information about the error. */
     fun meta(meta: Meta) = apply {
       this.meta = meta
     }
-    
+
     /** Creates an [Error] */
     fun build(): Error {
       return Error(id, links, status, code, title, detail, source, meta)

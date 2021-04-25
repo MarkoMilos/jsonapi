@@ -28,7 +28,7 @@ class ResourceIdentifier @JvmOverloads constructor(
   val lid: String? = null,
   val meta: Meta? = null
 ) {
-  
+
   init {
     check(type.isNotBlank()) {
       "A “resource identifier object” MUST contain a type member but was blank."
@@ -37,14 +37,14 @@ class ResourceIdentifier @JvmOverloads constructor(
       "A “resource identifier object” MUST contain an 'id' or 'lid' member but both were null or blank."
     }
   }
-  
+
   override fun equals(other: Any?): Boolean {
-    return (other is ResourceIdentifier)
-      && other.type == this.type
-      && other.id == this.id
-      && other.lid == this.lid
+    return (other is ResourceIdentifier) &&
+      other.type == this.type &&
+      other.id == this.id &&
+      other.lid == this.lid
   }
-  
+
   override fun hashCode(): Int {
     var result = type.hashCode()
     result = 31 * result + (id?.hashCode() ?: 0)

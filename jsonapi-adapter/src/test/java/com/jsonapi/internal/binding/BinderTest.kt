@@ -1,33 +1,39 @@
 package com.jsonapi.internal.binding
 
-import com.jsonapi.*
+import com.jsonapi.Article
+import com.jsonapi.Comment
+import com.jsonapi.Document
+import com.jsonapi.JsonApiException
+import com.jsonapi.Person
 import com.jsonapi.Relation.ToMany
 import com.jsonapi.Relation.ToOne
+import com.jsonapi.Resource
+import com.jsonapi.ResourceIdentifier
 import com.jsonapi.internal.bind
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
 class BinderTest {
-  
+
   private lateinit var article1: Article
   private lateinit var article2: Article
   private lateinit var author1: Person
   private lateinit var author2: Person
   private lateinit var comment1: Comment
   private lateinit var comment2: Comment
-  
+
   @Before
   fun setup() {
     author1 = Person("people", "1", "Name1", "Surname1", "@twitter1")
     author2 = Person("people", "2", "Name2", "Surname2", "@twitter2")
-    
+
     comment1 = Comment("comments", "1", "Comment1", author2)
     comment1.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "2")))
-    
+
     comment2 = Comment("comments", "2", "Comment2", author1)
     comment2.relationships = mapOf("author" to ToOne(ResourceIdentifier("people", "1")))
-    
+
     article1 = Article("articles", "1", "Title1")
     article1.relationships = mapOf(
       "author" to ToOne(ResourceIdentifier("people", "1")),
@@ -39,14 +45,14 @@ class BinderTest {
       ),
       "related" to ToMany(listOf(ResourceIdentifier("articles", "2")))
     )
-    
+
     article2 = Article("articles", "2", "Title2")
     article2.relationships = mapOf(
       "author" to ToOne(ResourceIdentifier("people", "2")),
       "related" to ToMany(listOf(ResourceIdentifier("articles", "1")))
     )
   }
-  
+
   @Test
   fun `bind primary resource for single resource document`() {
     val document = Document(
@@ -58,7 +64,7 @@ class BinderTest {
     assertThat(article1.comments).containsExactlyInAnyOrder(comment1, comment2)
     assertThat(article1.relatedArticles).isEmpty()
   }
-  
+
   @Test
   fun `bind primary resource for resource collection document`() {
     val document = Document(
@@ -66,16 +72,16 @@ class BinderTest {
       included = listOf(author1, author2, comment1, comment2)
     )
     document.bind()
-    
+
     assertThat(article1.author).isEqualTo(author1)
     assertThat(article1.comments).containsExactlyInAnyOrder(comment1, comment2)
     assertThat(article1.relatedArticles).containsExactly(article2)
-    
+
     assertThat(article2.author).isEqualTo(author2)
     assertThat(article2.comments).isNullOrEmpty()
     assertThat(article2.relatedArticles).containsExactly(article1)
   }
-  
+
   @Test
   fun `bind included resources`() {
     val document = Document(
@@ -87,7 +93,7 @@ class BinderTest {
     assertThat(comment2.author).isEqualTo(author1)
     assertThat(article2.relatedArticles).containsExactly(article1)
   }
-  
+
   @Test(expected = JsonApiException::class)
   fun `throws when incorrect type is bound to relationship field`() {
     // Within included provide Resource that will match relationship entry.
