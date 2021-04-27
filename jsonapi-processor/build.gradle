@@ -1,9 +1,10 @@
-apply plugin: 'kotlin'
-apply plugin: 'kotlin-kapt'
+plugins {
+  id 'org.jetbrains.kotlin.jvm'
+  id 'kotlin-kapt'
+}
 
 dependencies {
   implementation project(':jsonapi-adapter')
-  implementation deps.kotlinStdlib
   implementation deps.moshi
   implementation deps.javapoet
   implementation deps.autoservice
