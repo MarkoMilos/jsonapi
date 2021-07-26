@@ -2,34 +2,26 @@ package com.jsonapi.internal.adapter
 
 import com.jsonapi.Link
 import com.jsonapi.Links
+import com.jsonapi.internal.FactoryDelegate
+import com.jsonapi.internal.rawType
+import com.jsonapi.internal.writeNull
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import java.lang.reflect.Type
 
 internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
 
-  private val linkAdapter: JsonAdapter<Link> = moshi.adapter(Link::class.java)
+  private val linkAdapter = moshi.adapter(Link::class.java)
+  private val membersAdapter: JsonAdapter<Map<String, Link?>> = moshi.adapter(
+    Types.newParameterizedType(Map::class.java, String::class.java, Link::class.java)
+  )
 
   override fun fromJson(reader: JsonReader): Links? {
-    if (reader.peek() == Token.NULL) {
-      // In case of a null value deserialize to null and consume token
-      return reader.nextNull()
-    }
-
-    // deserialize all members of this object to map
-    val linksMap = mutableMapOf<String, Link>()
-    reader.beginObject()
-    while (reader.hasNext()) {
-      val name = reader.nextName()
-      val value = linkAdapter.fromJson(reader)
-      if (value != null) {
-        linksMap[name] = value
-      }
-    }
-    reader.endObject()
-    return Links(linksMap)
+    val members = membersAdapter.fromJson(reader) ?: return null
+    return Links(members)
   }
 
   override fun toJson(writer: JsonWriter, value: Links?) {
@@ -38,15 +30,32 @@ internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
       return
     }
 
-    writer
-      .beginObject()
-      .apply {
-        // deserialize all map entries as name value pairs
-        value.members.forEach { entry ->
-          name(entry.key)
-          linkAdapter.toJson(this, entry.value)
-        }
+    writer.beginObject()
+    value.members.forEach {
+      writer.name(it.key)
+      if (it.value == null) {
+        // Serialize null links (e.g. indicating no more pages for pagination)
+        writer.writeNull()
+      } else {
+        // Serialize value using delegate adapter
+        linkAdapter.toJson(writer, it.value)
       }
-      .endObject()
+    }
+    writer.endObject()
+  }
+
+  companion object {
+    internal val FACTORY = object : FactoryDelegate {
+      override fun create(
+        type: Type,
+        annotations: MutableSet<out Annotation>,
+        moshi: Moshi,
+        parent: Factory
+      ): JsonAdapter<*>? {
+        if (annotations.isNotEmpty()) return null
+        if (type.rawType() != Links::class.java) return null
+        return LinksAdapter(moshi)
+      }
+    }
   }
 }

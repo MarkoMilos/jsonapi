@@ -1,17 +1,28 @@
 package com.jsonapi
 
-import com.jsonapi.internal.factory.DocumentFactory
-import com.jsonapi.internal.factory.LinksFactory
-import com.jsonapi.internal.factory.MetaFactory
-import com.jsonapi.internal.factory.RelationFactory
-import com.jsonapi.internal.factory.ResourceFactory
-import com.jsonapi.internal.factory.ResourceSubclassFactory
-import com.jsonapi.internal.factory.VoidFactory
+import com.jsonapi.internal.adapter.DocumentAdapter
+import com.jsonapi.internal.adapter.ErrorAdapter
+import com.jsonapi.internal.adapter.JsonApiObjectAdapter
+import com.jsonapi.internal.adapter.LinkAdapter
+import com.jsonapi.internal.adapter.LinkObjectAdapter
+import com.jsonapi.internal.adapter.LinksAdapter
+import com.jsonapi.internal.adapter.MetaAdapter
+import com.jsonapi.internal.adapter.RelationshipAdapter
+import com.jsonapi.internal.adapter.RelationshipToManyAdapter
+import com.jsonapi.internal.adapter.RelationshipToOneAdapter
+import com.jsonapi.internal.adapter.RelationshipsAdapter
+import com.jsonapi.internal.adapter.ResourceIdentifierAdapter
+import com.jsonapi.internal.adapter.ResourceObjectAdapter
+import com.jsonapi.internal.adapter.ResourcePolymorphicAdapter
+import com.jsonapi.internal.adapter.ResourceTypeAdapter
+import com.jsonapi.internal.adapter.SourceAdapter
+import com.jsonapi.internal.adapter.TransientAdapter
+import com.jsonapi.internal.adapter.VoidAdapter
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import jsonapi.Resource
 import java.lang.reflect.Type
-import com.jsonapi.Type as TypeAnnotation
 
 /**
  * Factory that provides adapters for converting and binding JSON:API entities.
@@ -38,18 +49,28 @@ import com.jsonapi.Type as TypeAnnotation
 class JsonApiFactory private constructor(
   types: List<Type>,
   typeNames: List<String>,
-  allowUnregisteredTypes: Boolean,
   strictTypes: Boolean
 ) : JsonAdapter.Factory {
 
   private val factoryDelegates = listOf(
-    DocumentFactory(),
-    ResourceFactory(types, typeNames, allowUnregisteredTypes),
-    ResourceSubclassFactory(typeNames, allowUnregisteredTypes, strictTypes),
-    RelationFactory(),
-    LinksFactory(),
-    MetaFactory(),
-    VoidFactory()
+    DocumentAdapter.FACTORY,
+    ResourceIdentifierAdapter.FACTORY,
+    ResourceObjectAdapter.FACTORY,
+    ResourceTypeAdapter.factory(strictTypes),
+    ResourcePolymorphicAdapter.factory(types, typeNames),
+    RelationshipsAdapter.FACTORY,
+    RelationshipAdapter.FACTORY,
+    RelationshipToOneAdapter.FACTORY,
+    RelationshipToManyAdapter.FACTORY,
+    LinksAdapter.FACTORY,
+    LinkAdapter.FACTORY,
+    LinkObjectAdapter.FACTORY,
+    MetaAdapter.FACTORY,
+    JsonApiObjectAdapter.FACTORY,
+    ErrorAdapter.FACTORY,
+    SourceAdapter.FACTORY,
+    TransientAdapter.FACTORY,
+    VoidAdapter.FACTORY
   )
 
   override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi): JsonAdapter<*>? {
@@ -65,44 +86,21 @@ class JsonApiFactory private constructor(
   class Builder {
     private val types = mutableListOf<Type>()
     private val typeNames = mutableListOf<String>()
-    private var allowUnregisteredTypes = true
     private var strictTypes = false
 
-    /** Register JSON:API resource [type].  */
-    fun addType(type: Class<out Resource>) = apply {
+    /** Register JSON:API resource [type]. */
+    fun addType(type: Class<*>) = apply {
       types.add(type)
     }
 
     /** Register JSON:API resource [types]. */
-    fun addTypes(types: List<Class<out Resource>>) = apply {
+    fun addTypes(types: List<Class<*>>) = apply {
       types.forEach { addType(it) }
     }
 
     /** Register JSON:API resource [types]. */
-    fun addTypes(vararg types: Class<out Resource>) = apply {
+    fun addTypes(vararg types: Class<*>) = apply {
       types.forEach { addType(it) }
-    }
-
-    /**
-     * Modify behaviour when unregistered type is found during serialization/deserialization of [Resource]
-     * or it's subclasses.
-     *
-     * Serializing and deserializing [Resource] is polymorphic meaning that registered subclass type will be
-     * serialized/deserialized based on the value of `type` member.
-     * E.g. when deserializing [Resource], if `type` found in json is equal to `article` and there is an Article class
-     * (which inherits from Resource) registered for that value, then Article will be deserialized instead of a base
-     * [Resource] type.
-     *
-     * When this is set to false unregistered types won't be allowed meaning that [JsonApiException] will be thrown
-     * if `type` member is not within list of registered types.
-     *
-     * When this is set to true unregistered types are allowed meaning that exception won't be thrown, instead
-     * resource will be serialized/deserialized as base [Resource] type.
-     *
-     * By default unregistered types are allowed.
-     */
-    fun allowUnregisteredTypes(allow: Boolean) = apply {
-      allowUnregisteredTypes = allow
     }
 
     /**
@@ -131,11 +129,11 @@ class JsonApiFactory private constructor(
     fun build(): JsonAdapter.Factory {
       types.forEach {
         // Get and assert that Type annotation is present on target resource type
-        val typeAnnotation = Types.getRawType(it).getAnnotation(TypeAnnotation::class.java)
+        val resourceAnnotation = Types.getRawType(it).getAnnotation(Resource::class.java)
           ?: throw JsonApiException("Provided type '$it' is not annotated with @Type.")
 
         // Assert that valid type name is provided with @Type annotation
-        if (typeAnnotation.name.isBlank()) {
+        if (resourceAnnotation.type.isBlank()) {
           throw JsonApiException(
             "For type '" +
               it +
@@ -146,7 +144,7 @@ class JsonApiFactory private constructor(
 
         // Get assigned type name from annotation and add it to names list only
         // if not already in use by another type, throw if name is in use
-        val typeName = typeAnnotation.name
+        val typeName = resourceAnnotation.type
         if (!typeNames.contains(typeName)) {
           typeNames.add(typeName)
         } else {
@@ -158,7 +156,7 @@ class JsonApiFactory private constructor(
         }
       }
 
-      return JsonApiFactory(types, typeNames, allowUnregisteredTypes, strictTypes)
+      return JsonApiFactory(types, typeNames, strictTypes)
     }
   }
 }

@@ -1,8 +1,6 @@
 package com.jsonapi.processor
 
 import com.google.auto.service.AutoService
-import com.jsonapi.Resource
-import com.jsonapi.Type
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
@@ -10,6 +8,7 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
 import com.squareup.moshi.JsonAdapter
+import jsonapi.Resource
 import java.io.IOException
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -32,7 +31,7 @@ class TypesProcessor : AbstractProcessor() {
   }
 
   override fun getSupportedAnnotationTypes(): MutableSet<String> {
-    return mutableSetOf(Type::class.java.canonicalName)
+    return mutableSetOf(Resource::class.java.canonicalName)
   }
 
   override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -45,7 +44,7 @@ class TypesProcessor : AbstractProcessor() {
 
     // Collect all elements that are resource classes annotated with @Type
     val resourceElements = mutableListOf<TypeElement>()
-    roundEnv.getElementsAnnotatedWith(Type::class.java).forEach { element ->
+    roundEnv.getElementsAnnotatedWith(Resource::class.java).forEach { element ->
       if (isValidResourceElement(element)) {
         resourceElements.add(element as TypeElement)
       } else {
@@ -94,7 +93,7 @@ class TypesProcessor : AbstractProcessor() {
     // Create a file for defined type and write the java content
     val javaFile = JavaFile.builder("com.jsonapi", type).build()
     try {
-      javaFile.writeTo(System.out)
+      javaFile.writeTo(System.out) // TODO remove
       javaFile.writeTo(processingEnv.filer)
     } catch (e: IOException) {
       error("Failed to generate a ResourceTypes file.\n" + e.printStackTrace())

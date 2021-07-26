@@ -4,9 +4,10 @@ plugins {
 }
 
 dependencies {
+  api project(':jsonapi-annotations')
   implementation deps.moshi
-  kapt deps.moshi_kotlin_codegen
 
+  // TODO replace with reflect so that kapt plugin can be removed
   kaptTest deps.moshi_kotlin_codegen
   testImplementation deps.junit
   testImplementation deps.assertj

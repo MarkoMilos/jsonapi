@@ -1,10 +1,6 @@
 {
   "type": "articles",
   "id": "1",
-  "attributes": {
-    "title": "Title1",
-    "headline": "Headline1"
-  },
   "relationships": {
     "author": {
       "data": {
@@ -30,5 +26,8 @@
   },
   "meta": {
     "name": "value"
+  },
+  "attributes": {
+    "title": "Title"
   }
 }

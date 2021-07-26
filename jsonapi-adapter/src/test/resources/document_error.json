@@ -14,14 +14,15 @@
       "detail": "detail",
       "source": {
         "pointer": "/path/pointer",
-        "parameter": "param"
+        "parameter": "param",
+        "header": "header"
       },
       "meta": {
         "name": "value"
       }
     },
     {
-      "id": null,
+      "id": "1",
       "links": null,
       "status": null,
       "code": null,
@@ -31,14 +32,15 @@
       "meta": null
     },
     {
-      "id": "123-xyz-456",
+      "id": "1",
       "links": {
         "about": null,
         "type": null
       },
       "source": {
         "pointer": null,
-        "parameter": null
+        "parameter": null,
+        "header": null
       }
     }
   ]

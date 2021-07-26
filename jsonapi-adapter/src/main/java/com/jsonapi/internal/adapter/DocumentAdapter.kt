@@ -1,114 +1,241 @@
 package com.jsonapi.internal.adapter
 
 import com.jsonapi.Document
+import com.jsonapi.Document.IncludedSerialization.DOCUMENT
+import com.jsonapi.Document.IncludedSerialization.NONE
+import com.jsonapi.Document.IncludedSerialization.PROCESSED
+import com.jsonapi.Error
 import com.jsonapi.JsonApiException
+import com.jsonapi.JsonApiObject
+import com.jsonapi.Links
+import com.jsonapi.Meta
+import com.jsonapi.ResourceIdentifier
+import com.jsonapi.ResourceObject
+import com.jsonapi.internal.FactoryDelegate
 import com.jsonapi.internal.NAME_DATA
 import com.jsonapi.internal.NAME_ERRORS
+import com.jsonapi.internal.NAME_INCLUDED
+import com.jsonapi.internal.NAME_JSON_API
+import com.jsonapi.internal.NAME_LINKS
 import com.jsonapi.internal.NAME_META
-import com.jsonapi.internal.bind
-import com.jsonapi.internal.binding.Unbinder
+import com.jsonapi.internal.PolymorphicResource
+import com.jsonapi.internal.bindRelationshipFields
+import com.jsonapi.internal.collectionElementType
+import com.jsonapi.internal.isCollection
+import com.jsonapi.internal.isNothing
+import com.jsonapi.internal.isResourceType
+import com.jsonapi.internal.processIncluded
+import com.jsonapi.internal.scan
+import com.jsonapi.internal.writeNull
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.rawType
+import jsonapi.Resource
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
 internal class DocumentAdapter(
-  private val delegateAdapter: JsonAdapter<Document<*>>
+  moshi: Moshi,
+  private val resourceAdapter: JsonAdapter<Any>,
+  private val isCollectionDocument: Boolean
 ) : JsonAdapter<Document<*>>() {
+
+  private val jsonApiObjectAdapter = moshi.adapter(JsonApiObject::class.java)
+  private val linksAdapter = moshi.adapter(Links::class.java)
+  private val metaAdapter = moshi.adapter(Meta::class.java)
+  private val resourceObjectAdapter = moshi.adapter(ResourceObject::class.java)
+  private val resourcePolymorphicAdapter = moshi.adapter<Any>(Any::class.java, PolymorphicResource::class.java)
+  private val errorsAdapter =
+    moshi.adapter<List<Error>>(Types.newParameterizedType(List::class.java, Error::class.java))
 
   override fun fromJson(reader: JsonReader): Document<*>? {
     // In case of a null value deserialize to null and consume token
-    if (reader.peek() == JsonReader.Token.NULL) {
+    if (reader.peek() == Token.NULL) {
       return reader.nextNull()
     }
 
-    // Assert that root is a JSON object
-    if (reader.peek() != JsonReader.Token.BEGIN_OBJECT) {
+    // Assert that root of a document is a JSON object
+    if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonApiException("A JSON object MUST be at the root of every JSON:API document but found ${reader.peek()}")
     }
 
-    // Top-level member flags
-    var dataFound = false
-    var metaFound = false
-    var errorsFound = false
+    // Standard document structure
+    var data: Any? = null
+    var included: List<Any>? = null
+    var errors: List<Error>? = null
+    var links: Links? = null
+    var meta: Meta? = null
+    var jsonApiObject: JsonApiObject? = null
 
-    // Peak json reader so that we can search trough name/values without consuming anything
-    // We need to scan json and not the deserialized object since json could have a top level member
-    // with null value (e.g. data document {"data":null} which is valid per specification)
-    val peaked = reader.peekJson()
-    peaked.setFailOnUnknown(false)
-    peaked.beginObject()
-    while (peaked.hasNext()) {
-      when (peaked.nextName()) {
-        NAME_DATA -> dataFound = true
-        NAME_META -> metaFound = true
-        NAME_ERRORS -> errorsFound = true
+    // All deserialized resources for this document (data and included)
+    val resources = mutableListOf<Pair<ResourceObject, Any>>()
+
+    // Deserialize document members
+    reader.beginObject()
+    while (reader.hasNext()) {
+      when (reader.nextName()) {
+        NAME_DATA -> data = readData(reader, resources)
+        NAME_INCLUDED -> included = readIncluded(reader, resources)
+        NAME_ERRORS -> errors = errorsAdapter.fromJson(reader)
+        NAME_LINKS -> links = linksAdapter.fromJson(reader)
+        NAME_META -> meta = metaAdapter.fromJson(reader)
+        NAME_JSON_API -> jsonApiObject = jsonApiObjectAdapter.fromJson(reader)
       }
-      peaked.skipValue()
+    }
+    reader.endObject()
+
+    // Bind all deserialized resources mutually (primary and included)
+    bindRelationshipFields(resources)
+
+    return Document(data, included, errors, links, meta, jsonApiObject)
+  }
+
+  private fun readData(reader: JsonReader, resources: MutableList<Pair<ResourceObject, Any>>): Any? {
+    // Null data documents {"data":null} are valid documents
+    if (reader.peek() == Token.NULL) {
+      return reader.nextNull()
     }
 
-    if (!dataFound && !metaFound && !errorsFound) {
-      throw JsonApiException(
-        "A document MUST contain at least one of the following top-level members:\n" +
-          "  * data: the document’s “primary data”\n" +
-          "  * errors: an array of error objects\n" +
-          "  * meta: a meta object that contains non-standard meta-information.\n"
-      )
+    if (!isCollectionDocument) {
+      // Scan json and read resource object without consuming source reader
+      val resourceObject = reader.scan { resourceObjectAdapter.fromJson(it) } ?: return null
+      // Read the target resource
+      val resource = resourceAdapter.fromJson(reader) ?: return null
+      // Add to list of all deserialized resources
+      resources.add(resourceObject to resource)
+      return resource
+    } else {
+      val result = mutableListOf<Any>()
+      reader.beginArray()
+      // Read array of resources, skip for deserialized nulls
+      while (reader.hasNext()) {
+        // Scan json and read resource object without consuming source reader
+        val resourceObject = reader.scan { resourceObjectAdapter.fromJson(it) } ?: continue
+        // Read the target resource element
+        val resource = resourceAdapter.fromJson(reader) ?: continue
+        // Add to list of all deserialized resources
+        resources.add(resourceObject to resource)
+        result.add(resource)
+      }
+      reader.endArray()
+      return result
+    }
+  }
+
+  private fun readIncluded(reader: JsonReader, resources: MutableList<Pair<ResourceObject, Any>>): List<Any>? {
+    // Included can be null, read null and consume token
+    if (reader.peek() == Token.NULL) {
+      return reader.nextNull()
     }
 
-    if (errorsFound && dataFound) {
-      throw JsonApiException("The members data and errors MUST NOT coexist in the same document.")
+    // Read the array and deserialize resources using polymorphic adapter that will deserialize to
+    // correct instance based on the "type" member of each json object. If type (class) is not registered
+    // for given type name, polymorphic adapter will deserialize element as ResourceObject type
+    val included = mutableListOf<Any>()
+    reader.beginArray()
+    while (reader.hasNext()) {
+      // Scan json and read resource object without consuming source reader
+      val resourceObject = reader.scan { resourceObjectAdapter.fromJson(it) } ?: continue
+      // Read the target resource element with polymorphic adapter
+      val resource = resourcePolymorphicAdapter.fromJson(reader) ?: continue
+      // Add to list of all deserialized resources
+      resources.add(resourceObject to resource)
+      included.add(resource)
     }
-
-    val document = delegateAdapter.fromJson(reader)
-    document?.bind()
-    return document
+    reader.endArray()
+    return included
   }
 
   override fun toJson(writer: JsonWriter, value: Document<*>?) {
-    // Serialize null value as null
     if (value == null) {
       writer.nullValue()
       return
     }
 
-    // Serialize null data document as {"data":null} since it is a valid document per specification
-    if (!value.hasErrors() && !value.hasData() && !value.hasMeta()) {
-      writer.beginObject()
-
-      // Serialize data top-level member with null value (it is required to enable null serialization)
-      val wasSerializeNulls = writer.serializeNulls
-      writer.serializeNulls = true
-      writer.name(NAME_DATA).nullValue()
-      writer.serializeNulls = wasSerializeNulls
-
-      // Serialize anything else that this document might have
-      val token = writer.beginFlatten()
-      delegateAdapter.toJson(writer, value)
-      writer.endFlatten(token)
-
-      writer.endObject()
-      return
+    writer.beginObject()
+    writer.name(NAME_JSON_API).apply { jsonApiObjectAdapter.toJson(writer, value.jsonapi) }
+    writer.name(NAME_META).apply { metaAdapter.toJson(writer, value.meta) }
+    writer.name(NAME_LINKS).apply { linksAdapter.toJson(writer, value.links) }
+    writer.name(NAME_DATA).apply {
+      if (value.data == null && value.errors == null && value.meta == null) {
+        // Serialize data member for null document {"data":null} to produce valid json:api structure
+        writer.writeNull()
+      } else {
+        // Use delegate adapter to serialize single or collection of resources
+        if (value.data is Collection<*>) {
+          writer.beginArray()
+          value.data.forEach { resourceAdapter.toJson(writer, it) }
+          writer.endArray()
+        } else {
+          resourceAdapter.toJson(writer, value.data)
+        }
+      }
     }
+    writer.name(NAME_INCLUDED).apply {
+      // Determine what included should be serialized per document configuration
+      val included = when (value.includedSerialization) {
+        NONE -> null                        // Don't serialize included
+        DOCUMENT -> value.included          // Serialize only what is defined with Document
+        PROCESSED -> processIncluded(value) // Serialize what is defined with Document and all resource relationships
+      }
+      if (included == null) {
+        nullValue()
+      } else {
+        beginArray()
+        included.forEach { resourcePolymorphicAdapter.toJson(writer, it) }
+        endArray()
+      }
+    }
+    writer.name(NAME_ERRORS).apply { errorsAdapter.toJson(writer, value.errors) }
+    writer.endObject()
+  }
 
-    if (value.hasData()) {
-      // Transform document with data for serialization by unbinding relationship fields
-      val unbinder = Unbinder(value)
-      unbinder.unbind()
-      // When included needs to be omitted from serialization remove them from the document
-      if (value.serializationRules?.serializeIncluded == false) {
-        unbinder.removeIncluded()
+  companion object {
+    internal val FACTORY = object : FactoryDelegate {
+      override fun create(
+        type: Type,
+        annotations: MutableSet<out Annotation>,
+        moshi: Moshi,
+        parent: Factory
+      ): JsonAdapter<*>? {
+        if (annotations.isNotEmpty()) return null
+        if (type !is ParameterizedType) return null
+        if (type.rawType != Document::class.java) return null
+
+        // Type of data member for this document
+        val dataType = type.actualTypeArguments.first()
+
+        // Is document for collection of resources or single resource
+        val isCollectionDocument = dataType.isCollection()
+
+        // Assert that collection document has data member of type Collection or List
+        if (isCollectionDocument) {
+          require(dataType.rawType == Collection::class.java || dataType.rawType == List::class.java) {
+            "Collection documents must have 'data' defined either as Collection or List but was [$dataType]."
+          }
+        }
+
+        // Type of resource defined for this document (Document<[type]> or Document<List<[type]>>)
+        val targetType = if (isCollectionDocument) dataType.collectionElementType(Collection::class.java) else dataType
+
+        // Assert that target type is one of resource types or void
+        require(targetType.isResourceType() || targetType.isNothing()) {
+          "Resource type must be one of: " +
+            "${ResourceIdentifier::class.java.simpleName}, " +
+            "${ResourceObject::class.java.simpleName}," +
+            " or class with annotation @${Resource::class.java.simpleName}" +
+            " but was [$targetType]."
+        }
+
+        // Adapter for extracted target resource type
+        val targetAdapter = moshi.adapter<Any>(targetType)
+
+        return DocumentAdapter(moshi, targetAdapter, isCollectionDocument)
       }
-      // Serialize transformed document with delegate adapter
-      delegateAdapter.toJson(writer, value)
-      // When included were omitted for serialization assign them back to the document
-      if (value.serializationRules?.serializeIncluded == false) {
-        unbinder.assignIncluded()
-      }
-      // Bind document back so that primary resource(s) are not changed
-      value.bind()
-    } else {
-      // There is no data, there is nothing to transform, delegate adapter can perform serialization
-      delegateAdapter.toJson(writer, value)
     }
   }
 }

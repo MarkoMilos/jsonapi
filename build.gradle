@@ -1,6 +1,6 @@
 buildscript {
   ext.versions = [
-    'kotlin'         : '1.4.32',
+    'kotlin'         : '1.5.10',
     'moshi'          : '1.12.0',
     'javapoet'       : '1.13.0',
     'autoservice'    : '1.0',
@@ -12,6 +12,7 @@ buildscript {
   ]
 
   ext.deps = [
+    // TODO not used, assert that jdk8 is correct version to be used for library
     'kotlinStdlib'        : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
     'moshi'               : "com.squareup.moshi:moshi:${versions.moshi}",
     'moshi_kotlin_reflect': "com.squareup.moshi:moshi-kotlin:${versions.moshi}",

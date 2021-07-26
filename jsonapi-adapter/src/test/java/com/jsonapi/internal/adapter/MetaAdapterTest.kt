@@ -1,10 +1,11 @@
 package com.jsonapi.internal.adapter
 
+import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.META
 import com.jsonapi.Meta
-import com.jsonapi.TestUtils.moshi
 import com.jsonapi.read
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.junit.Test
@@ -13,6 +14,10 @@ class MetaAdapterTest {
 
   @JsonClass(generateAdapter = true)
   data class NestedMetaObject(val foo: String)
+
+  private val moshi = Moshi.Builder()
+    .add(JsonApiFactory.Builder().build())
+    .build()
 
   private val adapter = moshi.adapter(Meta::class.java)
 
@@ -25,8 +30,8 @@ class MetaAdapterTest {
   @Test
   fun `deserialize meta`() {
     val deserialized = adapter.fromJson(read(META))
-    assertThat(deserialized).isNotNull
-    assertThat(deserialized?.members).containsExactly(
+      ?: throw AssertionError("deserialized == null")
+    assertThat(deserialized.members).containsExactly(
       entry("number", 1.5),
       entry("string", "value"),
       entry("boolean", true),
@@ -44,7 +49,7 @@ class MetaAdapterTest {
 
   @Test
   fun `serialize meta`() {
-    val metaMap = mapOf(
+    val members = mapOf(
       "number" to 1.5,
       "string" to "value",
       "boolean" to true,
@@ -52,7 +57,7 @@ class MetaAdapterTest {
       "null" to null,
       "nested" to NestedMetaObject(foo = "bar")
     )
-    val meta = Meta(metaMap)
+    val meta = Meta(members)
     val expected = read(META, true)
     val serialized = adapter.serializeNulls().toJson(meta)
     assertThat(serialized).isEqualTo(expected)

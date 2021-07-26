@@ -1,9 +1,6 @@
 package com.example.jsonapi.resource
 
-import com.jsonapi.Resource
-import com.jsonapi.Type
-
-@Type("people")
+@Resource("people")
 class Person(
   type: String?,
   id: String?,

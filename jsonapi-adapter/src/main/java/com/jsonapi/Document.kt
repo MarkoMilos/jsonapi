@@ -1,8 +1,7 @@
 package com.jsonapi
 
 import com.jsonapi.Document.Builder
-import com.jsonapi.internal.serialization.SerializationRules
-import com.squareup.moshi.JsonClass
+import com.jsonapi.Document.IncludedSerialization.PROCESSED
 
 /**
  * Defines top level entity for JSON:API.
@@ -30,24 +29,27 @@ import com.squareup.moshi.JsonClass
  * @param links a links object related to the primary data
  * @param meta a meta object that contains non-standard meta-information
  * @param jsonapi includes information about JSON:API implementation
+ * @param includedSerialization defines strategy for serializing included resources
  *
  * @see Builder
  */
-@JsonClass(generateAdapter = true)
-class Document<T> @JvmOverloads constructor(
+class Document<T> internal constructor(
   val data: T? = null,
-  val included: List<Resource>? = null,
+  val included: List<Any>? = null,
   val errors: List<Error>? = null,
   val links: Links? = null,
   val meta: Meta? = null,
-  val jsonapi: JsonApiInfo? = null
+  val jsonapi: JsonApiObject? = null,
+  internal val includedSerialization: IncludedSerialization = PROCESSED
 ) {
-
-  @Transient internal var serializationRules: SerializationRules? = null
 
   init {
     if (data != null && errors != null) {
-      throw JsonApiException("The members data and errors MUST NOT coexist in the same document.")
+      throw IllegalArgumentException("The members data and errors MUST NOT coexist in the same document.")
+    }
+
+    if (included != null && data == null) {
+      throw IllegalArgumentException("If data member is null, the included member MUST NOT be present either.")
     }
   }
 
@@ -56,7 +58,10 @@ class Document<T> @JvmOverloads constructor(
     return data != null
   }
 
-  /** Returns true if document has errors, false otherwise. */
+  /**
+   * Returns true if document has errors, false otherwise.
+   * Note this will return true even if errors are empty.
+   */
   fun hasErrors(): Boolean {
     return errors != null
   }
@@ -66,36 +71,36 @@ class Document<T> @JvmOverloads constructor(
     return meta != null
   }
 
-  /**
-   * Get primary resource for this document. Throw if document has errors or primary resource is null.
-   *
-   * @throws JsonApiErrorsException document has errors
-   * @throws NullPointerException primary resource is null
-   */
-  fun get(): T {
-    if (errors != null) {
-      throw JsonApiErrorsException(errors)
-    }
-    return data ?: throw NullPointerException("Resource(s) for this document is null")
-  }
-
-  /** Get primary resource for this document. Return null if document has errors. */
-  fun getOrNull(): T? = data
+  /** Get primary resource for this document ignoring existence of errors. */
+  fun dataOrNull(): T? = data
 
   /**
    * Get primary resource for this document. Throw is this document is has errors.
    *
-   * @throws JsonApiErrorsException document has errors
+   * @throws ErrorsException document has errors
    */
-  fun getOrThrow(): T? {
-    return if (errors == null) data else throw JsonApiErrorsException(errors)
+  fun dataOrThrow(): T? {
+    return if (errors != null) throw ErrorsException(errors) else data
+  }
+
+  /**
+   * Get primary resource for this document. Throw if document has errors or primary resource is null.
+   *
+   * @throws ErrorsException document has errors
+   * @throws NullPointerException primary resource is null
+   */
+  fun requireData(): T {
+    if (errors != null) {
+      throw ErrorsException(errors)
+    }
+    return data ?: throw NullPointerException("Resource(s) for this document is null")
   }
 
   /**
    * Get primary resource for this document. Return [default] in case when primary resource is null
    * or this document is has errors.
    */
-  fun getOrDefault(default: T): T {
+  fun dataOrDefault(default: T): T {
     return data ?: default
   }
 
@@ -106,7 +111,7 @@ class Document<T> @JvmOverloads constructor(
    * @param block block that will be called if primary resource is null or document is has errors.
    * Errors, if exist for this document, will be passed to block.
    */
-  fun getOrElse(block: (List<Error>?) -> T): T {
+  fun dataOrElse(block: (List<Error>?) -> T): T {
     return data ?: block(errors)
   }
 
@@ -115,48 +120,106 @@ class Document<T> @JvmOverloads constructor(
     return errors ?: emptyList()
   }
 
-  /** Throws [JsonApiErrorsException] if this document is has errors. */
+  /** Throws [ErrorsException] if this document is has errors. */
   fun throwIfErrors() {
     if (errors != null) {
-      throw JsonApiErrorsException(errors)
+      throw ErrorsException(errors)
     }
   }
 
+  /** Returns new [Builder] initialized from this. */
+  fun newBuilder() = Builder(this)
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as Document<*>
+
+    if (data != other.data) return false
+    if (included != other.included) return false
+    if (errors != other.errors) return false
+    if (links != other.links) return false
+    if (meta != other.meta) return false
+    if (jsonapi != other.jsonapi) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = data?.hashCode() ?: 0
+    result = 31 * result + (included?.hashCode() ?: 0)
+    result = 31 * result + (errors?.hashCode() ?: 0)
+    result = 31 * result + (links?.hashCode() ?: 0)
+    result = 31 * result + (meta?.hashCode() ?: 0)
+    result = 31 * result + (jsonapi?.hashCode() ?: 0)
+    return result
+  }
+
+  override fun toString(): String {
+    return "Document(" +
+      "\n\tdata=$data," +
+      "\n\tincluded=$included " +
+      "\n\terrors=$errors " +
+      "\n\tlinks=$links " +
+      "\n\tmeta=$meta " +
+      "\n\tjsonapi=$jsonapi " +
+      "\n)"
+  }
+
   companion object {
-    /** Creates [Document] from [resource]. */
+    /** Creates empty [Document]. */
     @JvmStatic
-    fun <T> from(resource: T): Document<T> {
-      return Builder<T>().data(resource).build()
+    fun empty(): Document<Nothing> {
+      return Builder<Nothing>().build()
     }
 
-    /** Creates [Document] from [error]. */
+    /** Creates [Document] from [data]. */
     @JvmStatic
-    fun <T> from(error: Error): Document<T> {
-      return Builder<T>().errors(listOf(error)).build()
+    fun <T> from(data: T): Document<T> {
+      return Builder<T>().data(data).build()
+    }
+
+    /** Creates [Document] from [resources]. */
+    @JvmStatic
+    fun <T> from(vararg resources: T): Document<List<T>> {
+      return Builder<List<T>>().data(listOf(*resources)).build()
     }
 
     /** Creates [Document] from [errors]. */
     @JvmStatic
-    fun <T> from(errors: List<Error>): Document<T> {
-      return Builder<T>().errors(errors).build()
+    fun from(vararg errors: Error): Document<Nothing> {
+      return from(listOf(*errors))
+    }
+
+    /** Creates [Document] from [errors]. */
+    @JvmStatic
+    fun from(errors: List<Error>): Document<Nothing> {
+      return Builder<Nothing>().errors(errors).build()
     }
 
     /** Creates [Document] from [meta]. */
     @JvmStatic
-    fun <T> from(meta: Meta): Document<T> {
-      return Builder<T>().meta(meta).build()
+    fun from(meta: Meta): Document<Nothing> {
+      return Builder<Nothing>().meta(meta).build()
     }
 
-    /** Creates [Builder] from [resource]. */
+    /** Creates [Builder] from [data]. */
     @JvmStatic
-    fun <T> with(resource: T): Builder<T> {
-      return Builder<T>().data(resource)
+    fun <T> with(data: T): Builder<T> {
+      return Builder<T>().data(data)
     }
 
-    /** Creates [Builder] from [error]. */
+    /** Creates [Builder] from [resources]. */
     @JvmStatic
-    fun <T> with(error: Error): Builder<T> {
-      return Builder<T>().errors(listOf(error))
+    fun <T> with(vararg resources: T): Builder<List<T>> {
+      return Builder<List<T>>().data(listOf(*resources))
+    }
+
+    /** Creates [Builder] from [errors]. */
+    @JvmStatic
+    fun <T> with(vararg errors: Error): Builder<T> {
+      return Builder<T>().errors(listOf(*errors))
     }
 
     /** Creates [Builder] from [errors]. */
@@ -177,68 +240,112 @@ class Document<T> @JvmOverloads constructor(
    *
    * Example:
    * ```
-   *  Document.with(resource)
+   *  Document.Builder()
+   *    .data(resource)
    *    .links(...)
    *    .meta(...)
    *    .build()
    * ```
    */
   class Builder<T> {
-
     private var data: T? = null
-    private var included: List<Resource>? = null
+    private var included: List<Any>? = null
     private var errors: List<Error>? = null
     private var links: Links? = null
     private var meta: Meta? = null
-    private var jsonapi: JsonApiInfo? = null
-    private var serializeIncluded: Boolean = true
+    private var jsonapi: JsonApiObject? = null
+    private var includedSerialization: IncludedSerialization
 
-    fun data(data: T) = apply {
+    constructor() {
+      this.includedSerialization = PROCESSED
+    }
+
+    internal constructor(document: Document<T>) {
+      this.data = document.data
+      this.included = document.included
+      this.errors = document.errors
+      this.links = document.links
+      this.meta = document.meta
+      this.jsonapi = document.jsonapi
+      this.includedSerialization = document.includedSerialization
+    }
+
+    /**
+     * The document’s “primary data” is a representation of the resource or collection of resources.
+     * Primary data MUST be either:
+     *  * a single resource object, a single resource identifier object, or null, for requests that target
+     *  single resources
+     *  * an array of resource objects, an array of resource identifier objects, or an empty array ([]),
+     *  for requests that target resource collections
+     */
+    fun data(data: T?) = apply {
       this.data = data
     }
 
-    fun included(resources: List<Resource>) = apply {
+    /** An array of resource objects that are related to the primary data and/or each other (“included resources”). */
+    fun included(resources: List<Any>?) = apply {
       this.included = resources
     }
 
-    fun errors(errors: List<Error>) = apply {
+    /** An array of [Error] objects. */
+    fun errors(errors: List<Error>?) = apply {
       this.errors = errors
     }
 
-    fun links(links: Links) = apply {
+    /** An array of [Error] objects. */
+    fun errors(vararg errors: Error) = apply {
+      this.errors = listOf(*errors)
+    }
+
+    /** A links object related to the primary data. */
+    fun links(links: Links?) = apply {
       this.links = links
     }
 
-    fun meta(meta: Meta) = apply {
+    /** A meta object that contains non-standard meta-information. */
+    fun meta(meta: Meta?) = apply {
       this.meta = meta
     }
 
-    fun jsonapi(jsonapi: JsonApiInfo) = apply {
+    /** Includes information about JSON:API implementation. */
+    fun jsonapi(jsonapi: JsonApiObject?) = apply {
       this.jsonapi = jsonapi
     }
 
     /**
-     * Determines weather the included member should be serialized.
+     * Defines strategy for serialization of included resources.
+     * Default value is [PROCESSED].
      *
-     * By default included member will be created and serialized if primary resource has
-     * non-null relationship fields.
-     *
-     * Setting this to `false` will skip serialization for included.
+     * @see IncludedSerialization
      */
-    fun serializeIncluded(serializeIncluded: Boolean) = apply {
-      this.serializeIncluded = serializeIncluded
+    fun includedSerialization(includedSerialization: IncludedSerialization) = apply {
+      this.includedSerialization = includedSerialization
     }
 
-    /**
-     * Build [Document] configured with this builder.
-     *
-     * @throws JsonApiException throw when document has both data and errors member that should not
-     * coexist within the same document.
-     */
+    /** Creates an instance of [Document] configured with this builder. */
     fun build(): Document<T> {
-      val document = Document(data, included, errors, links, meta, jsonapi)
-      document.serializationRules = SerializationRules(serializeIncluded)
-      return document
+      return Document(data, included, errors, links, meta, jsonapi, includedSerialization)
     }
+  }
+
+  /** Defines strategy for serializing included resources. */
+  enum class IncludedSerialization {
+    /** Included resources won't be serialized. */
+    NONE,
+
+    /**
+     * Only included resources defined for document field `included` will be serialized.
+     * Relationships of resources within document will be ignored.
+     */
+    DOCUMENT,
+
+    /**
+     * Included resources will be processed from each resources within this document (primary data and included)
+     * by searching for non-null relationships and adding them to included resources list.
+     * Processed resources are then merged with ones defined for the document `included` field.
+     * During this process duplicates are omitted ensuring that only the same resources is not present within primary
+     * and included.
+     */
+    PROCESSED
   }
 }

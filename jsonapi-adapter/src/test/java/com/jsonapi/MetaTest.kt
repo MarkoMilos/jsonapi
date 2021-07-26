@@ -2,6 +2,7 @@ package com.jsonapi
 
 import com.squareup.moshi.JsonClass
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class MetaTest {
@@ -76,17 +77,16 @@ class MetaTest {
 
   @Test
   fun `map converts meta to target type`() {
-    val customMeta = meta.map<CustomMeta>()
-    assertThat(customMeta).isNotNull
-    assertThat(customMeta?.number).isEqualTo(1.5)
-    assertThat(customMeta?.string).isEqualTo("value")
-    assertThat(customMeta?.boolean).isEqualTo(true)
-    assertThat(customMeta?.array).containsExactly("one", "two", "three")
-    assertThat(customMeta?.nested).isEqualTo(NestedMetaObject("bar"))
+    val customMeta = meta.map<CustomMeta>() ?: fail("mapped meta == null")
+    assertThat(customMeta.number).isEqualTo(1.5)
+    assertThat(customMeta.string).isEqualTo("value")
+    assertThat(customMeta.boolean).isEqualTo(true)
+    assertThat(customMeta.array).containsExactly("one", "two", "three")
+    assertThat(customMeta.nested).isEqualTo(NestedMetaObject("bar"))
   }
 
   @Test
-  fun `builder creates meta with members`() {
+  fun `static builder creates meta from target object`() {
     val customMeta = CustomMeta(
       number = 1.5,
       string = "value",

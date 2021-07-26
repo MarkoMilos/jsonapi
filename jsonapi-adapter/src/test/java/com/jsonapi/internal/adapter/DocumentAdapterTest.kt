@@ -1,35 +1,81 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.Article
-import com.jsonapi.Comment
 import com.jsonapi.Document
+import com.jsonapi.Document.IncludedSerialization
 import com.jsonapi.Error
 import com.jsonapi.JsonApiException
+import com.jsonapi.JsonApiFactory
+import com.jsonapi.JsonApiObject
 import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_COLLECTION
-import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_COLLECTION_SIMPLE
+import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_COLLECTION_DUPLICATED_RESOURCES
+import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_COLLECTION_SERIALIZED
 import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE
-import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_SIMPLE
-import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_SIMPLE_NO_INCLUDED
-import com.jsonapi.JsonFile.DOCUMENT_EMPTY_COLLECTION
+import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_DUPLICATED_RESOURCES
+import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_SERIALIZED
+import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_SERIALIZED_DOCUMENT_ONLY_INCLUDED
+import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_SERIALIZED_NO_INCLUDED
 import com.jsonapi.JsonFile.DOCUMENT_ERROR
-import com.jsonapi.JsonFile.DOCUMENT_ERROR_SIMPLE
 import com.jsonapi.JsonFile.DOCUMENT_META
-import com.jsonapi.JsonFile.DOCUMENT_NULL_DATA
-import com.jsonapi.Link
 import com.jsonapi.Links
 import com.jsonapi.Meta
-import com.jsonapi.Person
 import com.jsonapi.ResourceIdentifier
-import com.jsonapi.TestUtils.moshi
+import com.jsonapi.ResourceObject
+import com.jsonapi.inlineJson
 import com.jsonapi.read
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import jsonapi.BindRelationship
+import jsonapi.Resource
+import jsonapi.ResourceId
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.entry
 import org.assertj.core.api.Assertions.fail
 import org.junit.Before
 import org.junit.Test
 
 class DocumentAdapterTest {
+
+  @JsonClass(generateAdapter = true)
+  @Resource("people")
+  data class Person(
+    @ResourceId val id: String?,
+    val firstName: String?,
+    val lastName: String?
+  )
+
+  @JsonClass(generateAdapter = true)
+  @Resource("comments")
+  data class Comment(
+    @ResourceId val id: String?,
+    val body: String?,
+    @BindRelationship("author") val author: Person? = null
+  )
+
+  @JsonClass(generateAdapter = true)
+  @Resource("articles")
+  data class Article(
+    @ResourceId val id: String?,
+    val title: String? = null,
+    @BindRelationship("author") val author: Person? = null,
+    @BindRelationship("comments") val comments: List<Comment>? = null,
+    @BindRelationship("related") val related: List<Article>? = null
+  )
+
+  private val factory = JsonApiFactory.Builder()
+    .addType(Person::class.java)
+    .addType(Article::class.java)
+    .addType(Comment::class.java)
+    .build()
+
+  private val moshi = Moshi.Builder()
+    .add(factory)
+    .build()
+
+  private val nothingAdapter: JsonAdapter<Document<Nothing>> = moshi.adapter(
+    Types.newParameterizedType(Document::class.java, Nothing::class.java)
+  )
 
   private val articleAdapter: JsonAdapter<Document<Article>> = moshi.adapter(
     Types.newParameterizedType(Document::class.java, Article::class.java)
@@ -39,22 +85,8 @@ class DocumentAdapterTest {
     Types.newParameterizedType(Document::class.java, Types.newParameterizedType(List::class.java, Article::class.java))
   )
 
-  private val resourceIdentifierAdapter: JsonAdapter<Document<ResourceIdentifier>> = moshi.adapter(
-    Types.newParameterizedType(Document::class.java, ResourceIdentifier::class.java)
-  )
-
-  private val resourceIdentifierCollectionAdapter: JsonAdapter<Document<List<ResourceIdentifier>>> = moshi.adapter(
-    Types.newParameterizedType(
-      Document::class.java,
-      Types.newParameterizedType(List::class.java, ResourceIdentifier::class.java)
-    )
-  )
-
-  private val nothingAdapter: JsonAdapter<Document<Nothing>> = moshi.adapter(
-    Types.newParameterizedType(Document::class.java, Nothing::class.java)
-  )
-
-  private lateinit var article: Article
+  private lateinit var article1: Article
+  private lateinit var article2: Article
   private lateinit var author1: Person
   private lateinit var author2: Person
   private lateinit var comment1: Comment
@@ -62,32 +94,13 @@ class DocumentAdapterTest {
 
   @Before
   fun setup() {
-    author1 = Person("people", "1", "Name1", "Surname1", "@twitter1")
-    author2 = Person("people", "2", "Name2", "Surname2", "@twitter2")
-
-    comment1 = Comment("comments", "1", "Comment1", author2)
-    comment2 = Comment("comments", "2", "Comment2", author1)
-
-    article = Article("articles", "1", "Title1", author1, listOf(comment1, comment2))
-  }
-
-  @Test(expected = JsonApiException::class)
-  fun `throw when root is not a JSON object`() {
-    // A JSON object MUST be at the root of every JSON:API request and response containing data.
-    // This object defines a document’s “top level”.
-    articleAdapter.fromJson("[]")
-  }
-
-  @Test(expected = JsonApiException::class)
-  fun `throw when document does not contain any standard top level member`() {
-    // Trying to deserialize document without data, meta or errors
-    articleAdapter.fromJson("{}")
-  }
-
-  @Test(expected = JsonApiException::class)
-  fun `throw when document contains both data and errors`() {
-    // The members data and errors MUST NOT coexist in the same document
-    articleAdapter.fromJson("""{"data":{},"errors":[]}""")
+    // Setup resources to match test json sample
+    author1 = Person("1", "Name1", "Surname1")
+    author2 = Person("2", "Name2", "Surname2")
+    comment1 = Comment("1", "Comment1")
+    comment2 = Comment("2", "Comment2", author1)
+    article2 = Article("2", "Title2", null, emptyList(), null)
+    article1 = Article("1", "Title1", author1, listOf(comment1, comment2), listOf(article2))
   }
 
   @Test
@@ -98,104 +111,359 @@ class DocumentAdapterTest {
 
   @Test
   fun `deserialize null data document`() {
-    val deserialized = articleAdapter.fromJson(read(DOCUMENT_NULL_DATA))
-    assertThat(deserialized).hasAllNullFieldsOrProperties()
-  }
-
-  @Test
-  fun `deserialize single resource document`() {
-    val deserialized = articleAdapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE))
-    assertThat(deserialized?.data).isNotNull
-    assertThat(deserialized?.included).isNotNull
-    assertThat(deserialized?.links).isNotNull
-    assertThat(deserialized?.meta).isNotNull
-    assertThat(deserialized?.jsonapi).isNotNull
-    assertThat(deserialized?.errors).isNull()
-  }
-
-  @Test
-  fun `deserialized single resource document is bound`() {
-    val deserialized = articleAdapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE))
-    assertThat(deserialized?.data?.author).isEqualTo(author1)
-    assertThat(deserialized?.data?.comments).asList().containsExactly(comment1, comment2)
+    val deserialized = articleAdapter.fromJson("""{"data":null}""") ?: fail("deserialized == null")
+    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("includedSerialization")
   }
 
   @Test
   fun `deserialize singe resource identifier document`() {
-    val deserialized = resourceIdentifierAdapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE_SIMPLE))
-    val resourceIdentifier = deserialized?.data
-    assertThat(resourceIdentifier).isNotNull
-    assertThat(resourceIdentifier?.type).isEqualTo("articles")
-    assertThat(resourceIdentifier?.id).isEqualTo("1")
-    assertThat(resourceIdentifier?.lid).isNull()
-    assertThat(resourceIdentifier?.meta).isNull()
+    val adapter = moshi.adapter<Document<ResourceIdentifier>>(
+      Types.newParameterizedType(Document::class.java, ResourceIdentifier::class.java)
+    )
+
+    // Primary data
+    val deserialized = adapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE)) ?: fail("deserialized == null")
+    val resourceIdentifier = deserialized.data ?: fail("deserialized.data == null")
+    assertThat(resourceIdentifier.type).isEqualTo("articles")
+    assertThat(resourceIdentifier.id).isEqualTo("1")
+    assertThat(resourceIdentifier.lid).isNull()
+    assertThat(resourceIdentifier.meta).isNull()
+
+    // Other Document fields
+    assertThat(deserialized.included).containsExactly(article2, comment1, comment2, author1)
+    assertThat(deserialized.errors).isNull()
+    assertThat(deserialized.links).isNotNull
+    assertThat(deserialized.meta).isNotNull
+    assertThat(deserialized.jsonapi).isNotNull
+  }
+
+  @Test
+  fun `deserialize singe resource object document`() {
+    val adapter = moshi.adapter<Document<ResourceObject>>(
+      Types.newParameterizedType(Document::class.java, ResourceObject::class.java)
+    )
+
+    // Primary data
+    val deserialized = adapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE)) ?: fail("deserialized == null")
+    val resourceObject = deserialized.data ?: fail("deserialized.data == null")
+    assertThat(resourceObject.type).isEqualTo("articles")
+    assertThat(resourceObject.id).isEqualTo("1")
+    assertThat(resourceObject.lid).isNull()
+    assertThat(resourceObject.relationships).isNotNull
+    assertThat(resourceObject.links).isNull()
+    assertThat(resourceObject.meta).isNull()
+
+    // Other Document fields
+    assertThat(deserialized.included).containsExactly(article2, comment1, comment2, author1)
+    assertThat(deserialized.errors).isNull()
+    assertThat(deserialized.links).isNotNull
+    assertThat(deserialized.meta).isNotNull
+    assertThat(deserialized.jsonapi).isNotNull
+  }
+
+  @Test
+  fun `deserialize single resource document`() {
+    val deserialized = articleAdapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE)) ?: fail("deserialized == null")
+    assertThat(deserialized.data).isEqualTo(article1)
+    assertThat(deserialized.included).containsExactly(article2, comment1, comment2, author1)
+    assertThat(deserialized.errors).isNull()
+    assertThat(deserialized.links).isNotNull
+    assertThat(deserialized.meta).isNotNull
+    assertThat(deserialized.jsonapi).isNotNull
+  }
+
+  @Test
+  fun `deserialized single resource document is bound`() {
+    val deserialized = articleAdapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE)) ?: fail("deserialized == null")
+    val included = deserialized.included ?: fail("included == null")
+
+    val article1 = deserialized.data ?: fail("article1 == null")
+    val article2 = included[0] as? Article ?: fail("article2 == null")
+    val comment1 = included[1] as? Comment ?: fail("comment1 == null")
+    val comment2 = included[2] as? Comment ?: fail("comment1 == null")
+    val author1 = included[3] as? Person ?: fail("author1 == null")
+
+    // Article 1
+    assertThat(article1.author).isEqualTo(author1)
+    assertThat(article1.comments).containsExactly(comment1, comment2)
+    assertThat(article1.related).containsExactly(article2)
+
+    // Article 2
+    assertThat(article2.author).isNull()     // not in included
+    assertThat(article2.comments).isEmpty()  // empty relationship
+    assertThat(article2.related).isNull()    // relationship not defined
+
+    // Comment 1
+    assertThat(comment1.author).isNull()     // not in included
+
+    // Comment 2
+    assertThat(comment2.author).isEqualTo(author1)
+  }
+
+  @Test
+  fun `deserialized single resource document with duplicated resources is bound`() {
+    val deserialized = articleAdapter.fromJson(read(DOCUMENT_ARTICLE_SINGLE_DUPLICATED_RESOURCES))
+      ?: fail("deserialized == null")
+    val included = deserialized.included ?: fail("included == null")
+
+    val article1Primary = deserialized.data ?: fail("article1 primary == null")
+    val article1Included = included[0] as? Article ?: fail("article1 included == null")
+    val article2 = included[1] as? Article ?: fail("article2 == null")
+    val comment1 = included[2] as? Comment ?: fail("comment1 == null")
+    val comment2 = included[3] as? Comment ?: fail("comment1 == null")
+    val author1 = included[4] as? Person ?: fail("author1 == null")
+
+    // Article 1 - from primary resources
+    assertThat(article1Primary.author).isEqualTo(author1)
+    assertThat(article1Primary.comments).containsExactly(comment1, comment2)
+    assertThat(article1Primary.related).containsExactly(article2)
+
+    // Article 1 - from included resources
+    assertThat(article1Included.author).isEqualTo(author1)
+    assertThat(article1Included.comments).containsExactly(comment1, comment2)
+    assertThat(article1Included.related).containsExactly(article2)
+
+    // Article 2
+    assertThat(article2.author).isNull()     // not in included
+    assertThat(article2.comments).isEmpty()  // empty relationship
+    assertThat(article2.related).isNull()    // relationship not defined
+
+    // Comment 1
+    assertThat(comment1.author).isNull()     // not in included
+
+    // Comment 2
+    assertThat(comment2.author).isEqualTo(author1)
   }
 
   @Test
   fun `deserialize empty collection document`() {
-    val deserialized = articleCollectionAdapter.fromJson(read(DOCUMENT_EMPTY_COLLECTION))
-    assertThat(deserialized).isNotNull
-    assertThat(deserialized?.data).asList().isEmpty()
-    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("data")
+    val deserialized = articleCollectionAdapter.fromJson("""{"data":[]}""") ?: fail("deserialized == null")
+    assertThat(deserialized.data).isEmpty()
+    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("data", "includedSerialization")
+  }
+
+  @Test
+  fun `deserialize resource identifier collection document`() {
+    val adapter: JsonAdapter<Document<List<ResourceIdentifier>>> = moshi.adapter(
+      Types.newParameterizedType(
+        Document::class.java,
+        Types.newParameterizedType(List::class.java, ResourceIdentifier::class.java)
+      )
+    )
+
+    val deserialized = adapter.fromJson(read(DOCUMENT_ARTICLE_COLLECTION)) ?: fail("deserialized == null")
+
+    // Primary resource 1
+    val identifier1 = deserialized.data?.get(0) ?: fail("identifier1 == null")
+    assertThat(identifier1.type).isEqualTo("articles")
+    assertThat(identifier1.id).isEqualTo("1")
+    assertThat(identifier1.lid).isNull()
+    assertThat(identifier1.meta).isNull()
+
+    // Primary resource 2
+    val identifier2 = deserialized.data?.get(1) ?: fail("identifier2 == null")
+    assertThat(identifier2.type).isEqualTo("articles")
+    assertThat(identifier2.id).isEqualTo("2")
+    assertThat(identifier2.lid).isNull()
+    assertThat(identifier2.meta).isNull()
+
+    // Other document elements
+    assertThat(deserialized.included).containsExactly(comment1, comment2, author1)
+    assertThat(deserialized.errors).isNull()
+    assertThat(deserialized.links).isNotNull
+    assertThat(deserialized.meta).isNotNull
+    assertThat(deserialized.jsonapi).isNotNull
+  }
+
+  @Test
+  fun `deserialize resource object collection document`() {
+    val adapter: JsonAdapter<Document<List<ResourceObject>>> = moshi.adapter(
+      Types.newParameterizedType(
+        Document::class.java,
+        Types.newParameterizedType(List::class.java, ResourceObject::class.java)
+      )
+    )
+
+    val deserialized = adapter.fromJson(read(DOCUMENT_ARTICLE_COLLECTION)) ?: fail("deserialized == null")
+
+    // Primary resource 1
+    val resourceObject1 = deserialized.data?.get(0) ?: fail("identifier1 == null")
+    assertThat(resourceObject1.type).isEqualTo("articles")
+    assertThat(resourceObject1.id).isEqualTo("1")
+    assertThat(resourceObject1.lid).isNull()
+    assertThat(resourceObject1.relationships).isNotNull
+    assertThat(resourceObject1.links).isNull()
+    assertThat(resourceObject1.meta).isNull()
+
+    // Primary resource 2
+    val resourceObject2 = deserialized.data?.get(1) ?: fail("identifier2 == null")
+    assertThat(resourceObject2.type).isEqualTo("articles")
+    assertThat(resourceObject2.id).isEqualTo("2")
+    assertThat(resourceObject2.lid).isNull()
+    assertThat(resourceObject1.relationships).isNotNull
+    assertThat(resourceObject1.links).isNull()
+    assertThat(resourceObject2.meta).isNull()
+
+    // Other document elements
+    assertThat(deserialized.included).containsExactly(comment1, comment2, author1)
+    assertThat(deserialized.errors).isNull()
+    assertThat(deserialized.links).isNotNull
+    assertThat(deserialized.meta).isNotNull
+    assertThat(deserialized.jsonapi).isNotNull
   }
 
   @Test
   fun `deserialize resource collection document`() {
     val deserialized = articleCollectionAdapter.fromJson(read(DOCUMENT_ARTICLE_COLLECTION))
-    assertThat(deserialized?.data).asList().isNotEmpty
-    assertThat(deserialized?.included).isNotNull
-    assertThat(deserialized?.links).isNotNull
-    assertThat(deserialized?.meta).isNotNull
-    assertThat(deserialized?.jsonapi).isNotNull
-    assertThat(deserialized?.errors).isNull()
+      ?: fail("deserialized == null")
+    assertThat(deserialized.data).containsExactly(article1, article2)
+    assertThat(deserialized.included).containsExactly(comment1, comment2, author1)
+    assertThat(deserialized.errors).isNull()
+    assertThat(deserialized.links).isNotNull
+    assertThat(deserialized.meta).isNotNull
+    assertThat(deserialized.jsonapi).isNotNull
   }
 
   @Test
   fun `deserialized resource collection document is bound`() {
     val deserialized = articleCollectionAdapter.fromJson(read(DOCUMENT_ARTICLE_COLLECTION))
-    val primaryResource = deserialized?.data?.first() ?: fail("primary resource is null")
-    assertThat(primaryResource.author).isEqualTo(author1)
-    assertThat(primaryResource.comments).asList().containsExactly(comment1, comment2)
+      ?: fail("deserialized == null")
+
+    val primary = deserialized.data ?: fail("primary == null")
+    val included = deserialized.included ?: fail("included == null")
+
+    val article1 = primary[0]
+    val article2 = primary[1]
+    val comment1 = included[0] as? Comment ?: fail("comment1 == null")
+    val comment2 = included[1] as? Comment ?: fail("comment1 == null")
+    val author1 = included[2] as? Person ?: fail("author1 == null")
+
+    // Article 1
+    assertThat(article1.author).isEqualTo(author1)
+    assertThat(article1.comments).containsExactly(comment1, comment2)
+    assertThat(article1.related).containsExactly(article2)
+
+    // Article 2
+    assertThat(article2.author).isNull()     // not in included
+    assertThat(article2.comments).isEmpty()  // empty relationship
+    assertThat(article2.related).isNull()    // relationship not defined
+
+    // Comment 1
+    assertThat(comment1.author).isNull()     // not in included
+
+    // Comment 2
+    assertThat(comment2.author).isEqualTo(author1)
   }
 
   @Test
-  fun `deserialize resource identifier collection document`() {
-    val deserialized = resourceIdentifierCollectionAdapter.fromJson(read(DOCUMENT_ARTICLE_COLLECTION_SIMPLE))
-    val resourceIdentifier = deserialized?.data?.first() ?: fail("resource identifier is null")
-    assertThat(resourceIdentifier.type).isEqualTo("articles")
-    assertThat(resourceIdentifier.id).isEqualTo("1")
-    assertThat(resourceIdentifier.lid).isNull()
-    assertThat(resourceIdentifier.meta).isNull()
+  fun `deserialized resource collection document with duplicated resources is bound`() {
+    val deserialized = articleCollectionAdapter.fromJson(read(DOCUMENT_ARTICLE_COLLECTION_DUPLICATED_RESOURCES))
+      ?: fail("deserialized == null")
+
+    val primary = deserialized.data ?: fail("primary == null")
+    val included = deserialized.included ?: fail("included == null")
+
+    val article1Primary = primary[0]
+    val article2 = primary[1]
+    val article1Included = included[0] as? Article ?: fail("article1 included == null")
+    val comment1 = included[1] as? Comment ?: fail("comment1 == null")
+    val comment2 = included[2] as? Comment ?: fail("comment1 == null")
+    val author1 = included[3] as? Person ?: fail("author1 == null")
+
+    // Article 1 - from primary resources
+    assertThat(article1Primary.author).isEqualTo(author1)
+    assertThat(article1Primary.comments).containsExactly(comment1, comment2)
+    assertThat(article1Primary.related).containsExactly(article2)
+
+    // Article 1 - from included resources
+    assertThat(article1Included.author).isEqualTo(author1)
+    assertThat(article1Included.comments).containsExactly(comment1, comment2)
+    assertThat(article1Included.related).containsExactly(article2)
+
+    // Article 2
+    assertThat(article2.author).isNull()     // not in included
+    assertThat(article2.comments).isEmpty()  // empty relationship
+    assertThat(article2.related).isNull()    // relationship not defined
+
+    // Comment 1
+    assertThat(comment1.author).isNull()     // not in included
+
+    // Comment 2
+    assertThat(comment2.author).isEqualTo(author1)
   }
 
   @Test
   fun `deserialize meta only document`() {
-    val deserialized = articleAdapter.fromJson(read(DOCUMENT_META))
-    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("meta")
+    val deserialized = nothingAdapter.fromJson(read(DOCUMENT_META))
+    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("meta", "includedSerialization")
+    assertThat(deserialized?.meta?.members).containsExactly(entry("name", "value"))
   }
 
   @Test
   fun `deserialize empty errors`() {
-    val deserialized = articleAdapter.fromJson("""{"errors":[]}""")
-    assertThat(deserialized?.errors).isEmpty()
-    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("errors")
+    val deserialized = nothingAdapter.fromJson("""{"errors":[]}""") ?: fail("deserialized == null")
+    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("errors", "includedSerialization")
+    assertThat(deserialized.errors).isEmpty()
   }
 
   @Test
   fun `deserialize non empty errors`() {
-    val deserialized = articleAdapter.fromJson(read(DOCUMENT_ERROR))
+    val deserialized = nothingAdapter.fromJson(read(DOCUMENT_ERROR)) ?: fail("deserialized == null")
 
-    val errors = deserialized?.errors ?: fail("errors are null")
+    val errors = deserialized.errors ?: fail("errors == null")
+    assertThat(errors).hasSize(3)
+
     val error1 = errors[0]
     val error2 = errors[1]
     val error3 = errors[2]
 
-    assertThat(errors).hasSize(3)
     assertThat(error1).hasNoNullFieldsOrProperties()
     assertThat(error1.source).hasNoNullFieldsOrProperties()
-    assertThat(error2).hasAllNullFieldsOrProperties()
+    assertThat(error2).hasAllNullFieldsOrPropertiesExcept("id")
     assertThat(error3).hasAllNullFieldsOrPropertiesExcept("id", "links", "source")
     assertThat(error3.source).hasAllNullFieldsOrProperties()
+  }
+
+  @Test
+  fun `deserialize included resources of unregistered type as resource objects`() {
+    // JSON with included resources with some types (A, B) that are not registered
+    val json = """
+      {
+        "data":{"type":"articles","id":"1"},
+        "included":[
+          {"type":"articles","id":"1"},
+          {"type":"A","id":"1"},
+          {"type":"B","id":"1"}
+        ]
+      }
+      """.inlineJson()
+
+    val deserialized = articleAdapter.fromJson(json) ?: fail("deserialized == null")
+
+    assertThat(deserialized.included).containsExactly(
+      Article("1"),
+      ResourceObject("A", "1"),
+      ResourceObject("B", "1"),
+    )
+  }
+
+  @Test(expected = JsonApiException::class)
+  fun `throw when document root is not a json object`() {
+    // A JSON object MUST be at the root of every JSON:API request and response containing data.
+    // This object defines a document’s “top level”.
+    articleAdapter.fromJson("[]")
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `throw when document contains both data and errors`() {
+    // The members data and errors MUST NOT coexist in the same document
+    articleAdapter.fromJson("""{"data":{"type":"articles","id":"1"},"errors":[]}""")
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `throw when document contains included but not data`() {
+    // If a document does not contain a top-level data key, the included member MUST NOT be present either
+    articleAdapter.fromJson("""{"included":[]}""")
   }
 
   @Test
@@ -206,98 +474,149 @@ class DocumentAdapterTest {
 
   @Test
   fun `serialize null data document`() {
-    val document = Document<Article>(null)
-    val serialized = articleAdapter.toJson(document)
+    val document = Document.empty()
+    val serialized = nothingAdapter.toJson(document)
     assertThat(serialized).isEqualTo("""{"data":null}""")
   }
 
   @Test
   fun `serialize null data document with links`() {
-    val document = Document<Article>(null, links = Links(mapOf("related" to Link.LinkURI("uri"))))
+    val document = Document.Builder<Article>()
+      .links(Links.from("link" to "link"))
+      .build()
     val serialized = articleAdapter.toJson(document)
-    assertThat(serialized).isEqualTo("""{"data":null,"links":{"related":"uri"}}""")
-  }
-
-  @Test
-  fun `serialize single resource document`() {
-    val expected = read(DOCUMENT_ARTICLE_SINGLE_SIMPLE, true)
-    val document = Document(article)
-    val serialized = articleAdapter.toJson(document)
-    assertThat(serialized).isEqualTo(expected)
+    assertThat(serialized).isEqualTo("""{"links":{"link":"link"},"data":null}""")
   }
 
   @Test
   fun `serialize single resource identifier document`() {
-    val document = Document(ResourceIdentifier("articles", "1", "1"))
-    val serialized = resourceIdentifierAdapter.toJson(document)
+    val adapter = moshi.adapter<Document<ResourceIdentifier>>(
+      Types.newParameterizedType(Document::class.java, ResourceIdentifier::class.java)
+    )
+    val document = Document.from(ResourceIdentifier("articles", "1", "1"))
+    val serialized = adapter.toJson(document)
     assertThat(serialized).isEqualTo("""{"data":{"type":"articles","id":"1","lid":"1"}}""")
   }
 
   @Test
+  fun `serialize single resource object document`() {
+    val adapter = moshi.adapter<Document<ResourceObject>>(
+      Types.newParameterizedType(Document::class.java, ResourceObject::class.java)
+    )
+    val document = Document.from(ResourceObject("articles", "1", "1"))
+    val serialized = adapter.toJson(document)
+    assertThat(serialized).isEqualTo("""{"data":{"type":"articles","id":"1","lid":"1"}}""")
+  }
+
+  @Test
+  fun `serialize single resource document`() {
+    // Document with all members (except errors)
+    val document = Document.with(article1)
+      .included(listOf(author2)) // Additional included not linked in via primary resource
+      .links(Links.from("link" to "link"))
+      .meta(Meta("name" to "value"))
+      .jsonapi(JsonApiObject("1"))
+      .build()
+    val serialized = articleAdapter.toJson(document)
+    val expected = read(DOCUMENT_ARTICLE_SINGLE_SERIALIZED, true)
+    assertThat(serialized).isEqualTo(expected)
+  }
+
+  @Test
   fun `serialize empty collection document`() {
-    val document = Document(emptyList<Article>())
+    val document = Document.from(emptyList<Article>())
     val serialized = articleCollectionAdapter.toJson(document)
     assertThat(serialized).isEqualTo("""{"data":[]}""")
   }
 
   @Test
-  fun `serialize resource collection document`() {
-    val expected = read(DOCUMENT_ARTICLE_COLLECTION_SIMPLE, true)
-    val document = Document(listOf(article))
-    val serialized = articleCollectionAdapter.toJson(document)
-    assertThat(serialized).isEqualTo(expected)
-  }
-
-  @Test
   fun `serialize resource identifier collection document`() {
-    val identifiers = listOf(ResourceIdentifier("articles", "1", "1"))
-    val document = Document(identifiers)
-    val serialized = resourceIdentifierCollectionAdapter.toJson(document)
+    val adapter = moshi.adapter<Document<List<ResourceIdentifier>>>(
+      Types.newParameterizedType(
+        Document::class.java,
+        Types.newParameterizedType(List::class.java, ResourceIdentifier::class.java)
+      )
+    )
+    val document = Document.from(listOf(ResourceIdentifier("articles", "1", "1")))
+    val serialized = adapter.toJson(document)
     assertThat(serialized).isEqualTo("""{"data":[{"type":"articles","id":"1","lid":"1"}]}""")
   }
 
   @Test
-  fun `serialize document without included`() {
-    val expected = read(DOCUMENT_ARTICLE_SINGLE_SIMPLE_NO_INCLUDED, true)
-    val document = Document.with(article).serializeIncluded(false).build()
+  fun `serialize resource object collection document`() {
+    val adapter = moshi.adapter<Document<List<ResourceObject>>>(
+      Types.newParameterizedType(
+        Document::class.java,
+        Types.newParameterizedType(List::class.java, ResourceObject::class.java)
+      )
+    )
+    val document = Document.from(listOf(ResourceObject("articles", "1", "1")))
+    val serialized = adapter.toJson(document)
+    assertThat(serialized).isEqualTo("""{"data":[{"type":"articles","id":"1","lid":"1"}]}""")
+  }
+
+  @Test
+  fun `serialize resource collection document`() {
+    // Document with all members (except errors)
+    val document = Document.with(listOf(article1, article2))
+      .included(listOf(author2)) // Additional included not linked in via primary resources
+      .links(Links.from("link" to "link"))
+      .meta(Meta("name" to "value"))
+      .jsonapi(JsonApiObject("1"))
+      .build()
+    val serialized = articleCollectionAdapter.toJson(document)
+    val expected = read(DOCUMENT_ARTICLE_COLLECTION_SERIALIZED, true)
+    assertThat(serialized).isEqualTo(expected)
+  }
+
+  @Test
+  fun `serialize document configured to skip included serialization`() {
+    val expected = read(DOCUMENT_ARTICLE_SINGLE_SERIALIZED_NO_INCLUDED, true)
+    val document = Document.with(article1)
+      .included(listOf(author2))
+      .includedSerialization(IncludedSerialization.NONE)
+      .build()
     val serialized = articleAdapter.toJson(document)
     assertThat(serialized).isEqualTo(expected)
   }
 
   @Test
+  fun `serialize document configured to serialize only document defined included`() {
+    val author = Person("1", "A", "B") // Shouldn't be in included
+    val comment1 = Comment("1", "Comment1")         // Should be in included
+    val comment2 = Comment("2", "Comment2")         // Should be in included
+    val article = Article("1", "Title1", author, listOf(comment1))  // Primary resource
+    val document = Document.with(article)
+      .included(listOf(comment1, comment2))
+      .includedSerialization(IncludedSerialization.DOCUMENT)
+      .build()
+    val serialized = articleAdapter.toJson(document)
+    val expected = read(DOCUMENT_ARTICLE_SINGLE_SERIALIZED_DOCUMENT_ONLY_INCLUDED, true)
+    assertThat(serialized).isEqualTo(expected)
+  }
+
+  @Test
   fun `serialize meta document`() {
-    // Meta document has only meta, data is null
-    val document = Document(
-      data = null,
-      meta = Meta(mapOf("name" to "value"))
-    )
+    val document = Document.from(Meta("name" to "value"))
     val serialized = nothingAdapter.toJson(document)
     assertThat(serialized).isEqualTo("""{"meta":{"name":"value"}}""")
   }
 
   @Test
   fun `serialize empty errors`() {
-    val document = Document(data = null, errors = emptyList())
+    val document = Document.from(emptyList())
     val serialized = nothingAdapter.toJson(document)
     assertThat(serialized).isEqualTo("""{"errors":[]}""")
   }
 
   @Test
   fun `serialize non empty errors`() {
-    val errors = listOf(Error(title = "Title", detail = "Detail"))
-    val document = Document(data = null, errors = errors)
+    val error = Error.Builder()
+      .title("Title")
+      .detail("Detail")
+      .build()
+    val document = Document.from(error)
     val serialized = nothingAdapter.toJson(document)
-    val expected = read(DOCUMENT_ERROR_SIMPLE, true)
-    assertThat(serialized).isEqualTo(expected)
-  }
-
-  @Test
-  fun `resource relations are unchanged after serialization`() {
-    val document = Document(article)
-    articleAdapter.toJson(document)
-    assertThat(article.author).isEqualTo(author1)
-    assertThat(article.comments).containsExactly(comment1, comment2)
-    assertThat(comment1.author).isEqualTo(author2)
-    assertThat(comment2.author).isEqualTo(author1)
+    assertThat(serialized).isEqualTo("""{"errors":[{"title":"Title","detail":"Detail"}]}""")
   }
 }

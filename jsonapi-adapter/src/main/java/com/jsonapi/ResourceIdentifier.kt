@@ -1,7 +1,5 @@
 package com.jsonapi
 
-import com.squareup.moshi.JsonClass
-
 /**
  * A “resource identifier object” is an object that identifies an individual resource.
  *
@@ -21,7 +19,6 @@ import com.squareup.moshi.JsonClass
  * @param lid Unique identifier of the resource (by `type` *locally*). **MUST** be included if `id` is omitted.
  * @param meta a [Meta] object containing non-standard meta-information about a resource identifier.
  */
-@JsonClass(generateAdapter = true)
 class ResourceIdentifier @JvmOverloads constructor(
   val type: String,
   val id: String? = null,
@@ -30,11 +27,11 @@ class ResourceIdentifier @JvmOverloads constructor(
 ) {
 
   init {
-    check(type.isNotBlank()) {
-      "A “resource identifier object” MUST contain a type member but was blank."
+    require(type.isNotBlank()) {
+      "A resource identifier MUST contain a type member but was blank."
     }
-    check(!id.isNullOrBlank() || !lid.isNullOrBlank()) {
-      "A “resource identifier object” MUST contain an 'id' or 'lid' member but both were null or blank."
+    require(!id.isNullOrBlank() || !lid.isNullOrBlank()) {
+      "A resource identifier MUST contain an 'id' or 'lid' member but both were null or blank."
     }
   }
 
@@ -50,5 +47,9 @@ class ResourceIdentifier @JvmOverloads constructor(
     result = 31 * result + (id?.hashCode() ?: 0)
     result = 31 * result + (lid?.hashCode() ?: 0)
     return result
+  }
+
+  override fun toString(): String {
+    return "ResourceIdentifier(type='$type', id=$id, lid=$lid, meta=$meta)"
   }
 }

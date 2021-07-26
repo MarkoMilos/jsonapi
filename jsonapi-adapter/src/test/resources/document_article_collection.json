@@ -1,18 +1,9 @@
 {
   "jsonapi": {
-    "version": "1.1",
-    "ext": [
-      "https://jsonapi.org/ext/atomic"
-    ],
-    "profile": [
-      "http://example.com/profiles/flexible-pagination",
-      "http://example.com/profiles/resource-versioning"
-    ]
+    "version": "1"
   },
   "links": {
-    "self": "http://example.com/articles",
-    "next": "http://example.com/articles?page[offset]=2",
-    "last": "http://example.com/articles?page[offset]=10"
+    "self": "self"
   },
   "meta": {
     "name": "value"
@@ -22,25 +13,16 @@
       "type": "articles",
       "id": "1",
       "attributes": {
-        "title": "Title1",
-        "headline": "Headline1"
+        "title": "Title1"
       },
       "relationships": {
         "author": {
-          "links": {
-            "self": "http://example.com/articles/1/relationships/author",
-            "related": "http://example.com/articles/1/author"
-          },
           "data": {
             "type": "people",
             "id": "1"
           }
         },
         "comments": {
-          "links": {
-            "self": "http://example.com/articles/1/relationships/comments",
-            "related": "http://example.com/articles/1/comments"
-          },
           "data": [
             {
               "type": "comments",
@@ -51,26 +33,37 @@
               "id": "2"
             }
           ]
+        },
+        "related": {
+          "data": [
+            {
+              "type": "articles",
+              "id": "2"
+            }
+          ]
         }
+      }
+    },
+    {
+      "type": "articles",
+      "id": "2",
+      "attributes": {
+        "title": "Title2"
       },
-      "links": {
-        "self": "http://example.com/articles/1"
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "2"
+          }
+        },
+        "comments": {
+          "data": []
+        }
       }
     }
   ],
   "included": [
-    {
-      "type": "people",
-      "id": "1",
-      "attributes": {
-        "firstName": "Name1",
-        "lastName": "Surname1",
-        "twitter": "@twitter1"
-      },
-      "links": {
-        "self": "http://example.com/people/1"
-      }
-    },
     {
       "type": "comments",
       "id": "1",
@@ -84,9 +77,6 @@
             "id": "2"
           }
         }
-      },
-      "links": {
-        "self": "http://example.com/comments/1"
       }
     },
     {
@@ -102,9 +92,14 @@
             "id": "1"
           }
         }
-      },
-      "links": {
-        "self": "http://example.com/comments/2"
+      }
+    },
+    {
+      "type": "people",
+      "id": "1",
+      "attributes": {
+        "firstName": "Name1",
+        "lastName": "Surname1"
       }
     }
   ]

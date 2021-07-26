@@ -1,7 +1,6 @@
 package com.jsonapi
 
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 
@@ -9,12 +8,14 @@ import com.squareup.moshi.Types
  * Meta is used to include non-standard meta-information.
  * Any members MAY be specified within meta objects.
  */
-@JsonClass(generateAdapter = true)
-class Meta constructor(val members: Map<String, Any?>) {
+class Meta(val members: Map<String, Any?>) {
 
   constructor(vararg members: Pair<String, Any?>) : this(mapOf(*members))
 
-  /** Returns true if this meta has members, false otherwise */
+  /** Returns number of members in this object. */
+  fun size() = members.size
+
+  /** Returns true if this meta has no members, false otherwise */
   fun isEmpty() = members.isEmpty()
 
   /** Returns true if meta has member with [name], false otherwise */
@@ -38,8 +39,7 @@ class Meta constructor(val members: Map<String, Any?>) {
    * Returns null if such a name is not present or it is not instance of defined type [T].
    */
   inline fun <reified T> member(name: String): T? {
-    val value = members[name]
-    return if (value is T) value else null
+    return members[name] as? T
   }
 
   /**
@@ -83,7 +83,7 @@ class Meta constructor(val members: Map<String, Any?>) {
    *
    * Use [configuredMoshi] if you want to use moshi instance that is configured with adapters
    * required for deserialization of defined type [T]. If [configuredMoshi] is not provided
-   * default instance `Moshi.Builder().build()` is used for deserialization.
+   * default instance `Moshi.Builder().build()` will be used.
    */
   @JvmOverloads
   fun <T> map(targetType: Class<T>, configuredMoshi: Moshi? = null): T? {
@@ -102,10 +102,28 @@ class Meta constructor(val members: Map<String, Any?>) {
    *
    * Use [configuredMoshi] if you want to use moshi instance that is configured with adapters
    * required for deserialization of defined type [T]. If [configuredMoshi] is not provided
-   * default instance `Moshi.Builder().build()` is used for deserialization.
+   * default instance `Moshi.Builder().build()` will be used.
    */
   inline fun <reified T> map(configuredMoshi: Moshi? = null): T? {
     return this.map(T::class.java, configuredMoshi)
+  }
+
+  /** Returns new [Builder] initialized from this */
+  fun newBuilder(): Builder {
+    return Builder(this)
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    return (other is Meta) && this.members == other.members
+  }
+
+  override fun hashCode(): Int {
+    return members.hashCode()
+  }
+
+  override fun toString(): String {
+    return "Meta(members=$members)"
   }
 
   companion object {
@@ -116,7 +134,7 @@ class Meta constructor(val members: Map<String, Any?>) {
      *
      * Use [configuredMoshi] if you want to use moshi instance that is configured with adapters
      * required for serialization of defined type [T]. If [configuredMoshi] is not provided
-     * default instance `Moshi.Builder().build()` is used for serialization.
+     * default instance `Moshi.Builder().build()` will be used.
      */
     @JvmStatic
     @JvmOverloads
@@ -129,6 +147,33 @@ class Meta constructor(val members: Map<String, Any?>) {
       val serializedValue = valueTypeAdapter.toJson(value)
       val metaMap = mapAdapter.fromJson(serializedValue) ?: emptyMap()
       return Meta(metaMap)
+    }
+  }
+
+  class Builder {
+    private val members: MutableMap<String, Any?>
+
+    constructor() {
+      this.members = mutableMapOf()
+    }
+
+    internal constructor(meta: Meta) {
+      this.members = meta.members.toMutableMap()
+    }
+
+    /** Add meta member with [name] and [value]. */
+    fun add(name: String, value: Any?) = apply {
+      this.members[name] = value
+    }
+
+    /** Add all meta members from [members]. */
+    fun add(members: Map<String, Any?>) = apply {
+      this.members.putAll(members)
+    }
+
+    /** Creates an instance of [Meta] configured with this builder. */
+    fun build(): Meta {
+      return Meta(members)
     }
   }
 }

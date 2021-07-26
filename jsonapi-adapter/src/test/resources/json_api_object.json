@@ -1,0 +1,13 @@
+{
+  "version": "1.1",
+  "ext": [
+    "ext-1"
+  ],
+  "profile": [
+    "profile-1",
+    "profile-2"
+  ],
+  "meta": {
+    "name": "value"
+  }
+}
