@@ -3,12 +3,12 @@
 //import com.example.jsonapi.resource.Article
 //import com.example.jsonapi.resource.Comment
 //import com.example.jsonapi.resource.Person
-//import com.jsonapi.Document
+//import jsonapi.Document
 //import com.jsonapi.JsonApi
-//import com.jsonapi.JsonApiFactory
-//import com.jsonapi.Link.URI
-//import com.jsonapi.Links
-//import com.jsonapi.Meta
+//import jsonapi.JsonApiFactory
+//import jsonapi.Link.URI
+//import jsonapi.Links
+//import jsonapi.Meta
 //import com.squareup.moshi.JsonAdapter
 //import com.squareup.moshi.Moshi
 //import com.squareup.moshi.Types

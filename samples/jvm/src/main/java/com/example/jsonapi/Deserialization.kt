@@ -1,9 +1,9 @@
 //package com.example.jsonapi
 //
 //import com.example.jsonapi.resource.Article
-//import com.jsonapi.Document
+//import jsonapi.Document
 //import com.jsonapi.JsonApi
-//import com.jsonapi.JsonApiFactory
+//import jsonapi.JsonApiFactory
 //import com.squareup.moshi.JsonAdapter
 //import com.squareup.moshi.Moshi
 //import com.squareup.moshi.Types
