@@ -1,10 +1,9 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Relationship
 import com.jsonapi.Relationship.ToMany
 import com.jsonapi.Relationship.ToOne
-import com.jsonapi.internal.NAME_DATA
 import com.jsonapi.internal.FactoryDelegate
 import com.jsonapi.internal.rawType
 import com.jsonapi.internal.scan
@@ -13,7 +12,6 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
-import java.lang.reflect.Type
 
 internal class RelationshipAdapter(moshi: Moshi) : JsonAdapter<Relationship>() {
 
@@ -26,9 +24,9 @@ internal class RelationshipAdapter(moshi: Moshi) : JsonAdapter<Relationship>() {
       return reader.nextNull()
     }
 
-    // Assert that relationship is JSON object
+    // Assert that root of relationship is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException(
+      throw JsonFormatException(
         "Relationship MUST be a JSON object but found "
           + reader.peek()
           + " on path "
@@ -55,7 +53,7 @@ internal class RelationshipAdapter(moshi: Moshi) : JsonAdapter<Relationship>() {
       }
       reader.skipValue()
     }
-    // If data member was not found then deserialize relationship as to-one
+    // If data member was not found then deserialize relationship as to-one (as it was null)
     return toOneAdapter
   }
 
@@ -68,17 +66,10 @@ internal class RelationshipAdapter(moshi: Moshi) : JsonAdapter<Relationship>() {
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != Relationship::class.java) return null
-        return RelationshipAdapter(moshi)
-      }
+    private const val NAME_DATA = "data"
+
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == Relationship::class.java) RelationshipAdapter(moshi) else null
     }
   }
 }

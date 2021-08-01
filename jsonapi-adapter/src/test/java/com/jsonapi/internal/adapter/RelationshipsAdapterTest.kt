@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.RELATIONSHIPS
 import com.jsonapi.Relationship.ToMany
@@ -67,7 +67,7 @@ class RelationshipsAdapterTest {
     assertThat(deserialized.members).isEmpty()
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when relationships is not json object`() {
     adapter.fromJson("[]")
   }

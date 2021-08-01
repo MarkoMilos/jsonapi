@@ -104,7 +104,7 @@ class Relationships(val members: Map<String, Relationship>) {
     private fun addRelationship(name: String, value: Relationship) {
       val replaced = members.put(name, value)
       if (replaced != null) {
-        throw JsonApiException(
+        throw IllegalArgumentException(
           "Multiple relationships defined for a key: "
             + name
             + "\nFirst: "

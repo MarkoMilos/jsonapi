@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.RESOURCE_ARTICLE
 import com.jsonapi.JsonFile.RESOURCE_ARTICLE_NON_STANDARD_NAMES
@@ -96,32 +96,32 @@ class ResourceTypeAdapterTest {
     assertThat(deserialized).hasNoNullFieldsOrPropertiesExcept("title")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource without type`() {
     adapter.fromJson("""{"id":"1"}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource with invalid type`() {
     adapter.fromJson("""{"type":null,"id":"1"}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource without id or lid`() {
     adapter.fromJson("""{"type":"articles"}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource with invalid id`() {
     adapter.fromJson("""{"type":"articles","id":""}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource with invalid lid`() {
     adapter.fromJson("""{"type":"articles","lid":""}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when deserializing non json object`() {
     adapter.fromJson("[]")
   }
@@ -207,7 +207,7 @@ class ResourceTypeAdapterTest {
     assertThat(deserialized.title).isNullOrEmpty()
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = AssertionError::class)
   fun `throw on deserializing non matching type when strict type checking is enabled`() {
     // Strict types are enabled and both Article and Comment types are registered
     val factory = JsonApiFactory.Builder()
@@ -308,25 +308,25 @@ class ResourceTypeAdapterTest {
     assertThat(serialized).isEqualTo("""{"type":"articles","id":"1","attributes":{"title":"Title"}}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `throw when serializing resource with invalid type`() {
     val article = Article(type = "", id = "1")
     adapter.toJson(article)
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `throw when serializing resource without id or lid`() {
     val article = Article(type = "articles", id = null, lid = null)
     adapter.toJson(article)
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `throw when serializing resource with invalid id`() {
     val article = Article(type = "articles", id = "", lid = null)
     adapter.toJson(article)
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `throw when serializing resource with invalid lid`() {
     val article = Article(type = "articles", id = null, lid = "")
     adapter.toJson(article)
@@ -414,7 +414,7 @@ class ResourceTypeAdapterTest {
     assertThat(serialized).isEqualTo("""{"type":"comments","id":"1","attributes":{"title":"Title"}}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = AssertionError::class)
   fun `throw on serializing non matching type when strict type checking is enabled`() {
     // Strict types are enabled and Article type is registered
     val factory = JsonApiFactory.Builder()

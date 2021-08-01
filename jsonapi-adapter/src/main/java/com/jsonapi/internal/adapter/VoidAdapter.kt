@@ -5,8 +5,6 @@ import com.jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
-import java.lang.reflect.Type
 
 /** Adapter for [Nothing] / [Void] which is not included in Moshi built in adapters for standard types. */
 internal class VoidAdapter : JsonAdapter<Nothing>() {
@@ -24,17 +22,8 @@ internal class VoidAdapter : JsonAdapter<Nothing>() {
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != Void::class.java) return null
-        return VoidAdapter()
-      }
+    internal val FACTORY = FactoryDelegate { type, annotations, _, _ ->
+      if (annotations.isEmpty() && type.rawType() == Void::class.java) VoidAdapter() else null
     }
   }
 }

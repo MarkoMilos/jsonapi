@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.LINK_OBJECT_FULL
 import com.jsonapi.Link
@@ -37,7 +37,7 @@ class LinkAdapterTest {
     assertThat(deserialized).isInstanceOf(LinkObject::class.java)
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when link is not string or object`() {
     adapter.fromJson("[]")
   }

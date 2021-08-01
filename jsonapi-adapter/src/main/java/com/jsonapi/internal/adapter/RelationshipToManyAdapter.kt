@@ -1,14 +1,11 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Links
 import com.jsonapi.Meta
 import com.jsonapi.Relationship.ToMany
 import com.jsonapi.ResourceIdentifier
 import com.jsonapi.internal.FactoryDelegate
-import com.jsonapi.internal.NAME_DATA
-import com.jsonapi.internal.NAME_LINKS
-import com.jsonapi.internal.NAME_META
 import com.jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
@@ -16,7 +13,6 @@ import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import java.lang.reflect.Type
 
 internal class RelationshipToManyAdapter(moshi: Moshi) : JsonAdapter<ToMany>() {
 
@@ -33,7 +29,7 @@ internal class RelationshipToManyAdapter(moshi: Moshi) : JsonAdapter<ToMany>() {
 
     // Assert that relationship is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException(
+      throw JsonFormatException(
         "Relationship MUST be a JSON object but found "
           + reader.peek()
           + " on path "
@@ -54,7 +50,7 @@ internal class RelationshipToManyAdapter(moshi: Moshi) : JsonAdapter<ToMany>() {
           data = if (reader.peek() == Token.BEGIN_ARRAY) {
             dataAdapter.fromJson(reader) ?: emptyList()
           } else {
-            throw JsonApiException(
+            throw JsonFormatException(
               "Resource linkage for to-many relationship MUST be represented as one of the following:\n"
                 + " - an empty array ([]) for empty to-many relationships.\n"
                 + " - an array of resource identifier objects for non-empty to-many relationships\n"
@@ -82,26 +78,20 @@ internal class RelationshipToManyAdapter(moshi: Moshi) : JsonAdapter<ToMany>() {
       return
     }
 
-    writer
-      .beginObject()
-      .name(NAME_DATA).apply { dataAdapter.toJson(writer, value.data) }
-      .name(NAME_LINKS).apply { linksAdapter.toJson(writer, value.links) }
-      .name(NAME_META).apply { metaAdapter.toJson(writer, value.meta) }
-      .endObject()
+    writer.beginObject()
+    writer.name(NAME_DATA).apply { dataAdapter.toJson(writer, value.data) }
+    writer.name(NAME_LINKS).apply { linksAdapter.toJson(writer, value.links) }
+    writer.name(NAME_META).apply { metaAdapter.toJson(writer, value.meta) }
+    writer.endObject()
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != ToMany::class.java) return null
-        return RelationshipToManyAdapter(moshi)
-      }
+    private const val NAME_DATA = "data"
+    private const val NAME_LINKS = "links"
+    private const val NAME_META = "meta"
+
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == ToMany::class.java) RelationshipToManyAdapter(moshi) else null
     }
   }
 }

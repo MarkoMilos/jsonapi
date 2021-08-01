@@ -2,9 +2,9 @@ package com.jsonapi.internal.adapter
 
 import com.jsonapi.Error
 import com.jsonapi.Error.Source
-import com.jsonapi.JsonApiException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.ERROR
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Links
 import com.jsonapi.Meta
 import com.jsonapi.read
@@ -31,12 +31,12 @@ class ErrorAdapterTest {
   fun `deserialize error`() {
     val deserialized = adapter.fromJson(read(ERROR)) ?: fail("deserialized == null")
     assertThat(deserialized.id).isEqualTo("id")
-    assertThat(deserialized.links).isNotNull
     assertThat(deserialized.status).isEqualTo("status")
     assertThat(deserialized.code).isEqualTo("code")
     assertThat(deserialized.title).isEqualTo("title")
     assertThat(deserialized.detail).isEqualTo("detail")
     assertThat(deserialized.source).isNotNull
+    assertThat(deserialized.links).isNotNull
     assertThat(deserialized.meta).isNotNull
   }
 
@@ -45,7 +45,7 @@ class ErrorAdapterTest {
     adapter.fromJson("""{"id":null}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when deserializing non json object`() {
     adapter.fromJson("[]")
   }
@@ -66,12 +66,12 @@ class ErrorAdapterTest {
   fun `serialize error`() {
     val error = Error.Builder()
       .id("id")
-      .links(Links.from("link" to "link"))
       .status("status")
       .code("code")
       .title("title")
       .detail("detail")
       .source(Source("pointer", "parameter", "header"))
+      .links(Links.from("link" to "link"))
       .meta(Meta("name" to "value"))
       .build()
     val serialized = adapter.toJson(error)

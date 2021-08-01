@@ -1,8 +1,5 @@
 {
   "id": "id",
-  "links": {
-    "link": "link"
-  },
   "status": "status",
   "code": "code",
   "title": "title",
@@ -11,6 +8,9 @@
     "pointer": "pointer",
     "parameter": "parameter",
     "header": "header"
+  },
+  "links": {
+    "link": "link"
   },
   "meta": {
     "name": "value"

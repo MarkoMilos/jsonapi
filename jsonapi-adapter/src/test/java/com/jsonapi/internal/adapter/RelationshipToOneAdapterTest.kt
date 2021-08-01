@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.RELATIONSHIP_TO_ONE
 import com.jsonapi.JsonFile.RELATIONSHIP_TO_ONE_EMPTY
@@ -44,7 +44,7 @@ class RelationshipToOneAdapterTest {
     assertThat(deserialized.meta).isNotNull
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when relationship is not json object`() {
     adapter.fromJson("[]")
   }

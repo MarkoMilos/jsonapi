@@ -1,7 +1,7 @@
 package com.jsonapi.internal.adapter
 
 import com.jsonapi.Error.Source
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.inlineJson
 import com.squareup.moshi.Moshi
@@ -38,7 +38,7 @@ class SourceAdapterTest {
     assertThat(deserialized.header).isEqualTo("header")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when deserializing non json object`() {
     adapter.fromJson("[]")
   }

@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.RESOURCE_ARTICLE
 import com.jsonapi.JsonFile.RESOURCE_ARTICLE_NON_STANDARD_NAMES
@@ -60,32 +60,32 @@ class ResourceObjectAdapterTest {
     assertThat(deserialized.meta).isNotNull
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource without type`() {
     adapter.fromJson("""{"id":"1"}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource with invalid type`() {
     adapter.fromJson("""{"type":null, "id":"1"}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource without id or lid`() {
     adapter.fromJson("""{"type":"articles"}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource with invalid id`() {
     adapter.fromJson("""{"type":"articles", "id":""}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource with invalid lid`() {
     adapter.fromJson("""{"type":"articles", "lid":""}""")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when deserializing resource that is not an json object`() {
     adapter.fromJson("[]")
   }

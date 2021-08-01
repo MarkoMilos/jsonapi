@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.LINK_OBJECT_FULL
 import com.jsonapi.JsonFile.LINK_OBJECT_HREF_ONLY
@@ -65,7 +65,7 @@ class LinkObjectAdapterTest {
     assertThat(deserialized.hreflang).asList().containsExactly("en", "es")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw for invalid link object`() {
     // Link object MUST contain member [href]
     adapter.fromJson("{}")

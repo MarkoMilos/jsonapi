@@ -17,7 +17,7 @@ internal fun <T> JsonReader.scan(block: (reader: JsonReader) -> T): T {
   return peeked.use { block(it) }
 }
 
-internal fun JsonWriter.writeNull() {
+internal fun JsonWriter.forceWriteNull() {
   val wasSerializeNulls = serializeNulls
   serializeNulls = true
   nullValue()

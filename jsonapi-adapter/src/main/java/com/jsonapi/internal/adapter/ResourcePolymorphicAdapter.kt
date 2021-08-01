@@ -1,10 +1,9 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.ResourceIdentifier
 import com.jsonapi.ResourceObject
 import com.jsonapi.internal.FactoryDelegate
-import com.jsonapi.internal.NAME_TYPE
 import com.jsonapi.internal.PolymorphicResource
 import com.jsonapi.internal.rawType
 import com.jsonapi.internal.scan
@@ -33,7 +32,12 @@ internal class ResourcePolymorphicAdapter(
 
     // Assert that resource is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException("Resource MUST be a JSON object but found ${reader.peek()} on path ${reader.path}")
+      throw JsonFormatException(
+        "Resource MUST be a JSON object but found "
+          + reader.peek()
+          + " on path "
+          + reader.path
+      )
     }
 
     // Scan json to find type member and determine adapter without consuming source reader
@@ -64,7 +68,7 @@ internal class ResourcePolymorphicAdapter(
       }
     }
     // Top level member type not found for this resource json
-    throw JsonApiException(
+    throw JsonFormatException(
       "Resource object MUST contain top-level member 'type' but it was not found on path ${reader.path}"
     )
   }
@@ -79,7 +83,7 @@ internal class ResourcePolymorphicAdapter(
       in types -> moshi.adapter(type).toJson(writer, value)
       ResourceObject::class.java -> moshi.adapter<Any>(ResourceObject::class.java).toJson(writer, value)
       ResourceIdentifier::class.java -> moshi.adapter<Any>(ResourceIdentifier::class.java).toJson(writer, value)
-      else -> throw JsonApiException(
+      else -> throw IllegalArgumentException(
         "Expected type was either: "
           + "\n * one of the registered types for JsonApiFactory"
           + "\n * a ResourceObject type"
@@ -95,6 +99,8 @@ internal class ResourcePolymorphicAdapter(
   }
 
   companion object {
+    private const val NAME_TYPE = "type"
+
     internal fun factory(types: List<Type>, typeNames: List<String>) = object : FactoryDelegate {
       override fun create(
         type: Type,

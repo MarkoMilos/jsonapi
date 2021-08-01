@@ -1,9 +1,8 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.ResourceObject
 import com.jsonapi.internal.FactoryDelegate
-import com.jsonapi.internal.NAME_ATTRIBUTES
 import com.jsonapi.internal.bindResourceObject
 import com.jsonapi.internal.rawType
 import com.jsonapi.internal.readResourceObject
@@ -23,7 +22,7 @@ internal class ResourceTypeAdapter(
   private val strictTypes: Boolean
 ) : JsonAdapter<Any>() {
 
-  private val resourceAdapter = moshi.adapter(ResourceObject::class.java)
+  private val resourceObjectAdapter = moshi.adapter(ResourceObject::class.java)
 
   override fun fromJson(reader: JsonReader): Any? {
     // In case of a null value deserialize to null and consume token
@@ -33,17 +32,22 @@ internal class ResourceTypeAdapter(
 
     // Assert that resource is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException("Resource MUST be a JSON object but found ${reader.peek()} on path ${reader.path}")
+      throw JsonFormatException(
+        "Resource MUST be a JSON object but found "
+          + reader.peek()
+          + " on path "
+          + reader.path
+      )
     }
 
     // Scan json and read resource object without consuming source reader
-    val resource = reader.scan { resourceAdapter.fromJson(it) } ?: return null
+    val resourceObject = reader.scan { resourceObjectAdapter.fromJson(it) } ?: return null
 
     // Target class that this adapter need to deserialize
     var target: Any? = null
     var hasAttributesMember = false
 
-    // We are going to look for attributes member and skip the rest
+    // Look for attributes member and skip the rest
     val wasFailOnUnknown = reader.failOnUnknown()
     reader.setFailOnUnknown(false)
     reader.beginObject()
@@ -62,9 +66,16 @@ internal class ResourceTypeAdapter(
     reader.endObject()
     reader.setFailOnUnknown(wasFailOnUnknown)
 
-    // When strict types are enabled assert that deserialized type matches value provided with @Resource annotation
-    if (strictTypes && resource.type != annotatedType) {
-      throw JsonApiException("Expected type [$annotatedType] but found [${resource.type}] on path ${reader.path}.")
+    // When strict types are enabled assert that deserialized type matches value provided with annotation
+    if (strictTypes && resourceObject.type != annotatedType) {
+      throw AssertionError(
+        "Expected type "
+          + annotatedType
+          + " but found "
+          + resourceObject.type
+          + " on path "
+          + reader.path
+      )
     }
 
     // If attributes member is not found delegate empty json object to delegate adapter
@@ -79,7 +90,7 @@ internal class ResourceTypeAdapter(
     }
 
     // Bind annotated fields of the target class instance with values from resource object
-    bindResourceObject(target, resource)
+    bindResourceObject(target, resourceObject)
 
     return target
   }
@@ -90,18 +101,25 @@ internal class ResourceTypeAdapter(
       return
     }
 
-    // Read the resource object via reflection
+    // Read the resource object from value via reflection
     val resourceObject = readResourceObject(value)
 
     // When strict types are enabled assert that type to be serialized matches value provided with @Resource annotation
     if (strictTypes && resourceObject.type != annotatedType) {
-      throw JsonApiException("Expected type [$annotatedType] but found [${resourceObject.type}] on path ${writer.path}")
+      throw AssertionError(
+        "Expected type "
+          + annotatedType
+          + " but found "
+          + resourceObject.type
+          + " on path "
+          + writer.path
+      )
     }
 
     writer.beginObject()
     // Write resource object members
     val token = writer.beginFlatten()
-    resourceAdapter.toJson(writer, resourceObject)
+    resourceObjectAdapter.toJson(writer, resourceObject)
     writer.endFlatten(token)
     // Serialize target 'value' under attributes name with delegate adapter down the chain
     val attributes = delegateAdapter.toJson(value)
@@ -114,6 +132,8 @@ internal class ResourceTypeAdapter(
   }
 
   companion object {
+    private const val NAME_ATTRIBUTES = "attributes"
+
     internal fun factory(strictTypes: Boolean) = object : FactoryDelegate {
       override fun create(
         type: Type,
@@ -128,7 +148,7 @@ internal class ResourceTypeAdapter(
 
         // Assert that valid type name is provided with annotation
         require(annotation.type.isNotBlank()) {
-          "For [$type] value provided with @Resource annotation was blank.\n" +
+          "For [$type] type name provided with @Resource annotation was blank.\n" +
             "The values of type members MUST adhere to the same constraints as member names per specification."
         }
 

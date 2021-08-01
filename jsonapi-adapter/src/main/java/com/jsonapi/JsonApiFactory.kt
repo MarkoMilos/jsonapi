@@ -18,9 +18,9 @@ import com.jsonapi.internal.adapter.ResourceTypeAdapter
 import com.jsonapi.internal.adapter.SourceAdapter
 import com.jsonapi.internal.adapter.TransientAdapter
 import com.jsonapi.internal.adapter.VoidAdapter
+import com.jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import jsonapi.Resource
 import java.lang.reflect.Type
 
@@ -29,7 +29,7 @@ import java.lang.reflect.Type
  *
  * Use [JsonApiFactory.Builder] for creating and instance of [JsonApiFactory].
  *
- * [JsonApiFactory] extends from Moshi [JsonAdapter.Factory] so it can be used via `.add(factory)`.
+ * [JsonApiFactory] extends from Moshi [JsonAdapter.Factory] so it can be used via [Moshi.Builder] `.add(factory)`.
  *
  * Example:
  * ```
@@ -44,6 +44,8 @@ import java.lang.reflect.Type
  *   .build()
  * ```
  *
+ * NOTE: [JsonApiFactory] should be added before custom adapters for resource types.
+ *
  * @see [JsonApiFactory.Builder]
  */
 class JsonApiFactory private constructor(
@@ -52,6 +54,7 @@ class JsonApiFactory private constructor(
   strictTypes: Boolean
 ) : JsonAdapter.Factory {
 
+  /** Factories for standard JSON:API types. */
   private val factoryDelegates = listOf(
     DocumentAdapter.FACTORY,
     ResourceIdentifierAdapter.FACTORY,
@@ -105,12 +108,11 @@ class JsonApiFactory private constructor(
 
     /**
      * Enables strict type checking meaning that each serialization/deserialization of resource will assert if
-     * `type` member matches with value provided with [TypeAnnotation] for the target class. On mismatch
-     * [JsonApiException] will be thrown.
+     * `type` member matches with value provided with [Resource] for the target class. On mismatch exception is thrown.
      *
-     * E.g. given that class Article that is annotated with `@Type("articles")` is being deserialized, when provided
-     * json for deserialization is "{"type":"dinosaur"....}", then [JsonApiException] will be thrown stating that
-     * "articles" was expected but "dinosaur" was found.
+     * E.g. given that class Article that is annotated with `@Resource("articles")` is being deserialized, when provided
+     * json for deserialization is "{"type":"dinosaur"....}", then exception will be thrown stating that "articles"
+     * was expected but "dinosaur" was found.
      *
      * By default strict type checking is disabled.
      */
@@ -121,25 +123,21 @@ class JsonApiFactory private constructor(
     /**
      * Creates instance of [JsonApiFactory].
      *
-     * Throws [JsonApiException] if there are multiple resources registered for the same name or if any of the
-     * registered resources has invalid type value.
-     *
+     * @throws IllegalArgumentException when registered type is not annotated with [Resource] or it has
+     * blank value (type name) provided with [Resource] annotation.
+     * @throws IllegalStateException when there are multiple types registered for the same type name.
      * @see JsonApiFactory
      */
     fun build(): JsonAdapter.Factory {
-      types.forEach {
-        // Get and assert that Type annotation is present on target resource type
-        val resourceAnnotation = Types.getRawType(it).getAnnotation(Resource::class.java)
-          ?: throw JsonApiException("Provided type '$it' is not annotated with @Type.")
+      types.forEach { clazz ->
+        // Get and assert that Resource annotation is present on target type
+        val resourceAnnotation = clazz.rawType().getAnnotation(Resource::class.java)
+          ?: throw IllegalArgumentException("Registered type '$clazz' is not annotated with @Resource.")
 
-        // Assert that valid type name is provided with @Type annotation
-        if (resourceAnnotation.type.isBlank()) {
-          throw JsonApiException(
-            "For type '" +
-              it +
-              "' value provided with @Type annotation was blank.\n" +
-              "The values of type members MUST adhere to the same constraints as member names per specification."
-          )
+        // Assert that valid json:api type name is provided with annotation
+        require(resourceAnnotation.type.isNotBlank()) {
+          "For type [$clazz] blank value was provided with @Resource annotation." +
+            "\nThe values of type members MUST adhere to the same constraints as member names per specification."
         }
 
         // Get assigned type name from annotation and add it to names list only
@@ -148,10 +146,10 @@ class JsonApiFactory private constructor(
         if (!typeNames.contains(typeName)) {
           typeNames.add(typeName)
         } else {
-          throw JsonApiException(
-            "Name '$typeName' " +
-              "for type '$it' " +
-              "is already registered for type '${types[typeNames.indexOf(typeName)]}'."
+          throw IllegalStateException(
+            "Name [$typeName]"
+              + " for type [$clazz]"
+              + " is already registered for type [${types[typeNames.indexOf(typeName)]}]."
           )
         }
       }

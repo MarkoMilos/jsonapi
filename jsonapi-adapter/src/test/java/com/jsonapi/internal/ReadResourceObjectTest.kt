@@ -1,6 +1,6 @@
 package com.jsonapi.internal
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Link
 import com.jsonapi.Links
 import com.jsonapi.Meta
@@ -140,14 +140,14 @@ class ReadResourceObjectTest {
     assertThat(resourceObject.type).isEqualTo("foo")
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `read throws for target without defined type`() {
     // Does not define type neither with class or field annotation
     class Foo(@ResourceId val id: String = "1")
     readResourceObject(Foo())
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `read throws for target with invalid type`() {
     @Resource("foo")
     class Foo {
@@ -170,7 +170,7 @@ class ReadResourceObjectTest {
   }
 
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `read throws for target with invalid identifier`() {
     @Resource("foo")
     class Foo {

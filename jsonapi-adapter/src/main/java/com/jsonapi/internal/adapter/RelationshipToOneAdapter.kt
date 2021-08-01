@@ -1,22 +1,18 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Links
 import com.jsonapi.Meta
 import com.jsonapi.Relationship.ToOne
 import com.jsonapi.ResourceIdentifier
 import com.jsonapi.internal.FactoryDelegate
-import com.jsonapi.internal.NAME_DATA
-import com.jsonapi.internal.NAME_LINKS
-import com.jsonapi.internal.NAME_META
+import com.jsonapi.internal.forceWriteNull
 import com.jsonapi.internal.rawType
-import com.jsonapi.internal.writeNull
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
-import java.lang.reflect.Type
 
 internal class RelationshipToOneAdapter(moshi: Moshi) : JsonAdapter<ToOne>() {
 
@@ -32,7 +28,7 @@ internal class RelationshipToOneAdapter(moshi: Moshi) : JsonAdapter<ToOne>() {
 
     // Assert that relationship is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException(
+      throw JsonFormatException(
         "Relationship MUST be a JSON object but found "
           + reader.peek()
           + " on path "
@@ -70,8 +66,8 @@ internal class RelationshipToOneAdapter(moshi: Moshi) : JsonAdapter<ToOne>() {
     writer.beginObject()
     writer.name(NAME_DATA).apply {
       if (value.data == null) {
-        // Serialize data member for empty ToOne relationship
-        writer.writeNull()
+        // Serialize data member for empty ToOne relationship as null (avoiding writer config)
+        writer.forceWriteNull()
       } else {
         // Serialize non-empty ToOne relationship with delegate adapter
         dataAdapter.toJson(writer, value.data)
@@ -83,17 +79,12 @@ internal class RelationshipToOneAdapter(moshi: Moshi) : JsonAdapter<ToOne>() {
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != ToOne::class.java) return null
-        return RelationshipToOneAdapter(moshi)
-      }
+    private const val NAME_DATA = "data"
+    private const val NAME_LINKS = "links"
+    private const val NAME_META = "meta"
+
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == ToOne::class.java) RelationshipToOneAdapter(moshi) else null
     }
   }
 }

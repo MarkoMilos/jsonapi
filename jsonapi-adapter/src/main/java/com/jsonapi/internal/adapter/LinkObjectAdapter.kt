@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Link
 import com.jsonapi.Link.LinkObject
 import com.jsonapi.Meta
@@ -12,7 +12,6 @@ import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import java.lang.reflect.Type
 
 internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
 
@@ -23,11 +22,12 @@ internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
     moshi.adapter(Types.newParameterizedType(List::class.java, String::class.java))
 
   override fun fromJson(reader: JsonReader): LinkObject? {
+    // In case of a null value deserialize to null and consume token
     if (reader.peek() == Token.NULL) {
-      // In case of a null value deserialize to null and consume token
       return reader.nextNull()
     }
 
+    // Standard structure of link object
     var href: String? = null
     var rel: String? = null
     var describedby: Link? = null
@@ -39,20 +39,20 @@ internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
     reader.beginObject()
     while (reader.hasNext()) {
       when (reader.nextName()) {
-        "href" -> href = stringAdapter.fromJson(reader)
-        "rel" -> rel = stringAdapter.fromJson(reader)
-        "describedby" -> describedby = linkAdapter.fromJson(reader)
-        "title" -> title = stringAdapter.fromJson(reader)
-        "type" -> type = stringAdapter.fromJson(reader)
-        "hreflang" -> hreflang = deserializeHrefLang(reader)
-        "meta" -> meta = metaAdapter.fromJson(reader)
+        NAME_HREF -> href = stringAdapter.fromJson(reader)
+        NAME_REL -> rel = stringAdapter.fromJson(reader)
+        NAME_DESCRIBED_BY -> describedby = linkAdapter.fromJson(reader)
+        NAME_TITLE -> title = stringAdapter.fromJson(reader)
+        NAME_TYPE -> type = stringAdapter.fromJson(reader)
+        NAME_HREF_LANG -> hreflang = deserializeHrefLang(reader)
+        NAME_META -> meta = metaAdapter.fromJson(reader)
         else -> reader.skipValue()
       }
     }
     reader.endObject()
 
     if (href == null) {
-      throw JsonApiException("A link object MUST contain member [href].")
+      throw JsonFormatException("A link object MUST contain member [href].")
     }
 
     return LinkObject(href, rel, describedby, title, type, hreflang, meta)
@@ -65,14 +65,14 @@ internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
     }
 
     writer.beginObject()
-      .name("href").value(value.href)
-      .name("rel").value(value.rel)
-      .name("describedby").apply { linkAdapter.toJson(writer, value.describedby) }
-      .name("title").value(value.title)
-      .name("type").value(value.type)
-      .name("hreflang").apply { serializeHrefLang(writer, value.hreflang) }
-      .name("meta").apply { metaAdapter.toJson(writer, value.meta) }
-      .endObject()
+    writer.name(NAME_HREF).value(value.href)
+    writer.name(NAME_REL).value(value.rel)
+    writer.name(NAME_DESCRIBED_BY).apply { linkAdapter.toJson(writer, value.describedby) }
+    writer.name(NAME_TITLE).value(value.title)
+    writer.name(NAME_TYPE).value(value.type)
+    writer.name(NAME_HREF_LANG).apply { serializeHrefLang(writer, value.hreflang) }
+    writer.name(NAME_META).apply { metaAdapter.toJson(writer, value.meta) }
+    writer.endObject()
   }
 
   private fun deserializeHrefLang(reader: JsonReader): List<String>? {
@@ -80,9 +80,12 @@ internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
       Token.NULL -> reader.nextNull()
       Token.STRING -> listOf(reader.nextString())
       Token.BEGIN_ARRAY -> listAdapter.fromJson(reader)
-      else -> throw JsonApiException(
-        "Member [hreflang] MUST be a string or an array of strings that indicates the language(s) of the link's target" +
-          " but was ${reader.peek()} on path ${reader.path}"
+      else -> throw JsonFormatException(
+        "Member [hreflang] MUST be a string or an array of strings that indicates the language(s) of the link's target"
+          + " but was "
+          + reader.peek()
+          + " on path "
+          + reader.path
       )
     }
   }
@@ -103,17 +106,16 @@ internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != LinkObject::class.java) return null
-        return LinkObjectAdapter(moshi)
-      }
+    private const val NAME_HREF = "href"
+    private const val NAME_REL = "rel"
+    private const val NAME_DESCRIBED_BY = "describedby"
+    private const val NAME_TITLE = "title"
+    private const val NAME_TYPE = "type"
+    private const val NAME_HREF_LANG = "hreflang"
+    private const val NAME_META = "meta"
+
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == LinkObject::class.java) LinkObjectAdapter(moshi) else null
     }
   }
 }

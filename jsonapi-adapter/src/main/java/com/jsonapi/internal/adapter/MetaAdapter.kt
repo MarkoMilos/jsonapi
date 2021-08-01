@@ -8,7 +8,6 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import java.lang.reflect.Type
 
 internal class MetaAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
 
@@ -26,17 +25,8 @@ internal class MetaAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != Meta::class.java) return null
-        return MetaAdapter(moshi)
-      }
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == Meta::class.java) MetaAdapter(moshi) else null
     }
   }
 }

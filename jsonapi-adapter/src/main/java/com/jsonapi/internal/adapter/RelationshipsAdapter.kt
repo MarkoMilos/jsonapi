@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Relationship
 import com.jsonapi.Relationships
 import com.jsonapi.internal.FactoryDelegate
@@ -11,7 +11,6 @@ import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import java.lang.reflect.Type
 
 internal class RelationshipsAdapter(moshi: Moshi) : JsonAdapter<Relationships>() {
 
@@ -25,9 +24,9 @@ internal class RelationshipsAdapter(moshi: Moshi) : JsonAdapter<Relationships>()
       return reader.nextNull()
     }
 
-    // Assert that relationship is JSON object
+    // Assert that root of relationships object is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException(
+      throw JsonFormatException(
         "Relationships MUST be a JSON object but found "
           + reader.peek()
           + " on path "
@@ -54,17 +53,8 @@ internal class RelationshipsAdapter(moshi: Moshi) : JsonAdapter<Relationships>()
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != Relationships::class.java) return null
-        return RelationshipsAdapter(moshi)
-      }
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == Relationships::class.java) RelationshipsAdapter(moshi) else null
     }
   }
 }

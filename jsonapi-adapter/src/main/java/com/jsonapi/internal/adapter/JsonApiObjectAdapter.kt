@@ -1,7 +1,7 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
 import com.jsonapi.JsonApiObject
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Meta
 import com.jsonapi.internal.FactoryDelegate
 import com.jsonapi.internal.rawType
@@ -26,9 +26,9 @@ internal class JsonApiObjectAdapter(moshi: Moshi) : JsonAdapter<JsonApiObject>()
       return reader.nextNull()
     }
 
-    // Assert that json api object is JSON object
+    // Assert that root of json api object is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException(
+      throw JsonFormatException(
         "Member 'jsonapi' MUST be a JSON object but found "
           + reader.peek()
           + " on path "

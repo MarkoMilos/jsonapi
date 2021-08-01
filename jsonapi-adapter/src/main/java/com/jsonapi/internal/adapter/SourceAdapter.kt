@@ -1,7 +1,7 @@
 package com.jsonapi.internal.adapter
 
 import com.jsonapi.Error.Source
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.internal.FactoryDelegate
 import com.jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
@@ -20,9 +20,9 @@ internal class SourceAdapter(moshi: Moshi) : JsonAdapter<Source>() {
       return reader.nextNull()
     }
 
-    // Assert that source is JSON object
+    // Assert that root of source is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException(
+      throw JsonFormatException(
         "Source MUST be a JSON object but found "
           + reader.peek()
           + " on path "

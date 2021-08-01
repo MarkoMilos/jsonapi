@@ -5,9 +5,8 @@ import org.junit.Test
 
 class JsonApiFactoryBuilderTest {
 
-  // TODO update this tests
-  @Test(expected = JsonApiException::class)
-  fun `throw when provided type is not annotated with Type annotation`() {
+  @Test(expected = IllegalArgumentException::class)
+  fun `throw when registered type is not annotated`() {
     class NotAnnotatedResource
 
     JsonApiFactory.Builder()
@@ -15,8 +14,8 @@ class JsonApiFactoryBuilderTest {
       .build()
   }
 
-  @Test(expected = JsonApiException::class)
-  fun `throw when provided type is annotated with invalid type value`() {
+  @Test(expected = IllegalArgumentException::class)
+  fun `throw when registered type has invalid type value provided with annotation`() {
     @Resource("")
     class InvalidTypeValueResource
 
@@ -25,12 +24,12 @@ class JsonApiFactoryBuilderTest {
       .build()
   }
 
-  @Test(expected = JsonApiException::class)
-  fun `throw when type name is already registered for another type`() {
-    @Resource("type-name")
+  @Test(expected = IllegalStateException::class)
+  fun `throw when multiple types are registered for the same name`() {
+    @Resource("NAME")
     class A
 
-    @Resource("type-name")
+    @Resource("NAME")
     class B
 
     JsonApiFactory.Builder()

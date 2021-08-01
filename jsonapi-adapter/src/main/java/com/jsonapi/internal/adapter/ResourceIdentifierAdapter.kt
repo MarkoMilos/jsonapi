@@ -1,20 +1,15 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Meta
 import com.jsonapi.ResourceIdentifier
 import com.jsonapi.internal.FactoryDelegate
-import com.jsonapi.internal.NAME_ID
-import com.jsonapi.internal.NAME_LID
-import com.jsonapi.internal.NAME_META
-import com.jsonapi.internal.NAME_TYPE
 import com.jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
-import java.lang.reflect.Type
 
 internal class ResourceIdentifierAdapter(moshi: Moshi) : JsonAdapter<ResourceIdentifier>() {
 
@@ -27,9 +22,9 @@ internal class ResourceIdentifierAdapter(moshi: Moshi) : JsonAdapter<ResourceIde
       return reader.nextNull()
     }
 
-    // Assert that resource object is JSON object
+    // Assert that resource identifier is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException(
+      throw JsonFormatException(
         "Resource identifier MUST be a JSON object but found "
           + reader.peek()
           + " on path "
@@ -59,12 +54,16 @@ internal class ResourceIdentifierAdapter(moshi: Moshi) : JsonAdapter<ResourceIde
 
     // Type is required, it should not be null or empty
     if (type.isNullOrEmpty()) {
-      throw JsonApiException("A resource identifier MUST contain non-null, non-empty type member.")
+      throw JsonFormatException(
+        "A resource identifier MUST contain non-null/non-empty type member but it was not found on path: ${reader.path}"
+      )
     }
 
     // Identifier is required so id or lid should not be empty
     if (id.isNullOrBlank() && lid.isNullOrBlank()) {
-      throw JsonApiException("A resource identifier MUST contain an 'id' or 'lid' member but both were null or blank.")
+      throw JsonFormatException(
+        "A resource identifier MUST contain an 'id' or 'lid' member but both were null or blank on path ${reader.path}"
+      )
     }
 
     return ResourceIdentifier(type, id, lid, meta)
@@ -76,28 +75,22 @@ internal class ResourceIdentifierAdapter(moshi: Moshi) : JsonAdapter<ResourceIde
       return
     }
 
-    // Serialize resource identifier using standard adapters
-    writer
-      .beginObject()
-      .name(NAME_TYPE).value(value.type)
-      .name(NAME_ID).value(value.id)
-      .name(NAME_LID).value(value.lid)
-      .name(NAME_META).apply { metaAdapter.toJson(writer, value.meta) }
-      .endObject()
+    writer.beginObject()
+    writer.name(NAME_TYPE).value(value.type)
+    writer.name(NAME_ID).value(value.id)
+    writer.name(NAME_LID).value(value.lid)
+    writer.name(NAME_META).apply { metaAdapter.toJson(writer, value.meta) }
+    writer.endObject()
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != ResourceIdentifier::class.java) return null
-        return ResourceIdentifierAdapter(moshi)
-      }
+    private const val NAME_TYPE = "type"
+    private const val NAME_ID = "id"
+    private const val NAME_LID = "lid"
+    private const val NAME_META = "meta"
+
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == ResourceIdentifier::class.java) ResourceIdentifierAdapter(moshi) else null
     }
   }
 }

@@ -3,7 +3,7 @@ package com.jsonapi.internal.adapter
 import com.jsonapi.Document
 import com.jsonapi.Document.IncludedSerialization
 import com.jsonapi.Error
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonApiObject
 import com.jsonapi.JsonFile.DOCUMENT_ARTICLE_COLLECTION
@@ -447,7 +447,7 @@ class DocumentAdapterTest {
     )
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when document root is not a json object`() {
     // A JSON object MUST be at the root of every JSON:API request and response containing data.
     // This object defines a document’s “top level”.

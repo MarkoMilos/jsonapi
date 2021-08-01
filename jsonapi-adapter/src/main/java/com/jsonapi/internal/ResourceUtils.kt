@@ -2,7 +2,6 @@
 
 package com.jsonapi.internal
 
-import com.jsonapi.JsonApiException
 import com.jsonapi.Links
 import com.jsonapi.Meta
 import com.jsonapi.Relationship
@@ -43,13 +42,13 @@ private fun resourceIdentifier(target: Any): ResourceIdentifier {
   val classLevelType = target::class.java.getAnnotation(Resource::class.java)?.type
   val type = getValueOfAnnotatedField(target, ResourceType::class.java) ?: classLevelType
   if (type.isNullOrEmpty()) {
-    throw JsonApiException("A resource MUST contain non-null, non-empty type.")
+    throw IllegalArgumentException("A resource MUST contain non-null, non-empty type.")
   }
 
   val id = getValueOfAnnotatedField<String>(target, ResourceId::class.java)
   val lid = getValueOfAnnotatedField<String>(target, ResourceLid::class.java)
   if (id.isNullOrBlank() && lid.isNullOrBlank()) {
-    throw JsonApiException("A resource MUST contain an 'id' or 'lid' but both were null or blank.")
+    throw IllegalArgumentException("A resource MUST contain an 'id' or 'lid' but both were null or blank.")
   }
 
   return ResourceIdentifier(type, id, lid)

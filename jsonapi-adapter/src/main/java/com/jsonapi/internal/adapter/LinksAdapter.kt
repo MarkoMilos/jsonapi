@@ -4,13 +4,12 @@ import com.jsonapi.Link
 import com.jsonapi.Links
 import com.jsonapi.internal.FactoryDelegate
 import com.jsonapi.internal.rawType
-import com.jsonapi.internal.writeNull
+import com.jsonapi.internal.forceWriteNull
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import java.lang.reflect.Type
 
 internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
 
@@ -34,8 +33,9 @@ internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
     value.members.forEach {
       writer.name(it.key)
       if (it.value == null) {
-        // Serialize null links (e.g. indicating no more pages for pagination)
-        writer.writeNull()
+        // Null links must be serialized e.g. indicating no more pages for pagination
+        // Force serialize null link avoiding writer 'serializeNulls' config
+        writer.forceWriteNull()
       } else {
         // Serialize value using delegate adapter
         linkAdapter.toJson(writer, it.value)
@@ -45,17 +45,8 @@ internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != Links::class.java) return null
-        return LinksAdapter(moshi)
-      }
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == Links::class.java) LinksAdapter(moshi) else null
     }
   }
 }

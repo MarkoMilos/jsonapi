@@ -5,9 +5,7 @@ package com.jsonapi.internal
 import com.jsonapi.Relationship
 import com.jsonapi.Relationships
 import com.jsonapi.ResourceObject
-import com.squareup.moshi.Types
 import jsonapi.BindRelationship
-import java.lang.reflect.ParameterizedType
 
 /**
  * Bind all [BindRelationship] annotated fields of each resource with other resources based on
@@ -64,11 +62,10 @@ private fun bindRelationshipFields(
           }
         }
 
-        // Assert that target field is a Collection type
-        val fieldType = field.genericType
-        if (fieldType is ParameterizedType && fieldType.isCollection()) {
+        // Assert that target field is either Collection or List
+        if (field.type == Collection::class.java || field.type == List::class.java) {
           // Assert that matched resources are assignable to field
-          val fieldElementType = Types.getRawType(fieldType.actualTypeArguments.first())
+          val fieldElementType = field.genericType.collectionElementType(Collection::class.java).rawType()
           val nonMatchingResource = matchedResources.find { !fieldElementType.isAssignableFrom(it::class.java) }
           if (nonMatchingResource == null) {
             // All resources are assignable to declared field type - set field via reflection
@@ -85,9 +82,9 @@ private fun bindRelationshipFields(
             )
           }
         } else {
-          // Field type is not collection - cannot bind to-many relationship
+          // Field type is not Collection or List - cannot bind to-many relationship
           throw IllegalArgumentException(
-            "For to-many relationship expected field type is List<>"
+            "For to-many relationship expected field type is Collection or List"
               + " but for to-many relationship with name [$name]"
               + " target field [${target.javaClass.simpleName}.${field.name}]"
               + " is of type [${field.type.simpleName}]."

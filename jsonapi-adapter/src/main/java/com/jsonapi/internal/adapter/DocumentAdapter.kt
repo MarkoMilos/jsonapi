@@ -5,19 +5,13 @@ import com.jsonapi.Document.IncludedSerialization.DOCUMENT
 import com.jsonapi.Document.IncludedSerialization.NONE
 import com.jsonapi.Document.IncludedSerialization.PROCESSED
 import com.jsonapi.Error
-import com.jsonapi.JsonApiException
 import com.jsonapi.JsonApiObject
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Links
 import com.jsonapi.Meta
 import com.jsonapi.ResourceIdentifier
 import com.jsonapi.ResourceObject
 import com.jsonapi.internal.FactoryDelegate
-import com.jsonapi.internal.NAME_DATA
-import com.jsonapi.internal.NAME_ERRORS
-import com.jsonapi.internal.NAME_INCLUDED
-import com.jsonapi.internal.NAME_JSON_API
-import com.jsonapi.internal.NAME_LINKS
-import com.jsonapi.internal.NAME_META
 import com.jsonapi.internal.PolymorphicResource
 import com.jsonapi.internal.bindRelationshipFields
 import com.jsonapi.internal.collectionElementType
@@ -26,7 +20,7 @@ import com.jsonapi.internal.isNothing
 import com.jsonapi.internal.isResourceType
 import com.jsonapi.internal.processIncluded
 import com.jsonapi.internal.scan
-import com.jsonapi.internal.writeNull
+import com.jsonapi.internal.forceWriteNull
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
@@ -60,7 +54,7 @@ internal class DocumentAdapter(
 
     // Assert that root of a document is a JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
-      throw JsonApiException("A JSON object MUST be at the root of every JSON:API document but found ${reader.peek()}")
+      throw JsonFormatException("A JSON object MUST be at the root of every JSON:API document but found ${reader.peek()}")
     }
 
     // Standard document structure
@@ -163,7 +157,7 @@ internal class DocumentAdapter(
     writer.name(NAME_DATA).apply {
       if (value.data == null && value.errors == null && value.meta == null) {
         // Serialize data member for null document {"data":null} to produce valid json:api structure
-        writer.writeNull()
+        writer.forceWriteNull()
       } else {
         // Use delegate adapter to serialize single or collection of resources
         if (value.data is Collection<*>) {
@@ -195,6 +189,13 @@ internal class DocumentAdapter(
   }
 
   companion object {
+    private const val NAME_DATA = "data"
+    private const val NAME_INCLUDED = "included"
+    private const val NAME_ERRORS = "errors"
+    private const val NAME_LINKS = "links"
+    private const val NAME_META = "meta"
+    private const val NAME_JSON_API = "jsonapi"
+
     internal val FACTORY = object : FactoryDelegate {
       override fun create(
         type: Type,
@@ -224,10 +225,11 @@ internal class DocumentAdapter(
 
         // Assert that target type is one of resource types or void
         require(targetType.isResourceType() || targetType.isNothing()) {
-          "Resource type must be one of: " +
-            "${ResourceIdentifier::class.java.simpleName}, " +
-            "${ResourceObject::class.java.simpleName}," +
-            " or class with annotation @${Resource::class.java.simpleName}" +
+          "Resource type must be one of:" +
+            " ${ResourceIdentifier::class.java.simpleName}," +
+            " ${ResourceObject::class.java.simpleName}," +
+            " class with annotation @${Resource::class.java.simpleName}," +
+            " or Void (in case of error or meta-only documents without any data)" +
             " but was [$targetType]."
         }
 

@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.Link
 import com.jsonapi.Link.LinkObject
 import com.jsonapi.Link.URI
@@ -11,7 +11,6 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
-import java.lang.reflect.Type
 
 internal class LinkAdapter(moshi: Moshi) : JsonAdapter<Link>() {
 
@@ -22,7 +21,7 @@ internal class LinkAdapter(moshi: Moshi) : JsonAdapter<Link>() {
       Token.NULL -> reader.nextNull()
       Token.STRING -> URI(reader.nextString())
       Token.BEGIN_OBJECT -> linkObjectAdapter.fromJson(reader)
-      else -> throw JsonApiException(
+      else -> throw JsonFormatException(
         "A link MUST be represented as either:\n"
           + " * a string whose value is a URI-reference pointing to the link’s target\n"
           + " * a link object that represents a web link per specification\n"
@@ -34,26 +33,17 @@ internal class LinkAdapter(moshi: Moshi) : JsonAdapter<Link>() {
     }
   }
 
-  override fun toJson(writer: JsonWriter, value: Link?) {
-    when (value) {
-      is URI -> writer.value(value.value)
-      is LinkObject -> linkObjectAdapter.toJson(writer, value)
+  override fun toJson(writer: JsonWriter, link: Link?) {
+    when (link) {
+      is URI -> writer.value(link.value)
+      is LinkObject -> linkObjectAdapter.toJson(writer, link)
       null -> writer.nullValue()
     }
   }
 
   companion object {
-    internal val FACTORY = object : FactoryDelegate {
-      override fun create(
-        type: Type,
-        annotations: MutableSet<out Annotation>,
-        moshi: Moshi,
-        parent: Factory
-      ): JsonAdapter<*>? {
-        if (annotations.isNotEmpty()) return null
-        if (type.rawType() != Link::class.java) return null
-        return LinkAdapter(moshi)
-      }
+    internal val FACTORY = FactoryDelegate { type, annotations, moshi, _ ->
+      if (annotations.isEmpty() && type.rawType() == Link::class.java) LinkAdapter(moshi) else null
     }
   }
 }

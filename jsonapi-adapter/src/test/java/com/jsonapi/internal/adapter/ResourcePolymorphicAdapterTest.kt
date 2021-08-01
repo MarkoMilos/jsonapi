@@ -1,9 +1,9 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonFile.RESOURCE_ARTICLE
 import com.jsonapi.JsonFile.RESOURCE_COMMENT
+import com.jsonapi.JsonFormatException
 import com.jsonapi.ResourceIdentifier
 import com.jsonapi.ResourceObject
 import com.jsonapi.internal.PolymorphicResource
@@ -54,13 +54,13 @@ class ResourcePolymorphicAdapterTest {
     assertThat(deserialized).isInstanceOf(ResourceObject::class.java)
   }
 
-  @Test(expected = JsonApiException::class)
-  fun `throw when resource does not have top level member type`() {
+  @Test(expected = JsonFormatException::class)
+  fun `throw on deserializing resource without type`() {
     adapter.fromJson("""{"id":"1"}""")
   }
 
-  @Test(expected = JsonApiException::class)
-  fun `throw when not json object`() {
+  @Test(expected = JsonFormatException::class)
+  fun `throw when deserializing non json object`() {
     adapter.fromJson("[]")
   }
 
@@ -91,8 +91,8 @@ class ResourcePolymorphicAdapterTest {
     assertThat(serialized).isEqualTo("""{"type":"articles","id":"1"}""")
   }
 
-  @Test(expected = JsonApiException::class)
-  fun `throw when resource is not of expected type`() {
+  @Test(expected = IllegalArgumentException::class)
+  fun `throw when serializing resource of expected type`() {
     class UnregisteredResource
 
     val resource = UnregisteredResource()

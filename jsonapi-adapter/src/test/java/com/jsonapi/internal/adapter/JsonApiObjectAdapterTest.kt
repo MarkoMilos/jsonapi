@@ -1,6 +1,6 @@
 package com.jsonapi.internal.adapter
 
-import com.jsonapi.JsonApiException
+import com.jsonapi.JsonFormatException
 import com.jsonapi.JsonApiFactory
 import com.jsonapi.JsonApiObject
 import com.jsonapi.JsonFile.JSON_API_OBJECT
@@ -34,7 +34,7 @@ class JsonApiObjectAdapterTest {
     assertThat(deserialized.meta).isNotNull
   }
 
-  @Test(expected = JsonApiException::class)
+  @Test(expected = JsonFormatException::class)
   fun `throw when deserializing non json object`() {
     adapter.fromJson("[]")
   }
