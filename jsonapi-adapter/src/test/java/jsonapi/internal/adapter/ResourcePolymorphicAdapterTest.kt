@@ -11,7 +11,7 @@ import jsonapi.read
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import jsonapi.Resource
-import jsonapi.ResourceId
+import jsonapi.Id
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -20,7 +20,7 @@ class ResourcePolymorphicAdapterTest {
   @JsonClass(generateAdapter = true)
   @Resource("articles")
   class Article(
-    @ResourceId val id: String? = null,
+    @Id val id: String? = null,
     val title: String? = null
   )
 

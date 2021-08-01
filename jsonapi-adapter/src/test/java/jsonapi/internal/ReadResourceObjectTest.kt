@@ -9,12 +9,12 @@ import jsonapi.Relationships
 import jsonapi.ResourceIdentifier
 import jsonapi.BindRelationship
 import jsonapi.Resource
-import jsonapi.ResourceId
-import jsonapi.ResourceLid
-import jsonapi.ResourceLinks
-import jsonapi.ResourceMeta
-import jsonapi.ResourceRelationships
-import jsonapi.ResourceType
+import jsonapi.Id
+import jsonapi.Lid
+import jsonapi.LinksObject
+import jsonapi.MetaObject
+import jsonapi.RelationshipsObject
+import jsonapi.Type
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.junit.Test
@@ -24,8 +24,8 @@ class ReadResourceObjectTest {
   @Test
   fun `read from target with basic annotations`() {
     class Foo {
-      @ResourceType val type = "foo"
-      @ResourceId val id = "1"
+      @Type val type = "foo"
+      @Id val id = "1"
     }
 
     val resourceObject = readResourceObject(Foo())
@@ -38,15 +38,15 @@ class ReadResourceObjectTest {
   @Test
   fun `read from target with all resource object annotations`() {
     class Foo {
-      @ResourceType val type = "foo"
-      @ResourceId val id = "1"
-      @ResourceLid val lid = "2"
-      @ResourceRelationships val relationships = Relationships(
+      @Type val type = "foo"
+      @Id val id = "1"
+      @Lid val lid = "2"
+      @RelationshipsObject val relationships = Relationships(
         "bar" to ToOne(ResourceIdentifier("bar", "1")),
         "bars" to ToMany(listOf(ResourceIdentifier("bar", "1")))
       )
-      @ResourceLinks val links = Links.from("self" to "self")
-      @ResourceMeta val meta = Meta("name" to "value")
+      @LinksObject val links = Links.from("self" to "self")
+      @MetaObject val meta = Meta("name" to "value")
     }
 
     val resourceObject = readResourceObject(Foo())
@@ -65,11 +65,11 @@ class ReadResourceObjectTest {
   @Test
   fun `read from target with relationships`() {
     @Resource("bar")
-    class Bar(@ResourceId val id: String)
+    class Bar(@Id val id: String)
 
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
+      @Id val id = "1"
       @BindRelationship("A") val a = Bar("1")
       @BindRelationship("B") val b = Bar("2")
       @BindRelationship("C") val c = listOf(Bar("1"), Bar("2"), Bar("3"))
@@ -95,11 +95,11 @@ class ReadResourceObjectTest {
   @Test(expected = IllegalStateException::class)
   fun `read throws if multiple relationship fields are annotated with the same relationship name`() {
     @Resource("bar")
-    class Bar(@ResourceId val id: String)
+    class Bar(@Id val id: String)
 
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
+      @Id val id = "1"
       @BindRelationship("A") val first = Bar("1")
       @BindRelationship("A") val second = Bar("1")
     }
@@ -110,13 +110,13 @@ class ReadResourceObjectTest {
   @Test
   fun `read prioritizes relationships defined in relationship object`() {
     @Resource("bar")
-    class Bar(@ResourceId val id: String)
+    class Bar(@Id val id: String)
 
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
+      @Id val id = "1"
       @BindRelationship("bar") val bar = Bar("1")
-      @ResourceRelationships val relationships = Relationships(
+      @RelationshipsObject val relationships = Relationships(
         "bar" to ToOne(ResourceIdentifier("bar", "2"))
       )
     }
@@ -132,7 +132,7 @@ class ReadResourceObjectTest {
   fun `read from target without type field`() {
     // Type field omitted and type defined with @Resource annotation
     @Resource("foo")
-    class Foo(@ResourceId val id: String = "1")
+    class Foo(@Id val id: String = "1")
 
     val resourceObject = readResourceObject(Foo())
 
@@ -142,7 +142,7 @@ class ReadResourceObjectTest {
   @Test(expected = IllegalArgumentException::class)
   fun `read throws for target without defined type`() {
     // Does not define type neither with class or field annotation
-    class Foo(@ResourceId val id: String = "1")
+    class Foo(@Id val id: String = "1")
     readResourceObject(Foo())
   }
 
@@ -150,8 +150,8 @@ class ReadResourceObjectTest {
   fun `read throws for target with invalid type`() {
     @Resource("foo")
     class Foo {
-      @ResourceType val type = "" // Invalid and has priority
-      @ResourceId val id = "1"
+      @Type val type = "" // Invalid and has priority
+      @Id val id = "1"
     }
 
     readResourceObject(Foo())
@@ -160,7 +160,7 @@ class ReadResourceObjectTest {
   @Test
   fun `read from target with local identifier`() {
     @Resource("foo")
-    class Foo(@ResourceLid val lid: String = "1")
+    class Foo(@Lid val lid: String = "1")
 
     val resourceObject = readResourceObject(Foo())
 
@@ -173,8 +173,8 @@ class ReadResourceObjectTest {
   fun `read throws for target with invalid identifier`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = ""
-      @ResourceLid val lid = ""
+      @Id val id = ""
+      @Lid val lid = ""
     }
 
     readResourceObject(Foo())
@@ -183,8 +183,8 @@ class ReadResourceObjectTest {
   @Test(expected = IllegalStateException::class)
   fun `read throws for target with multiple type annotated fields`() {
     class Foo {
-      @ResourceType val field1 = "foo"
-      @ResourceType val field2 = "foo"
+      @Type val field1 = "foo"
+      @Type val field2 = "foo"
     }
 
     readResourceObject(Foo())
@@ -194,8 +194,8 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple id annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val field1 = "1"
-      @ResourceId val field2 = "1"
+      @Id val field1 = "1"
+      @Id val field2 = "1"
     }
 
     readResourceObject(Foo())
@@ -205,8 +205,8 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple lid annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceLid val field1 = "1"
-      @ResourceLid val field2 = "1"
+      @Lid val field1 = "1"
+      @Lid val field2 = "1"
     }
 
     readResourceObject(Foo())
@@ -216,9 +216,9 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple relationships object annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceRelationships val field1: Relationships? = null
-      @ResourceRelationships val field2: Relationships? = null
+      @Id val id = "1"
+      @RelationshipsObject val field1: Relationships? = null
+      @RelationshipsObject val field2: Relationships? = null
     }
 
     readResourceObject(Foo())
@@ -228,9 +228,9 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple links annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceLinks val field1: Links? = null
-      @ResourceLinks val field2: Links? = null
+      @Id val id = "1"
+      @LinksObject val field1: Links? = null
+      @LinksObject val field2: Links? = null
     }
 
     readResourceObject(Foo())
@@ -240,9 +240,9 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple meta annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceMeta val field1: Meta? = null
-      @ResourceMeta val field2: Meta? = null
+      @Id val id = "1"
+      @MetaObject val field1: Meta? = null
+      @MetaObject val field2: Meta? = null
     }
 
     readResourceObject(Foo())
@@ -251,8 +251,8 @@ class ReadResourceObjectTest {
   @Test(expected = ClassCastException::class)
   fun `read throws for target with type field of incorrect type`() {
     class Foo {
-      @ResourceType val type: Int = 1
-      @ResourceId val id = "1"
+      @Type val type: Int = 1
+      @Id val id = "1"
     }
 
     readResourceObject(Foo())
@@ -262,7 +262,7 @@ class ReadResourceObjectTest {
   fun `read throws for target with id field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id: Int = 1
+      @Id val id: Int = 1
     }
 
     readResourceObject(Foo())
@@ -272,7 +272,7 @@ class ReadResourceObjectTest {
   fun `read throws for target with lid field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceLid val lid: Int = 1
+      @Lid val lid: Int = 1
     }
 
     readResourceObject(Foo())
@@ -282,8 +282,8 @@ class ReadResourceObjectTest {
   fun `read throws for target with relationships object field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceRelationships val relationships: String = ""
+      @Id val id = "1"
+      @RelationshipsObject val relationships: String = ""
     }
 
     readResourceObject(Foo())
@@ -293,8 +293,8 @@ class ReadResourceObjectTest {
   fun `read throws for target with links field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceLinks val links: String = ""
+      @Id val id = "1"
+      @LinksObject val links: String = ""
     }
 
     readResourceObject(Foo())
@@ -304,8 +304,8 @@ class ReadResourceObjectTest {
   fun `read throws for target with meta field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceMeta val meta: String = ""
+      @Id val id = "1"
+      @MetaObject val meta: String = ""
     }
 
     readResourceObject(Foo())

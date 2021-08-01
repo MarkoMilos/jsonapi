@@ -8,12 +8,12 @@ import jsonapi.Relationships
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
 import jsonapi.Resource
-import jsonapi.ResourceId
-import jsonapi.ResourceLid
-import jsonapi.ResourceLinks
-import jsonapi.ResourceMeta
-import jsonapi.ResourceRelationships
-import jsonapi.ResourceType
+import jsonapi.Id
+import jsonapi.Lid
+import jsonapi.LinksObject
+import jsonapi.MetaObject
+import jsonapi.RelationshipsObject
+import jsonapi.Type
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.junit.Test
@@ -39,12 +39,12 @@ class BindResourceObjectTest {
   fun `bind to target with all annotations`() {
     @Resource("foo")
     class Foo {
-      @ResourceType val type: String? = null
-      @ResourceId val id: String? = null
-      @ResourceLid val lid: String? = null
-      @ResourceRelationships val relationships: Relationships? = null
-      @ResourceLinks val links: Links? = null
-      @ResourceMeta val meta: Meta? = null
+      @Type val type: String? = null
+      @Id val id: String? = null
+      @Lid val lid: String? = null
+      @RelationshipsObject val relationships: Relationships? = null
+      @LinksObject val links: Links? = null
+      @MetaObject val meta: Meta? = null
     }
 
     val target = Foo()
@@ -77,12 +77,12 @@ class BindResourceObjectTest {
   fun `bind does not override default values`() {
     @Resource("foo")
     class Foo(
-      @ResourceId val id: String = "1",
-      @ResourceLid val lid: String = "2",
-      @ResourceRelationships val relationships: Relationships =
+      @Id val id: String = "1",
+      @Lid val lid: String = "2",
+      @RelationshipsObject val relationships: Relationships =
         Relationships("bar" to Relationship.ToOne(ResourceIdentifier("bar", "1"))),
-      @ResourceLinks val links: Links = Links.from("self" to "link"),
-      @ResourceMeta val meta: Meta = Meta("name" to "value")
+      @LinksObject val links: Links = Links.from("self" to "link"),
+      @MetaObject val meta: Meta = Meta("name" to "value")
     )
 
     val target = Foo()
@@ -102,8 +102,8 @@ class BindResourceObjectTest {
   @Test(expected = IllegalStateException::class)
   fun `bind throws for target with multiple type annotated fields`() {
     class Foo {
-      @ResourceType val field1 = "foo"
-      @ResourceType val field2 = "foo"
+      @Type val field1 = "foo"
+      @Type val field2 = "foo"
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1"))
@@ -113,8 +113,8 @@ class BindResourceObjectTest {
   fun `bind throws for target with multiple id annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val field1 = "1"
-      @ResourceId val field2 = "1"
+      @Id val field1 = "1"
+      @Id val field2 = "1"
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1"))
@@ -124,8 +124,8 @@ class BindResourceObjectTest {
   fun `bind throws for target with multiple lid annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceLid val field1 = "1"
-      @ResourceLid val field2 = "1"
+      @Lid val field1 = "1"
+      @Lid val field2 = "1"
     }
 
     bindResourceObject(Foo(), ResourceObject("t", lid = "1"))
@@ -135,9 +135,9 @@ class BindResourceObjectTest {
   fun `bind throws for target with multiple relationships object annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceRelationships val field1: Relationships? = null
-      @ResourceRelationships val field2: Relationships? = null
+      @Id val id = "1"
+      @RelationshipsObject val field1: Relationships? = null
+      @RelationshipsObject val field2: Relationships? = null
     }
 
     bindResourceObject(
@@ -150,9 +150,9 @@ class BindResourceObjectTest {
   fun `bind throws for target with multiple links annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceLinks val field1: Links? = null
-      @ResourceLinks val field2: Links? = null
+      @Id val id = "1"
+      @LinksObject val field1: Links? = null
+      @LinksObject val field2: Links? = null
     }
 
     bindResourceObject(
@@ -165,9 +165,9 @@ class BindResourceObjectTest {
   fun `bind throws for target with multiple meta annotated fields`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceMeta val field1: Meta? = null
-      @ResourceMeta val field2: Meta? = null
+      @Id val id = "1"
+      @MetaObject val field1: Meta? = null
+      @MetaObject val field2: Meta? = null
     }
 
     bindResourceObject(
@@ -179,8 +179,8 @@ class BindResourceObjectTest {
   @Test(expected = IllegalArgumentException::class)
   fun `bind throws for target with type field of incorrect type`() {
     class Foo {
-      @ResourceType val type: Int = 1
-      @ResourceId val id = "1"
+      @Type val type: Int = 1
+      @Id val id = "1"
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1"))
@@ -190,7 +190,7 @@ class BindResourceObjectTest {
   fun `bind throws for target with id field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id: Int = 1
+      @Id val id: Int = 1
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1"))
@@ -200,7 +200,7 @@ class BindResourceObjectTest {
   fun `bind throws for target with lid field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceLid val lid: Int = 1
+      @Lid val lid: Int = 1
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1", "1"))
@@ -210,8 +210,8 @@ class BindResourceObjectTest {
   fun `bind throws for target with relationships object field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceRelationships val relationships: String = ""
+      @Id val id = "1"
+      @RelationshipsObject val relationships: String = ""
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1", relationships = Relationships.Builder().build()))
@@ -221,8 +221,8 @@ class BindResourceObjectTest {
   fun `bind throws for target with links field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceLinks val links: String = ""
+      @Id val id = "1"
+      @LinksObject val links: String = ""
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1", links = Links(emptyMap())))
@@ -232,8 +232,8 @@ class BindResourceObjectTest {
   fun `bind throws for target with meta field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @ResourceId val id = "1"
-      @ResourceMeta val meta: String = ""
+      @Id val id = "1"
+      @MetaObject val meta: String = ""
     }
 
     bindResourceObject(Foo(), ResourceObject("t", "1", meta = Meta(emptyMap())))

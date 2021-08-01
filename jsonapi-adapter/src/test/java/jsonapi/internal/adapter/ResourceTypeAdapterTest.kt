@@ -20,12 +20,12 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import jsonapi.BindRelationship
 import jsonapi.Resource
-import jsonapi.ResourceId
-import jsonapi.ResourceLid
-import jsonapi.ResourceLinks
-import jsonapi.ResourceMeta
-import jsonapi.ResourceRelationships
-import jsonapi.ResourceType
+import jsonapi.Id
+import jsonapi.Lid
+import jsonapi.LinksObject
+import jsonapi.MetaObject
+import jsonapi.RelationshipsObject
+import jsonapi.Type
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test
@@ -432,51 +432,51 @@ class ResourceTypeAdapterTest {
   @JsonClass(generateAdapter = true)
   @Resource("people")
   class Person(
-    @ResourceType val type: String? = null,
-    @ResourceId val id: String? = null,
+    @Type val type: String? = null,
+    @Id val id: String? = null,
     val firstName: String,
     val lastName: String
   ) {
-    @ResourceLid val lid: String? = null
-    @ResourceRelationships val relationships: Relationships? = null
-    @ResourceLinks val links: Links? = null
-    @ResourceMeta val meta: Meta? = null
+    @Lid val lid: String? = null
+    @RelationshipsObject val relationships: Relationships? = null
+    @LinksObject val links: Links? = null
+    @MetaObject val meta: Meta? = null
   }
 
   @JsonClass(generateAdapter = true)
   @Resource("comments")
   class Comment(
-    @ResourceType val type: String? = null,
-    @ResourceId val id: String? = null,
+    @Type val type: String? = null,
+    @Id val id: String? = null,
     val body: String,
     @BindRelationship("author") val author: Person? = null
   ) {
-    @ResourceLid val lid: String? = null
-    @ResourceRelationships val relationships: Relationships? = null
-    @ResourceMeta val meta: Meta? = null
-    @ResourceLinks val links: Links? = null
+    @Lid val lid: String? = null
+    @RelationshipsObject val relationships: Relationships? = null
+    @MetaObject val meta: Meta? = null
+    @LinksObject val links: Links? = null
   }
 
   @JsonClass(generateAdapter = true)
   @Resource("articles")
   class Article(
-    @ResourceType val type: String? = null,
-    @ResourceId val id: String? = null,
-    @ResourceLid val lid: String? = null,
+    @Type val type: String? = null,
+    @Id val id: String? = null,
+    @Lid val lid: String? = null,
     val title: String? = null,
     @BindRelationship("author") val author: Person? = null,
     @BindRelationship("comments") val comments: List<Comment>? = null,
     @BindRelationship("related") val related: List<Article>? = null,
-    @ResourceRelationships val relationships: Relationships? = null,
-    @ResourceLinks val links: Links? = null,
-    @ResourceMeta val meta: Meta? = null
+    @RelationshipsObject val relationships: Relationships? = null,
+    @LinksObject val links: Links? = null,
+    @MetaObject val meta: Meta? = null
   )
 
   // Simplified version of article used for some adapter tests
   @JsonClass(generateAdapter = true)
   @Resource("articles")
   class SimpleArticle(
-    @ResourceId val id: String?,
+    @Id val id: String?,
     val title: String
   )
 }

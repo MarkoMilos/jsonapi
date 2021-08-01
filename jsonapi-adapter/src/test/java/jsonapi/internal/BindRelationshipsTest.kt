@@ -1,30 +1,30 @@
 package jsonapi.internal
 
+import jsonapi.BindRelationship
+import jsonapi.Id
 import jsonapi.Relationship.ToMany
 import jsonapi.Relationship.ToOne
 import jsonapi.Relationships
+import jsonapi.Resource
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
-import jsonapi.BindRelationship
-import jsonapi.Resource
-import jsonapi.ResourceId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class BindRelationshipsTest {
 
   @Resource("people")
-  private data class Person(@ResourceId val id: String?)
+  private data class Person(@Id val id: String?)
 
   @Resource("comments")
   private data class Comment(
-    @ResourceId val id: String?,
+    @Id val id: String?,
     @BindRelationship("author") val author: Person? = null
   )
 
   @Resource("articles")
   private data class Article(
-    @ResourceId val id: String?,
+    @Id val id: String?,
     @BindRelationship("author") val author: Person? = null,
     @BindRelationship("comments") val comments: List<Comment>? = null,
     @BindRelationship("related") val related: List<Article>? = null

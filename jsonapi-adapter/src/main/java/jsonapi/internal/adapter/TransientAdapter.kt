@@ -1,19 +1,19 @@
 package jsonapi.internal.adapter
 
-import jsonapi.internal.FactoryDelegate
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import jsonapi.BindRelationship
-import jsonapi.ResourceId
-import jsonapi.ResourceLid
-import jsonapi.ResourceLinks
-import jsonapi.ResourceMeta
-import jsonapi.ResourceRelationships
-import jsonapi.ResourceType
+import jsonapi.Id
+import jsonapi.Lid
+import jsonapi.LinksObject
+import jsonapi.MetaObject
+import jsonapi.RelationshipsObject
+import jsonapi.internal.FactoryDelegate
 import java.lang.reflect.Type
+import jsonapi.Type as ResourceType
 
 /** Adapter that will skip serialization / deserialization for the given type. */
 internal class TransientAdapter<T> : JsonAdapter<T>() {
@@ -40,11 +40,11 @@ internal class TransientAdapter<T> : JsonAdapter<T>() {
     private val TRANSIENT_ANNOTATIONS = listOf(
       BindRelationship::class.java,
       ResourceType::class.java,
-      ResourceId::class.java,
-      ResourceLid::class.java,
-      ResourceRelationships::class.java,
-      ResourceLinks::class.java,
-      ResourceMeta::class.java,
+      Id::class.java,
+      Lid::class.java,
+      RelationshipsObject::class.java,
+      LinksObject::class.java,
+      MetaObject::class.java,
     )
 
     internal val FACTORY = object : FactoryDelegate {

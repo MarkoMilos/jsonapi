@@ -7,4 +7,4 @@ import kotlin.annotation.AnnotationTarget.FIELD
 @JsonQualifier
 @Target(FIELD)
 @Retention(RUNTIME)
-annotation class ResourceType
+annotation class Id

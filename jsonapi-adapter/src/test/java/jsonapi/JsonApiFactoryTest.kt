@@ -1,5 +1,8 @@
 package jsonapi
 
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import jsonapi.internal.PolymorphicResource
 import jsonapi.internal.adapter.DocumentAdapter
 import jsonapi.internal.adapter.ErrorAdapter
@@ -19,12 +22,10 @@ import jsonapi.internal.adapter.ResourceTypeAdapter
 import jsonapi.internal.adapter.SourceAdapter
 import jsonapi.internal.adapter.TransientAdapter
 import jsonapi.internal.adapter.VoidAdapter
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.lang.reflect.Type
+import jsonapi.Type as ResourceType
 
 class JsonApiFactoryTest {
 
@@ -221,11 +222,11 @@ class JsonApiFactoryTest {
     class TestResource(
       @BindRelationship("foo") val resource: ValidResource,
       @ResourceType val type: String? = null,
-      @ResourceId val id: String? = null,
-      @ResourceLid val lid: String? = null,
-      @ResourceRelationships val relationships: Relationships? = null,
-      @ResourceLinks val links: Links? = null,
-      @ResourceMeta val meta: Meta? = null
+      @Id val id: String? = null,
+      @Lid val lid: String? = null,
+      @RelationshipsObject val relationships: Relationships? = null,
+      @LinksObject val links: Links? = null,
+      @MetaObject val meta: Meta? = null
     )
 
     val clazz = TestResource::class.java

@@ -4,8 +4,6 @@ plugins {
 }
 
 dependencies {
-  // TODO remove once when modules are merged back
-  api project(':jsonapi-annotations')
   implementation deps.moshi
 
   kaptTest deps.moshi_kotlin_codegen

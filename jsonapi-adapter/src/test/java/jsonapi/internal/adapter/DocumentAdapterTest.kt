@@ -28,7 +28,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import jsonapi.BindRelationship
 import jsonapi.Resource
-import jsonapi.ResourceId
+import jsonapi.Id
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.assertj.core.api.Assertions.fail
@@ -40,7 +40,7 @@ class DocumentAdapterTest {
   @JsonClass(generateAdapter = true)
   @Resource("people")
   data class Person(
-    @ResourceId val id: String?,
+    @Id val id: String?,
     val firstName: String?,
     val lastName: String?
   )
@@ -48,7 +48,7 @@ class DocumentAdapterTest {
   @JsonClass(generateAdapter = true)
   @Resource("comments")
   data class Comment(
-    @ResourceId val id: String?,
+    @Id val id: String?,
     val body: String?,
     @BindRelationship("author") val author: Person? = null
   )
@@ -56,7 +56,7 @@ class DocumentAdapterTest {
   @JsonClass(generateAdapter = true)
   @Resource("articles")
   data class Article(
-    @ResourceId val id: String?,
+    @Id val id: String?,
     val title: String? = null,
     @BindRelationship("author") val author: Person? = null,
     @BindRelationship("comments") val comments: List<Comment>? = null,

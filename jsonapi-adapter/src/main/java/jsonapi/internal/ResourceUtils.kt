@@ -2,51 +2,51 @@
 
 package jsonapi.internal
 
+import jsonapi.BindRelationship
+import jsonapi.Id
+import jsonapi.Lid
 import jsonapi.Links
 import jsonapi.Meta
 import jsonapi.Relationship
 import jsonapi.Relationships
-import jsonapi.ResourceIdentifier
-import jsonapi.ResourceObject
-import jsonapi.BindRelationship
 import jsonapi.Resource
-import jsonapi.ResourceId
-import jsonapi.ResourceLid
-import jsonapi.ResourceLinks
-import jsonapi.ResourceMeta
-import jsonapi.ResourceRelationships
-import jsonapi.ResourceType
+import jsonapi.ResourceIdentifier
+import jsonapi.LinksObject
+import jsonapi.MetaObject
+import jsonapi.ResourceObject
+import jsonapi.RelationshipsObject
+import jsonapi.Type
 
 /** Reads [ResourceObject] from [target] annotated fields via reflection. */
 internal fun readResourceObject(target: Any): ResourceObject {
   val identifier = resourceIdentifier(target)
   val relationships = relationships(target)
-  val links = getValueOfAnnotatedField<Links>(target, ResourceLinks::class.java)
-  val meta = getValueOfAnnotatedField<Meta>(target, ResourceMeta::class.java)
+  val links = getValueOfAnnotatedField<Links>(target, LinksObject::class.java)
+  val meta = getValueOfAnnotatedField<Meta>(target, MetaObject::class.java)
   return ResourceObject(identifier.type, identifier.id, identifier.lid, relationships, links, meta)
 }
 
 /** Writes [ResourceObject] values to [target] annotated fields via reflection. */
 internal fun bindResourceObject(target: Any, resourceObject: ResourceObject) {
-  setValueOfAnnotatedField(target, ResourceType::class.java, resourceObject.type)
+  setValueOfAnnotatedField(target, Type::class.java, resourceObject.type)
   // Set value of other annotated fields but don't override if default value is set
-  resourceObject.id?.let { setValueOfAnnotatedField(target, ResourceId::class.java, it) }
-  resourceObject.lid?.let { setValueOfAnnotatedField(target, ResourceLid::class.java, it) }
-  resourceObject.relationships?.let { setValueOfAnnotatedField(target, ResourceRelationships::class.java, it) }
-  resourceObject.links?.let { setValueOfAnnotatedField(target, ResourceLinks::class.java, it) }
-  resourceObject.meta?.let { setValueOfAnnotatedField(target, ResourceMeta::class.java, it) }
+  resourceObject.id?.let { setValueOfAnnotatedField(target, Id::class.java, it) }
+  resourceObject.lid?.let { setValueOfAnnotatedField(target, Lid::class.java, it) }
+  resourceObject.relationships?.let { setValueOfAnnotatedField(target, RelationshipsObject::class.java, it) }
+  resourceObject.links?.let { setValueOfAnnotatedField(target, LinksObject::class.java, it) }
+  resourceObject.meta?.let { setValueOfAnnotatedField(target, MetaObject::class.java, it) }
 }
 
 private fun resourceIdentifier(target: Any): ResourceIdentifier {
   // When no field annotations are declared for member type use the value from class annotation
   val classLevelType = target::class.java.getAnnotation(Resource::class.java)?.type
-  val type = getValueOfAnnotatedField(target, ResourceType::class.java) ?: classLevelType
+  val type = getValueOfAnnotatedField(target, Type::class.java) ?: classLevelType
   if (type.isNullOrEmpty()) {
     throw IllegalArgumentException("A resource MUST contain non-null, non-empty type.")
   }
 
-  val id = getValueOfAnnotatedField<String>(target, ResourceId::class.java)
-  val lid = getValueOfAnnotatedField<String>(target, ResourceLid::class.java)
+  val id = getValueOfAnnotatedField<String>(target, Id::class.java)
+  val lid = getValueOfAnnotatedField<String>(target, Lid::class.java)
   if (id.isNullOrBlank() && lid.isNullOrBlank()) {
     throw IllegalArgumentException("A resource MUST contain an 'id' or 'lid' but both were null or blank.")
   }
@@ -75,7 +75,7 @@ private fun relationships(target: Any): Relationships? {
 
   // Merge relationship from annotated @ResourceRelationships field (if exists)
   // These will override any relationship set from @BindRelationship fields (if any)
-  val relationshipsObject = getValueOfAnnotatedField<Relationships>(target, ResourceRelationships::class.java)
+  val relationshipsObject = getValueOfAnnotatedField<Relationships>(target, RelationshipsObject::class.java)
   if (relationshipsObject != null) {
     mergedRelationships.putAll(relationshipsObject.members)
   }
