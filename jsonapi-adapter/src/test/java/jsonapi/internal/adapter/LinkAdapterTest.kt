@@ -1,13 +1,13 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.LINK_OBJECT_FULL
+import jsonapi.JsonFormatException
 import jsonapi.Link
 import jsonapi.Link.LinkObject
 import jsonapi.Link.URI
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

@@ -1,5 +1,10 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonReader.Token
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
 import jsonapi.JsonFormatException
 import jsonapi.Relationship
 import jsonapi.Relationship.ToMany
@@ -7,11 +12,6 @@ import jsonapi.Relationship.ToOne
 import jsonapi.internal.FactoryDelegate
 import jsonapi.internal.rawType
 import jsonapi.internal.scan
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonReader.Token
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
 
 internal class RelationshipAdapter(moshi: Moshi) : JsonAdapter<Relationship>() {
 

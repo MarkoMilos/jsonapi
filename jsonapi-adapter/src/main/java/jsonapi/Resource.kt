@@ -4,18 +4,17 @@ import java.lang.annotation.Inherited
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 
-// TODO update documentation
 /**
- * Annotation used for defining JSON:API resource `type` for the given class.
+ * Annotation used for defining JSON:API resource.
  *
- * The `type` member is used to describe resource objects that share common attributes and relationships.
- * The values of type members **MUST** adhere to the same constraints as
+ * The [type] name is used to describe resource objects that share common attributes and relationships.
+ * The values of type **MUST** adhere to the same constraints as
  * [member names](https://jsonapi.org/format/1.1/#document-member-names).
  *
  * Example:
  * ```
- *  @Type("articles")
- *  class Article() : Resource()
+ *  @Resource("articles")
+ *  class Article()
  * ```
  */
 @Inherited

@@ -1,15 +1,15 @@
 package jsonapi.internal.adapter
 
-import jsonapi.Link
-import jsonapi.Links
-import jsonapi.internal.FactoryDelegate
-import jsonapi.internal.rawType
-import jsonapi.internal.forceWriteNull
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import jsonapi.Link
+import jsonapi.Links
+import jsonapi.internal.FactoryDelegate
+import jsonapi.internal.forceWriteNull
+import jsonapi.internal.rawType
 
 internal class LinksAdapter(moshi: Moshi) : JsonAdapter<Links>() {
 

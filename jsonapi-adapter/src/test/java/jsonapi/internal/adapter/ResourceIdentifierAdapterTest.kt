@@ -1,15 +1,16 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.RESOURCE_ARTICLE
 import jsonapi.JsonFile.RESOURCE_ARTICLE_NON_STANDARD_NAMES
+import jsonapi.JsonFormatException
 import jsonapi.Meta
 import jsonapi.ResourceIdentifier
 import jsonapi.inlineJson
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class ResourceIdentifierAdapterTest {
@@ -28,8 +29,7 @@ class ResourceIdentifierAdapterTest {
 
   @Test
   fun `deserialize basic identifier`() {
-    val deserialized = adapter.fromJson("""{"type":"articles", "id":"1"}""")
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson("""{"type":"articles", "id":"1"}""") ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.id).isEqualTo("1")
     assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type", "id")
@@ -37,8 +37,7 @@ class ResourceIdentifierAdapterTest {
 
   @Test
   fun `deserialize identifier with lid`() {
-    val deserialized = adapter.fromJson("""{"type":"articles", "lid":"1"}""")
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson("""{"type":"articles", "lid":"1"}""") ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.lid).isEqualTo("1")
     assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type", "lid")
@@ -46,8 +45,7 @@ class ResourceIdentifierAdapterTest {
 
   @Test
   fun `deserialize identifier with all members`() {
-    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE)) ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.id).isEqualTo("1")
     assertThat(deserialized.lid).isNull()
@@ -86,8 +84,7 @@ class ResourceIdentifierAdapterTest {
 
   @Test
   fun `ignore non standard json names`() {
-    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE_NON_STANDARD_NAMES))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE_NON_STANDARD_NAMES)) ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.id).isEqualTo("1")
     assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type", "id")
@@ -127,10 +124,10 @@ class ResourceIdentifierAdapterTest {
     assertThat(serialized).isEqualTo(
       """
       {
-      "type":"articles",
-      "id":"1",
-      "lid":"2",
-      "meta":{"name":"value"}
+        "type":"articles",
+        "id":"1",
+        "lid":"2",
+        "meta":{"name":"value"}
       }
       """.inlineJson()
     )

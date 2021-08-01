@@ -2,12 +2,12 @@
 
 package jsonapi.internal
 
-import jsonapi.ResourceIdentifier
-import jsonapi.ResourceObject
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Types
 import jsonapi.Resource
+import jsonapi.ResourceIdentifier
+import jsonapi.ResourceObject
 import java.lang.reflect.Field
 import java.lang.reflect.Type
 

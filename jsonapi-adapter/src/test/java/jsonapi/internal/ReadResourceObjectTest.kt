@@ -1,19 +1,18 @@
 package jsonapi.internal
 
+import jsonapi.Id
+import jsonapi.Lid
 import jsonapi.Link
 import jsonapi.Links
+import jsonapi.LinksObject
 import jsonapi.Meta
+import jsonapi.MetaObject
 import jsonapi.Relationship.ToMany
 import jsonapi.Relationship.ToOne
 import jsonapi.Relationships
-import jsonapi.ResourceIdentifier
-import jsonapi.BindRelationship
-import jsonapi.Resource
-import jsonapi.Id
-import jsonapi.Lid
-import jsonapi.LinksObject
-import jsonapi.MetaObject
 import jsonapi.RelationshipsObject
+import jsonapi.Resource
+import jsonapi.ResourceIdentifier
 import jsonapi.Type
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
@@ -43,7 +42,7 @@ class ReadResourceObjectTest {
       @Lid val lid = "2"
       @RelationshipsObject val relationships = Relationships(
         "bar" to ToOne(ResourceIdentifier("bar", "1")),
-        "bars" to ToMany(listOf(ResourceIdentifier("bar", "1")))
+        "bars" to ToMany(ResourceIdentifier("bar", "1"))
       )
       @LinksObject val links = Links.from("self" to "self")
       @MetaObject val meta = Meta("name" to "value")
@@ -56,7 +55,7 @@ class ReadResourceObjectTest {
     assertThat(resourceObject.lid).isEqualTo("2")
     assertThat(resourceObject.relationships?.members).containsExactly(
       entry("bar", ToOne(ResourceIdentifier("bar", "1"))),
-      entry("bars", ToMany(listOf(ResourceIdentifier("bar", "1"))))
+      entry("bars", ToMany(ResourceIdentifier("bar", "1")))
     )
     assertThat(resourceObject.links?.members).containsExactly(entry("self", Link.URI("self")))
     assertThat(resourceObject.meta?.members).containsExactly(entry("name", "value"))
@@ -70,9 +69,9 @@ class ReadResourceObjectTest {
     @Resource("foo")
     class Foo {
       @Id val id = "1"
-      @BindRelationship("A") val a = Bar("1")
-      @BindRelationship("B") val b = Bar("2")
-      @BindRelationship("C") val c = listOf(Bar("1"), Bar("2"), Bar("3"))
+      @jsonapi.ToOne("A") val a = Bar("1")
+      @jsonapi.ToOne("B") val b = Bar("2")
+      @jsonapi.ToMany("C") val c = listOf(Bar("1"), Bar("2"), Bar("3"))
     }
 
     val resourceObject = readResourceObject(Foo())
@@ -82,26 +81,38 @@ class ReadResourceObjectTest {
       entry("B", ToOne(ResourceIdentifier("bar", "2"))),
       entry(
         "C", ToMany(
-          listOf(
-            ResourceIdentifier("bar", "1"),
-            ResourceIdentifier("bar", "2"),
-            ResourceIdentifier("bar", "3")
-          )
+          ResourceIdentifier("bar", "1"),
+          ResourceIdentifier("bar", "2"),
+          ResourceIdentifier("bar", "3")
         )
       )
     )
   }
 
   @Test(expected = IllegalStateException::class)
-  fun `read throws if multiple relationship fields are annotated with the same relationship name`() {
+  fun `read throws if multiple relationship fields are defined for the same name`() {
     @Resource("bar")
     class Bar(@Id val id: String)
 
     @Resource("foo")
     class Foo {
       @Id val id = "1"
-      @BindRelationship("A") val first = Bar("1")
-      @BindRelationship("A") val second = Bar("1")
+      @jsonapi.ToOne("A") val first = Bar("1")
+      @jsonapi.ToOne("A") val second = Bar("1")
+    }
+
+    readResourceObject(Foo())
+  }
+
+  @Test(expected = IllegalStateException::class)
+  fun `read throws when to-many relationship annotation is set on non-collection field`() {
+    @Resource("bar")
+    class Bar(@Id val id: String)
+
+    @Resource("foo")
+    class Foo {
+      @Id val id = "1"
+      @jsonapi.ToMany("A") val first = Bar("1") // ToMany annotation on non-collection field
     }
 
     readResourceObject(Foo())
@@ -115,7 +126,7 @@ class ReadResourceObjectTest {
     @Resource("foo")
     class Foo {
       @Id val id = "1"
-      @BindRelationship("bar") val bar = Bar("1")
+      @jsonapi.ToOne("bar") val bar = Bar("1")
       @RelationshipsObject val relationships = Relationships(
         "bar" to ToOne(ResourceIdentifier("bar", "2"))
       )

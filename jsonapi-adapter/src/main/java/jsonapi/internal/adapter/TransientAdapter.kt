@@ -5,12 +5,13 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import jsonapi.BindRelationship
 import jsonapi.Id
 import jsonapi.Lid
 import jsonapi.LinksObject
 import jsonapi.MetaObject
 import jsonapi.RelationshipsObject
+import jsonapi.ToMany
+import jsonapi.ToOne
 import jsonapi.internal.FactoryDelegate
 import java.lang.reflect.Type
 import jsonapi.Type as ResourceType
@@ -38,7 +39,8 @@ internal class TransientAdapter<T> : JsonAdapter<T>() {
 
   companion object {
     private val TRANSIENT_ANNOTATIONS = listOf(
-      BindRelationship::class.java,
+      ToOne::class.java,
+      ToMany::class.java,
       ResourceType::class.java,
       Id::class.java,
       Lid::class.java,

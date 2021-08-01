@@ -1,14 +1,15 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.LINKS
 import jsonapi.Link.LinkObject
 import jsonapi.Link.URI
 import jsonapi.Links
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class LinksAdapterTest {
@@ -27,8 +28,7 @@ class LinksAdapterTest {
 
   @Test
   fun `deserialize links`() {
-    val deserialized = adapter.fromJson(read(LINKS))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(LINKS)) ?: fail("deserialized == null")
     assertThat(deserialized.members).containsExactly(
       entry("self", URI("self")),
       entry("related", LinkObject("href")),

@@ -3,14 +3,10 @@
 package jsonapi.internal
 
 import jsonapi.Relationship
-import jsonapi.Relationships
 import jsonapi.ResourceObject
-import jsonapi.BindRelationship
+import jsonapi.ToMany
+import jsonapi.ToOne
 
-/**
- * Bind all [BindRelationship] annotated fields of each resource with other resources based on
- * relationship name set with [BindRelationship] annotation and [Relationships] data from [ResourceObject].
- */
 internal fun bindRelationshipFields(resources: List<Pair<ResourceObject, Any>>) {
   resources.forEach { (resourceObject, target) ->
     bindRelationshipFields(target, resourceObject, resources)
@@ -22,11 +18,20 @@ private fun bindRelationshipFields(
   resourceObject: ResourceObject,
   resources: List<Pair<ResourceObject, Any>>
 ) {
-  // Get all relationship annotated fields for this resource
-  val relationshipsFields = target.fieldsWithAnnotation(BindRelationship::class.java)
-  relationshipsFields.forEach { field ->
-    // Get the name from annotation
-    val name = field.getAnnotation(BindRelationship::class.java).name
+  // All to-one relationship fields
+  val toOneRelationshipFields = target
+    .fieldsWithAnnotation(ToOne::class.java)
+    .map { it.getAnnotation(ToOne::class.java).name to it }
+
+  // All to-many relationship fields
+  val toManyRelationshipFields = target
+    .fieldsWithAnnotation(ToMany::class.java)
+    .map { it.getAnnotation(ToMany::class.java).name to it }
+
+  // Merged relationship fields
+  val relationshipFields = toOneRelationshipFields + toManyRelationshipFields
+
+  relationshipFields.forEach { (name, field) ->
     // Get defined relationship with given name - skip this filed if there isn't any
     val relationship = resourceObject.relationships?.get(name) ?: return@forEach
     // Relationship with given name exists, bind depending on the relationship type
@@ -42,7 +47,7 @@ private fun bindRelationshipFields(
             "Cannot bind"
               + " field [${target.javaClass.simpleName}.${field.name}]"
               + " of type [${field.type.simpleName}]"
-              + " annotated with [@${BindRelationship::class.java.simpleName}(\"$name\")]"
+              + " defined as relationship with name [$name]"
               + " to matched relationship value of type [${matchedResource.javaClass.simpleName}]."
               + "\nRelationship found under name [$name]"
               + " had the resource linkage [$resourceIdentifier]"
@@ -84,9 +89,9 @@ private fun bindRelationshipFields(
         } else {
           // Field type is not Collection or List - cannot bind to-many relationship
           throw IllegalArgumentException(
-            "For to-many relationship expected field type is Collection or List"
-              + " but for to-many relationship with name [$name]"
-              + " target field [${target.javaClass.simpleName}.${field.name}]"
+            "For relationship with name [$name]"
+              + " resolved relationship value is to-many and expected field type is Collection or List"
+              + " but target field [${target.javaClass.simpleName}.${field.name}]"
               + " is of type [${field.type.simpleName}]."
               + "\nVerify that relationships are correctly defined."
           )

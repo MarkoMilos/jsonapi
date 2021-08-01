@@ -1,5 +1,6 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.Moshi
 import jsonapi.Error
 import jsonapi.Error.Source
 import jsonapi.JsonApiFactory
@@ -8,7 +9,6 @@ import jsonapi.JsonFormatException
 import jsonapi.Links
 import jsonapi.Meta
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test

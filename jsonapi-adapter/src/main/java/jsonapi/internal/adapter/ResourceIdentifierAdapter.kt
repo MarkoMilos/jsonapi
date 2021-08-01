@@ -1,15 +1,15 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
-import jsonapi.Meta
-import jsonapi.ResourceIdentifier
-import jsonapi.internal.FactoryDelegate
-import jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import jsonapi.JsonFormatException
+import jsonapi.Meta
+import jsonapi.ResourceIdentifier
+import jsonapi.internal.FactoryDelegate
+import jsonapi.internal.rawType
 
 internal class ResourceIdentifierAdapter(moshi: Moshi) : JsonAdapter<ResourceIdentifier>() {
 

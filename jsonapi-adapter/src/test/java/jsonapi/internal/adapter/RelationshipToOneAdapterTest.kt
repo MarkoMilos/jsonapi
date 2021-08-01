@@ -1,17 +1,18 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.RELATIONSHIP_TO_ONE
 import jsonapi.JsonFile.RELATIONSHIP_TO_ONE_EMPTY
+import jsonapi.JsonFormatException
 import jsonapi.Links
 import jsonapi.Meta
 import jsonapi.Relationship.ToOne
 import jsonapi.ResourceIdentifier
 import jsonapi.inlineJson
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class RelationshipToOneAdapterTest {
@@ -30,15 +31,13 @@ class RelationshipToOneAdapterTest {
 
   @Test
   fun `deserialize empty to-one relationship`() {
-    val deserialized = adapter.fromJson(read(RELATIONSHIP_TO_ONE_EMPTY))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RELATIONSHIP_TO_ONE_EMPTY)) ?: fail("deserialized == null")
     assertThat(deserialized).hasAllNullFieldsOrProperties()
   }
 
   @Test
   fun `deserialize non-empty to-one relationship`() {
-    val deserialized = adapter.fromJson(read(RELATIONSHIP_TO_ONE))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RELATIONSHIP_TO_ONE)) ?: fail("deserialized == null")
     assertThat(deserialized.data).isEqualTo(ResourceIdentifier("type", "1"))
     assertThat(deserialized.links).isNotNull
     assertThat(deserialized.meta).isNotNull
@@ -72,9 +71,9 @@ class RelationshipToOneAdapterTest {
     assertThat(serialized).isEqualTo(
       """
       {
-      "data":{"type":"type","id":"1"},
-      "links":{"link":"link"},
-      "meta":{"name":"value"}
+        "data":{"type":"type","id":"1"},
+        "links":{"link":"link"},
+        "meta":{"name":"value"}
       }
       """.inlineJson()
     )

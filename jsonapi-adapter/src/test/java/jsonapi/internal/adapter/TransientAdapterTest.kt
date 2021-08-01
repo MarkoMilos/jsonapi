@@ -1,16 +1,17 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonApiFactory
-import jsonapi.inlineJson
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
-import jsonapi.BindRelationship
 import jsonapi.Id
+import jsonapi.JsonApiFactory
 import jsonapi.Lid
 import jsonapi.LinksObject
 import jsonapi.MetaObject
 import jsonapi.RelationshipsObject
+import jsonapi.ToMany
+import jsonapi.ToOne
 import jsonapi.Type
+import jsonapi.inlineJson
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test
@@ -26,7 +27,8 @@ class TransientAdapterTest {
     @RelationshipsObject val transient4: Any? = null,
     @LinksObject val transient5: Any? = null,
     @MetaObject val transient6: Any? = null,
-    @BindRelationship("author") val transient7: Any? = null
+    @ToOne("ONE") val transient7: Any? = null,
+    @ToMany("MANY") val transient8: List<Any>? = null
   )
 
   private val moshi = Moshi.Builder()
@@ -48,7 +50,8 @@ class TransientAdapterTest {
         "transient4":"value",
         "transient5":"value",
         "transient6":"value",
-        "transient7":"value"
+        "transient7":"value",
+        "transient8":["value"]
       }
     """.inlineJson()
 
@@ -69,7 +72,8 @@ class TransientAdapterTest {
       transient4 = "value",
       transient5 = "value",
       transient6 = "value",
-      transient7 = "value"
+      transient7 = "value",
+      transient8 = listOf("value")
     )
 
     val serialized = adapter.toJson(value)

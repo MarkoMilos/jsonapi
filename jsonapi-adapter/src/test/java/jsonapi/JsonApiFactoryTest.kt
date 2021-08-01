@@ -220,7 +220,7 @@ class JsonApiFactoryTest {
   @Test
   fun `create transient adapter`() {
     class TestResource(
-      @BindRelationship("foo") val resource: ValidResource,
+      @ToOne("foo") val resource: ValidResource,
       @ResourceType val type: String? = null,
       @Id val id: String? = null,
       @Lid val lid: String? = null,

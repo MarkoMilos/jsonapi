@@ -1,5 +1,11 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonReader.Token
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import jsonapi.JsonFormatException
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
@@ -7,12 +13,6 @@ import jsonapi.internal.FactoryDelegate
 import jsonapi.internal.PolymorphicResource
 import jsonapi.internal.rawType
 import jsonapi.internal.scan
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonReader.Token
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
 internal class ResourcePolymorphicAdapter(

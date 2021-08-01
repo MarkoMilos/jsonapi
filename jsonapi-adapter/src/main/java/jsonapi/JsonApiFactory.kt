@@ -1,5 +1,7 @@
 package jsonapi
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import jsonapi.internal.adapter.DocumentAdapter
 import jsonapi.internal.adapter.ErrorAdapter
 import jsonapi.internal.adapter.JsonApiObjectAdapter
@@ -19,8 +21,6 @@ import jsonapi.internal.adapter.SourceAdapter
 import jsonapi.internal.adapter.TransientAdapter
 import jsonapi.internal.adapter.VoidAdapter
 import jsonapi.internal.rawType
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
 import java.lang.reflect.Type
 
 /**

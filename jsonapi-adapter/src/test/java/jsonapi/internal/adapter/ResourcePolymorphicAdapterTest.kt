@@ -1,18 +1,19 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import jsonapi.Id
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.RESOURCE_ARTICLE
 import jsonapi.JsonFile.RESOURCE_COMMENT
 import jsonapi.JsonFormatException
+import jsonapi.Resource
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
 import jsonapi.internal.PolymorphicResource
 import jsonapi.read
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
-import jsonapi.Resource
-import jsonapi.Id
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class ResourcePolymorphicAdapterTest {
@@ -42,15 +43,13 @@ class ResourcePolymorphicAdapterTest {
 
   @Test
   fun `deserialize registered resource to registered type`() {
-    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE)) ?: fail("deserialized == null")
     assertThat(deserialized).isInstanceOf(Article::class.java)
   }
 
   @Test
   fun `deserialize unregistered type as resource object`() {
-    val deserialized = adapter.fromJson(read(RESOURCE_COMMENT))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RESOURCE_COMMENT)) ?: fail("deserialized == null")
     assertThat(deserialized).isInstanceOf(ResourceObject::class.java)
   }
 
@@ -92,7 +91,7 @@ class ResourcePolymorphicAdapterTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `throw when serializing resource of expected type`() {
+  fun `throw when serializing resource of unexpected type`() {
     class UnregisteredResource
 
     val resource = UnregisteredResource()

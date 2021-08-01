@@ -1,18 +1,18 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonReader.Token
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
 import jsonapi.JsonFormatException
+import jsonapi.Resource
 import jsonapi.ResourceObject
 import jsonapi.internal.FactoryDelegate
 import jsonapi.internal.bindResourceObject
 import jsonapi.internal.rawType
 import jsonapi.internal.readResourceObject
 import jsonapi.internal.scan
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonReader.Token
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
-import jsonapi.Resource
 import java.lang.reflect.Type
 
 internal class ResourceTypeAdapter(

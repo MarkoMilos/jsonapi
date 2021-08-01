@@ -1,10 +1,10 @@
 package jsonapi.internal.adapter
 
-import jsonapi.internal.FactoryDelegate
-import jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
+import jsonapi.internal.FactoryDelegate
+import jsonapi.internal.rawType
 
 /** Adapter for [Nothing] / [Void] which is not included in Moshi built in adapters for standard types. */
 internal class VoidAdapter : JsonAdapter<Nothing>() {

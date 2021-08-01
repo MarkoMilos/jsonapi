@@ -1,11 +1,12 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.RELATIONSHIP_TO_MANY
 import jsonapi.JsonFile.RELATIONSHIP_TO_MANY_EMPTY
 import jsonapi.JsonFile.RELATIONSHIP_TO_ONE
 import jsonapi.JsonFile.RELATIONSHIP_TO_ONE_EMPTY
+import jsonapi.JsonFormatException
 import jsonapi.Links
 import jsonapi.Meta
 import jsonapi.Relationship
@@ -14,7 +15,6 @@ import jsonapi.Relationship.ToOne
 import jsonapi.ResourceIdentifier
 import jsonapi.inlineJson
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -140,13 +140,13 @@ class RelationshipAdapterTest {
     assertThat(serialized).isEqualTo(
       """
       {
-      "data":[
-        {"type":"type","id":"1"},
-        {"type":"type","id":"2"},
-        {"type":"type","id":"3"}
-      ],
-      "links":{"link":"link"},
-      "meta":{"name":"value"}
+        "data":[
+          {"type":"type","id":"1"},
+          {"type":"type","id":"2"},
+          {"type":"type","id":"3"}
+        ],
+        "links":{"link":"link"},
+        "meta":{"name":"value"}
       }
       """.inlineJson()
     )

@@ -1,15 +1,16 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.LINK_OBJECT_FULL
 import jsonapi.JsonFile.LINK_OBJECT_HREF_ONLY
 import jsonapi.JsonFile.LINK_OBJECT_SINGLE_HREFLANG
+import jsonapi.JsonFormatException
 import jsonapi.Link.LinkObject
 import jsonapi.inlineJson
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class LinkObjectAdapterTest {
@@ -28,8 +29,7 @@ class LinkObjectAdapterTest {
 
   @Test
   fun `deserialize full link object`() {
-    val deserialized = adapter.fromJson(read(LINK_OBJECT_FULL))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(LINK_OBJECT_FULL)) ?: fail("deserialized == null")
     assertThat(deserialized.href).isEqualTo("href")
     assertThat(deserialized.rel).isEqualTo("rel")
     assertThat(deserialized.describedby).isInstanceOfSatisfying(LinkObject::class.java) {
@@ -45,7 +45,7 @@ class LinkObjectAdapterTest {
 
   @Test
   fun `deserialize href only link object`() {
-    val deserialized = adapter.fromJson(read(LINK_OBJECT_HREF_ONLY))
+    val deserialized = adapter.fromJson(read(LINK_OBJECT_HREF_ONLY)) ?: fail("deserialized == null")
     assertThat(deserialized)
       .hasFieldOrPropertyWithValue("href", "href")
       .hasAllNullFieldsOrPropertiesExcept("href")
@@ -53,15 +53,13 @@ class LinkObjectAdapterTest {
 
   @Test
   fun `deserialize link object with hreflang string value as list of string`() {
-    val deserialized = adapter.fromJson(read(LINK_OBJECT_SINGLE_HREFLANG))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(LINK_OBJECT_SINGLE_HREFLANG)) ?: fail("deserialized == null")
     assertThat(deserialized.hreflang).asList().containsExactly("en")
   }
 
   @Test
   fun `deserialize link object with hreflang array value as list of string`() {
-    val deserialized = adapter.fromJson(read(LINK_OBJECT_FULL))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(LINK_OBJECT_FULL)) ?: fail("deserialized == null")
     assertThat(deserialized.hreflang).asList().containsExactly("en", "es")
   }
 
@@ -92,13 +90,14 @@ class LinkObjectAdapterTest {
     assertThat(serialized).isEqualTo(
       """
         {
-        "href":"href",
-        "rel":"rel",
-        "describedby":{"href":"href"},
-        "title":"title",
-        "type":"type",
-        "hreflang":["en","es"]
-        }""".inlineJson()
+          "href":"href",
+          "rel":"rel",
+          "describedby":{"href":"href"},
+          "title":"title",
+          "type":"type",
+          "hreflang":["en","es"]
+        }
+      """.inlineJson()
     )
   }
 

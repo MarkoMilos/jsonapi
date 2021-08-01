@@ -5,7 +5,8 @@ package jsonapi.internal
 import jsonapi.Document
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
-import jsonapi.BindRelationship
+import jsonapi.ToMany
+import jsonapi.ToOne
 
 internal fun processIncluded(document: Document<*>): List<Any>? {
   // Transform documents primary data to map of resources
@@ -72,19 +73,38 @@ internal fun processIncluded(document: Document<*>): List<Any>? {
 
 private fun relationshipResources(target: Any): Map<ResourceObject, Any> {
   val relationships = mutableMapOf<ResourceObject, Any>()
+
+  // ToOne field relationships
   target
-    .fieldsWithAnnotation(BindRelationship::class.java)
-    .forEach {
-      val value = it.getValue(target) ?: return@forEach
+    .fieldsWithAnnotation(ToOne::class.java)
+    .forEach { field ->
+      val value = field.getValue(target) ?: return@forEach
+      relationships[readResourceObject(value)] = value
+    }
+
+  // ToMany field relationships
+  target
+    .fieldsWithAnnotation(ToMany::class.java)
+    .forEach { field ->
+      val value = field.getValue(target) ?: return@forEach
       if (value is Collection<*>) {
-        // Relationship to-many
         value.forEach { element ->
           if (element != null) relationships[readResourceObject(element)] = element
         }
       } else {
-        // Relationship to-one
-        relationships[readResourceObject(value)] = value
+        throw IllegalStateException(
+          "Class ["
+            + target.javaClass.simpleName
+            + "] has field ["
+            + field.name
+            + "] annotated with ["
+            + ToMany::class.java.simpleName
+            + "] that is of non-collection type ["
+            + value::class.java.simpleName
+            + "].\nTo-many relationship fields should be of type Collection or List."
+        )
       }
     }
+
   return relationships
 }

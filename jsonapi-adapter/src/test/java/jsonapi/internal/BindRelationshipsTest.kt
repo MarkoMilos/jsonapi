@@ -1,6 +1,5 @@
 package jsonapi.internal
 
-import jsonapi.BindRelationship
 import jsonapi.Id
 import jsonapi.Relationship.ToMany
 import jsonapi.Relationship.ToOne
@@ -19,15 +18,15 @@ class BindRelationshipsTest {
   @Resource("comments")
   private data class Comment(
     @Id val id: String?,
-    @BindRelationship("author") val author: Person? = null
+    @jsonapi.ToOne("author") val author: Person? = null
   )
 
   @Resource("articles")
   private data class Article(
     @Id val id: String?,
-    @BindRelationship("author") val author: Person? = null,
-    @BindRelationship("comments") val comments: List<Comment>? = null,
-    @BindRelationship("related") val related: List<Article>? = null
+    @jsonapi.ToOne("author") val author: Person? = null,
+    @jsonapi.ToMany("comments") val comments: List<Comment>? = null,
+    @jsonapi.ToMany("related") val related: List<Article>? = null
   )
 
   @Test
@@ -288,7 +287,7 @@ class BindRelationshipsTest {
     bindRelationshipFields(resources)
   }
 
-  // TODO add test when RO and RI API is added (for field binding e.g @BindRel("a") val a: ResourceObject)
+  // TODO add test when RO and RI API is added for field binding e.g @ToOne("foo") val foo: ResourceObject
   // assign resource object when field type is RO
   // assign resource identifier when field type is RI
   // -||- above tests but for to-many relationship

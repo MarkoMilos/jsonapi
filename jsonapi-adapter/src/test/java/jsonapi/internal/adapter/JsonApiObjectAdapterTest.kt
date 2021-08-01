@@ -1,12 +1,12 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonApiObject
 import jsonapi.JsonFile.JSON_API_OBJECT
+import jsonapi.JsonFormatException
 import jsonapi.Meta
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test

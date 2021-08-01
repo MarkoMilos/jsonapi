@@ -1,9 +1,10 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.RESOURCE_ARTICLE
 import jsonapi.JsonFile.RESOURCE_ARTICLE_NON_STANDARD_NAMES
+import jsonapi.JsonFormatException
 import jsonapi.Link.URI
 import jsonapi.Links
 import jsonapi.Meta
@@ -12,8 +13,8 @@ import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
 import jsonapi.inlineJson
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class ResourceObjectAdapterTest {
@@ -32,8 +33,7 @@ class ResourceObjectAdapterTest {
 
   @Test
   fun `deserialize basic resource`() {
-    val deserialized = adapter.fromJson("""{"type":"articles", "id":"1"}""")
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson("""{"type":"articles", "id":"1"}""") ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.id).isEqualTo("1")
     assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type", "id")
@@ -41,8 +41,7 @@ class ResourceObjectAdapterTest {
 
   @Test
   fun `deserialize resource with local identifier`() {
-    val deserialized = adapter.fromJson("""{"type":"articles", "lid":"1"}""")
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson("""{"type":"articles", "lid":"1"}""") ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.lid).isEqualTo("1")
     assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type", "lid")
@@ -50,8 +49,7 @@ class ResourceObjectAdapterTest {
 
   @Test
   fun `deserialize resource with resource object members`() {
-    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE)) ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.id).isEqualTo("1")
     assertThat(deserialized.lid).isNull()
@@ -92,8 +90,7 @@ class ResourceObjectAdapterTest {
 
   @Test
   fun `ignore non standard json names`() {
-    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE_NON_STANDARD_NAMES))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RESOURCE_ARTICLE_NON_STANDARD_NAMES)) ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
     assertThat(deserialized.id).isEqualTo("1")
     assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type", "id")
@@ -142,14 +139,14 @@ class ResourceObjectAdapterTest {
     assertThat(serialized).isEqualTo(
       """
       {
-      "type":"articles",
-      "id":"1",
-      "lid":"2",
-      "relationships":{
-        "author":{"data":{"type":"people","id":"1"}},
-        "comments":{"data":[{"type":"comments","id":"1"},{"type":"comments","id":"2"}]}},
-      "links":{"self":"self"},
-      "meta":{"name":"value"}
+        "type":"articles",
+        "id":"1",
+        "lid":"2",
+        "relationships":{
+          "author":{"data":{"type":"people","id":"1"}},
+          "comments":{"data":[{"type":"comments","id":"1"},{"type":"comments","id":"2"}]}},
+        "links":{"self":"self"},
+        "meta":{"name":"value"}
       }
       """.inlineJson()
     )

@@ -1,11 +1,12 @@
 package jsonapi.internal
 
 import jsonapi.Document
+import jsonapi.Id
+import jsonapi.Resource
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
-import jsonapi.BindRelationship
-import jsonapi.Resource
-import jsonapi.Id
+import jsonapi.ToMany
+import jsonapi.ToOne
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -17,15 +18,15 @@ class ProcessIncludedTest {
   @Resource("comments")
   private data class Comment(
     @Id val id: String?,
-    @BindRelationship("author") val author: Person? = null
+    @ToOne("author") val author: Person? = null
   )
 
   @Resource("articles")
   private data class Article(
     @Id val id: String?,
-    @BindRelationship("author") val author: Person? = null,
-    @BindRelationship("comments") val comments: List<Comment>? = null,
-    @BindRelationship("related") val related: List<Article>? = null
+    @ToOne("author") val author: Person? = null,
+    @ToMany("comments") val comments: List<Comment>? = null,
+    @ToMany("related") val related: List<Article>? = null
   )
 
   @Test
@@ -192,8 +193,8 @@ class ProcessIncludedTest {
   @Resource("node")
   private data class Node(
     @Id val id: String,
-    @BindRelationship("left") val left: Node?,
-    @BindRelationship("right") val right: Node?
+    @ToOne("left") val left: Node?,
+    @ToOne("right") val right: Node?
   )
 
   private fun generateNodeTree(depth: Int, nodeId: String): Node {

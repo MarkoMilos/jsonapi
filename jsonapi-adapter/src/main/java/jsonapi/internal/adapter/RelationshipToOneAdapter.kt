@@ -1,5 +1,10 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonReader.Token
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
 import jsonapi.JsonFormatException
 import jsonapi.Links
 import jsonapi.Meta
@@ -8,11 +13,6 @@ import jsonapi.ResourceIdentifier
 import jsonapi.internal.FactoryDelegate
 import jsonapi.internal.forceWriteNull
 import jsonapi.internal.rawType
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonReader.Token
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
 
 internal class RelationshipToOneAdapter(moshi: Moshi) : JsonAdapter<ToOne>() {
 

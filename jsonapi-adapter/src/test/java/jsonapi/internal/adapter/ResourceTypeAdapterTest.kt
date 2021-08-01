@@ -1,31 +1,32 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
-import jsonapi.JsonApiFactory
-import jsonapi.JsonFile.RESOURCE_ARTICLE
-import jsonapi.JsonFile.RESOURCE_ARTICLE_NON_STANDARD_NAMES
-import jsonapi.JsonFile.RESOURCE_COMMENT
-import jsonapi.Link
-import jsonapi.Links
-import jsonapi.Meta
-import jsonapi.Relationship
-import jsonapi.Relationships
-import jsonapi.ResourceIdentifier
-import jsonapi.inlineJson
-import jsonapi.read
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
-import jsonapi.BindRelationship
-import jsonapi.Resource
 import jsonapi.Id
+import jsonapi.JsonApiFactory
+import jsonapi.JsonFile.RESOURCE_ARTICLE
+import jsonapi.JsonFile.RESOURCE_ARTICLE_NON_STANDARD_NAMES
+import jsonapi.JsonFile.RESOURCE_COMMENT
+import jsonapi.JsonFormatException
 import jsonapi.Lid
+import jsonapi.Link
+import jsonapi.Links
 import jsonapi.LinksObject
+import jsonapi.Meta
 import jsonapi.MetaObject
+import jsonapi.Relationship
+import jsonapi.Relationships
 import jsonapi.RelationshipsObject
+import jsonapi.Resource
+import jsonapi.ResourceIdentifier
+import jsonapi.ToMany
+import jsonapi.ToOne
 import jsonapi.Type
+import jsonapi.inlineJson
+import jsonapi.read
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test
@@ -278,10 +279,8 @@ class ResourceTypeAdapterTest {
     val relationships = Relationships(
       "author" to Relationship.ToOne(ResourceIdentifier("people", "1")),
       "comments" to Relationship.ToMany(
-        listOf(
-          ResourceIdentifier("comments", "1"),
-          ResourceIdentifier("comments", "2"),
-        )
+        ResourceIdentifier("comments", "1"),
+        ResourceIdentifier("comments", "2"),
       )
     )
 
@@ -362,10 +361,10 @@ class ResourceTypeAdapterTest {
     assertThat(serialized).isEqualTo(
       """
       {
-      "type":"articles",
-      "id":"1",
-      "relationships":{"author":{"data":{"type":"people","id":"1"}}},
-      "attributes":{"title":"Title-by-Name"}
+        "type":"articles",
+        "id":"1",
+        "relationships":{"author":{"data":{"type":"people","id":"1"}}},
+        "attributes":{"title":"Title-by-Name"}
       }
       """.inlineJson()
     )
@@ -449,7 +448,7 @@ class ResourceTypeAdapterTest {
     @Type val type: String? = null,
     @Id val id: String? = null,
     val body: String,
-    @BindRelationship("author") val author: Person? = null
+    @ToOne("author") val author: Person? = null
   ) {
     @Lid val lid: String? = null
     @RelationshipsObject val relationships: Relationships? = null
@@ -464,9 +463,9 @@ class ResourceTypeAdapterTest {
     @Id val id: String? = null,
     @Lid val lid: String? = null,
     val title: String? = null,
-    @BindRelationship("author") val author: Person? = null,
-    @BindRelationship("comments") val comments: List<Comment>? = null,
-    @BindRelationship("related") val related: List<Article>? = null,
+    @ToOne("author") val author: Person? = null,
+    @ToMany("comments") val comments: List<Comment>? = null,
+    @ToMany("related") val related: List<Article>? = null,
     @RelationshipsObject val relationships: Relationships? = null,
     @LinksObject val links: Links? = null,
     @MetaObject val meta: Meta? = null

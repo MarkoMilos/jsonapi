@@ -1,18 +1,18 @@
 package jsonapi.internal
 
-import jsonapi.Link
-import jsonapi.Links
-import jsonapi.Meta
-import jsonapi.Relationship
-import jsonapi.Relationships
-import jsonapi.ResourceIdentifier
-import jsonapi.ResourceObject
-import jsonapi.Resource
 import jsonapi.Id
 import jsonapi.Lid
+import jsonapi.Link
+import jsonapi.Links
 import jsonapi.LinksObject
+import jsonapi.Meta
 import jsonapi.MetaObject
+import jsonapi.Relationship
+import jsonapi.Relationships
 import jsonapi.RelationshipsObject
+import jsonapi.Resource
+import jsonapi.ResourceIdentifier
+import jsonapi.ResourceObject
 import jsonapi.Type
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry

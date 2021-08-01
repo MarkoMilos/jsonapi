@@ -1,5 +1,12 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonReader.Token
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.rawType
 import jsonapi.Document
 import jsonapi.Document.IncludedSerialization.DOCUMENT
 import jsonapi.Document.IncludedSerialization.NONE
@@ -9,26 +16,19 @@ import jsonapi.JsonApiObject
 import jsonapi.JsonFormatException
 import jsonapi.Links
 import jsonapi.Meta
+import jsonapi.Resource
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
 import jsonapi.internal.FactoryDelegate
 import jsonapi.internal.PolymorphicResource
 import jsonapi.internal.bindRelationshipFields
 import jsonapi.internal.collectionElementType
+import jsonapi.internal.forceWriteNull
 import jsonapi.internal.isCollection
 import jsonapi.internal.isNothing
 import jsonapi.internal.isResourceType
 import jsonapi.internal.processIncluded
 import jsonapi.internal.scan
-import jsonapi.internal.forceWriteNull
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonReader.Token
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.rawType
-import jsonapi.Resource
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 

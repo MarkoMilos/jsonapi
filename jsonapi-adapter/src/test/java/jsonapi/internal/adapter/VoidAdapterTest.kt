@@ -1,9 +1,9 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonApiFactory
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import jsonapi.JsonApiFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test

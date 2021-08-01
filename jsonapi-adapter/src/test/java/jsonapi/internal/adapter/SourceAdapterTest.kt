@@ -1,10 +1,10 @@
 package jsonapi.internal.adapter
 
-import jsonapi.Error.Source
-import jsonapi.JsonFormatException
-import jsonapi.JsonApiFactory
-import jsonapi.inlineJson
 import com.squareup.moshi.Moshi
+import jsonapi.Error.Source
+import jsonapi.JsonApiFactory
+import jsonapi.JsonFormatException
+import jsonapi.inlineJson
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test

@@ -1,17 +1,17 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
-import jsonapi.Link
-import jsonapi.Link.LinkObject
-import jsonapi.Meta
-import jsonapi.internal.FactoryDelegate
-import jsonapi.internal.rawType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import jsonapi.JsonFormatException
+import jsonapi.Link
+import jsonapi.Link.LinkObject
+import jsonapi.Meta
+import jsonapi.internal.FactoryDelegate
+import jsonapi.internal.rawType
 
 internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
 

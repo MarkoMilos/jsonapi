@@ -1,9 +1,13 @@
 package jsonapi.internal.adapter
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import jsonapi.Document
 import jsonapi.Document.IncludedSerialization
 import jsonapi.Error
-import jsonapi.JsonFormatException
+import jsonapi.Id
 import jsonapi.JsonApiFactory
 import jsonapi.JsonApiObject
 import jsonapi.JsonFile.DOCUMENT_ARTICLE_COLLECTION
@@ -16,19 +20,16 @@ import jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_SERIALIZED_DOCUMENT_ONLY_INCLUDE
 import jsonapi.JsonFile.DOCUMENT_ARTICLE_SINGLE_SERIALIZED_NO_INCLUDED
 import jsonapi.JsonFile.DOCUMENT_ERROR
 import jsonapi.JsonFile.DOCUMENT_META
+import jsonapi.JsonFormatException
 import jsonapi.Links
 import jsonapi.Meta
+import jsonapi.Resource
 import jsonapi.ResourceIdentifier
 import jsonapi.ResourceObject
+import jsonapi.ToMany
+import jsonapi.ToOne
 import jsonapi.inlineJson
 import jsonapi.read
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import jsonapi.BindRelationship
-import jsonapi.Resource
-import jsonapi.Id
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.assertj.core.api.Assertions.fail
@@ -50,7 +51,7 @@ class DocumentAdapterTest {
   data class Comment(
     @Id val id: String?,
     val body: String?,
-    @BindRelationship("author") val author: Person? = null
+    @ToOne("author") val author: Person? = null
   )
 
   @JsonClass(generateAdapter = true)
@@ -58,9 +59,9 @@ class DocumentAdapterTest {
   data class Article(
     @Id val id: String?,
     val title: String? = null,
-    @BindRelationship("author") val author: Person? = null,
-    @BindRelationship("comments") val comments: List<Comment>? = null,
-    @BindRelationship("related") val related: List<Article>? = null
+    @ToOne("author") val author: Person? = null,
+    @ToMany("comments") val comments: List<Comment>? = null,
+    @ToMany("related") val related: List<Article>? = null
   )
 
   private val factory = JsonApiFactory.Builder()

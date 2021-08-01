@@ -1,16 +1,17 @@
 package jsonapi.internal.adapter
 
-import jsonapi.JsonFormatException
+import com.squareup.moshi.Moshi
 import jsonapi.JsonApiFactory
 import jsonapi.JsonFile.RELATIONSHIPS
+import jsonapi.JsonFormatException
 import jsonapi.Relationship.ToMany
 import jsonapi.Relationship.ToOne
 import jsonapi.Relationships
 import jsonapi.ResourceIdentifier
 import jsonapi.inlineJson
 import jsonapi.read
-import com.squareup.moshi.Moshi
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 
 class RelationshipsAdapterTest {
@@ -29,15 +30,13 @@ class RelationshipsAdapterTest {
 
   @Test
   fun `deserialize empty relationships`() {
-    val deserialized = adapter.fromJson("{}")
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson("{}") ?: fail("deserialized == null")
     assertThat(deserialized.isEmpty()).isTrue
   }
 
   @Test
   fun `deserialize non-empty relationships`() {
-    val deserialized = adapter.fromJson(read(RELATIONSHIPS))
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson(read(RELATIONSHIPS)) ?: fail("deserialized == null")
 
     assertThat(deserialized.members).containsOnlyKeys("to_one_empty", "to_one", "to_many_empty", "to_many")
     assertThat(deserialized.members["to_one_empty"]).isInstanceOfSatisfying(ToOne::class.java) {
@@ -62,8 +61,7 @@ class RelationshipsAdapterTest {
 
   @Test
   fun `omit null relationships`() {
-    val deserialized = adapter.fromJson("""{"key":null}""")
-      ?: throw AssertionError("deserialized == null")
+    val deserialized = adapter.fromJson("""{"key":null}""") ?: fail("deserialized == null")
     assertThat(deserialized.members).isEmpty()
   }
 
@@ -88,21 +86,19 @@ class RelationshipsAdapterTest {
   @Test
   fun `serialize non-empty relationships`() {
     val relationships = Relationships(
-      mapOf(
-        "to_one_empty" to ToOne(),
-        "to_one" to ToOne(ResourceIdentifier("type", "1")),
-        "to_many_empty" to ToMany(emptyList()),
-        "to_many" to ToMany(listOf(ResourceIdentifier("type", "1")))
-      )
+      "to_one_empty" to ToOne(),
+      "to_one" to ToOne(ResourceIdentifier("type", "1")),
+      "to_many_empty" to ToMany(emptyList()),
+      "to_many" to ToMany(listOf(ResourceIdentifier("type", "1")))
     )
     val serialized = adapter.toJson(relationships)
     assertThat(serialized).isEqualTo(
       """
       {
-      "to_one_empty":{"data":null},
-      "to_one":{"data":{"type":"type","id":"1"}},
-      "to_many_empty":{"data":[]},
-      "to_many":{"data":[{"type":"type","id":"1"}]}
+        "to_one_empty":{"data":null},
+        "to_one":{"data":{"type":"type","id":"1"}},
+        "to_many_empty":{"data":[]},
+        "to_many":{"data":[{"type":"type","id":"1"}]}
       }
       """.inlineJson()
     )
