@@ -1,14 +1,12 @@
 package com.example.jsonapi.resource
 
-@Resource("comments")
-class Comment(
-  type: String?,
-  id: String?,
-  val body: String,
-  @Relationship("author") val author: Person?
-) : Resource(type, id) {
+import jsonapi.Id
+import jsonapi.Resource
+import jsonapi.ToOne
 
-  override fun toString(): String {
-    return "$body from $author"
-  }
-}
+@Resource("comments")
+data class Comment(
+  @Id val id: String?,
+  val body: String,
+  @ToOne("author") val author: Person?
+)

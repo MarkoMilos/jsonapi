@@ -1,15 +1,12 @@
 package com.example.jsonapi.resource
 
+import jsonapi.Id
+import jsonapi.Resource
+
 @Resource("people")
-class Person(
-  type: String?,
-  id: String?,
+data class Person(
+  @Id val id: String?,
   val firstName: String,
   val lastName: String,
   val twitter: String
-) : Resource(type, id) {
-
-  override fun toString(): String {
-    return "$firstName $lastName (on Twitter: $twitter)"
-  }
-}
+)

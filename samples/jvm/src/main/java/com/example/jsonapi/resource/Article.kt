@@ -1,18 +1,14 @@
 package com.example.jsonapi.resource
 
-@Resource("articles")
-class Article(
-  type: String?,
-  id: String?,
-  var title: String? = "",
-  @Relationship("author") val author: Person? = null,
-  @Relationship("comments") val comments: List<Comment>? = null,
-) : Resource(type, id) {
+import jsonapi.Id
+import jsonapi.Resource
+import jsonapi.ToMany
+import jsonapi.ToOne
 
-  override fun toString(): String {
-    return "" +
-      "Title: $title\n" +
-      "Author: $author\n" +
-      "Comments:\n${comments?.joinToString("\n")}"
-  }
-}
+@Resource("articles")
+data class Article(
+  @Id val id: String?,
+  var title: String? = "",
+  @ToOne("author") val author: Person? = null,
+  @ToMany("comments") val comments: List<Comment>? = null,
+)
