@@ -67,7 +67,7 @@ internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
     writer.beginObject()
     writer.name(NAME_HREF).value(value.href)
     writer.name(NAME_REL).value(value.rel)
-    writer.name(NAME_DESCRIBED_BY).apply { linkAdapter.toJson(writer, value.describedby) }
+    writer.name(NAME_DESCRIBED_BY).apply { linkAdapter.toJson(writer, value.describedBy) }
     writer.name(NAME_TITLE).value(value.title)
     writer.name(NAME_TYPE).value(value.type)
     writer.name(NAME_HREF_LANG).apply { serializeHrefLang(writer, value.hreflang) }

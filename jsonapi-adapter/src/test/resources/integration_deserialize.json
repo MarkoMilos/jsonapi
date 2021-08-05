@@ -1,0 +1,365 @@
+{
+  "jsonapi": {
+    "version": "1",
+    "ext": [
+      "ext-1"
+    ],
+    "profile": [
+      "profile-1",
+      "profile-2"
+    ],
+    "meta": null
+  },
+  "links": {
+    "self": "self",
+    "related": {
+      "href": "href",
+      "rel": "rel",
+      "describedby": {
+        "href": "href"
+      },
+      "title": "title",
+      "type": "type",
+      "hreflang": [
+        "en",
+        "es"
+      ],
+      "meta": {
+        "name": "value"
+      }
+    },
+    "next": null,
+    "prev": null
+  },
+  "meta": {
+    "number": 1.5,
+    "string": "value",
+    "boolean": true,
+    "array": [
+      "one",
+      "two",
+      "three"
+    ],
+    "null": null,
+    "nested": {
+      "foo": "bar"
+    }
+  },
+  "data": [
+    {
+      "type": "articles",
+      "id": "1",
+      "attributes": {
+        "title": "Title1",
+        "promoted": true,
+        "tags": [
+          "new",
+          "hot"
+        ],
+        "price": 10,
+        "source": {
+          "name": "value"
+        }
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "1",
+            "meta": {
+              "name": "value"
+            }
+          },
+          "links": {
+            "related": {
+              "href": "href"
+            }
+          },
+          "meta": {
+            "number": 1.5,
+            "string": "value"
+          }
+        },
+        "comments": {
+          "data": [
+            {
+              "type": "comments",
+              "id": "1"
+            },
+            {
+              "type": "comments",
+              "id": "2"
+            },
+            {
+              "type": "comments",
+              "id": "3"
+            }
+          ]
+        },
+        "related": {
+          "data": [
+            {
+              "type": "articles",
+              "id": "2"
+            },
+            {
+              "type": "articles",
+              "id": "3"
+            }
+          ]
+        }
+      },
+      "links": {
+        "prev": null,
+        "next": "next",
+        "related": {
+          "href": "href",
+          "rel": "rel",
+          "title": "title",
+          "type": "type",
+          "hreflang": "en"
+        }
+      },
+      "meta": {
+        "number": 1.5,
+        "string": "value"
+      }
+    },
+    {
+      "type": "articles",
+      "id": "2",
+      "attributes": {
+        "title": "Title2",
+        "promoted": false,
+        "tags": [],
+        "price": 2,
+        "source": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "2"
+          }
+        },
+        "comments": {
+          "data": [
+            {
+              "type": "comments",
+              "id": "4"
+            },
+            {
+              "type": "comments",
+              "id": "5"
+            },
+            {
+              "type": "comments",
+              "id": "6"
+            }
+          ]
+        },
+        "related": {
+          "data": [
+            {
+              "type": "articles",
+              "id": "3"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "included": [
+    {
+      "type": "articles",
+      "id": "3",
+      "attributes": {
+        "title": "Title3",
+        "promoted": false,
+        "tags": null,
+        "price": null,
+        "source": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "3"
+          }
+        },
+        "comments": {
+          "data": []
+        },
+        "related": {
+          "data": [
+            {
+              "type": "articles",
+              "id": "4"
+            },
+            {
+              "type": "articles",
+              "id": "5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "articles",
+      "id": "4",
+      "attributes": {
+        "title": "Title4",
+        "promoted": false,
+        "tags": null,
+        "price": 1.5,
+        "source": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "4"
+          }
+        },
+        "related": {
+          "data": [
+            {
+              "type": "articles",
+              "id": "5"
+            },
+            {
+              "type": "articles",
+              "id": "6"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "articles",
+      "id": "5",
+      "attributes": {
+        "title": "Title5",
+        "promoted": false,
+        "tags": null,
+        "price": null,
+        "source": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "5"
+          }
+        }
+      }
+    },
+    {
+      "type": "comments",
+      "id": "1",
+      "attributes": {
+        "body": "Comment1"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "1"
+          }
+        }
+      }
+    },
+    {
+      "type": "comments",
+      "id": "2",
+      "attributes": {
+        "body": "Comment2"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "2"
+          }
+        }
+      }
+    },
+    {
+      "type": "comments",
+      "id": "3",
+      "attributes": {
+        "body": "Comment3"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "3"
+          }
+        }
+      }
+    },
+    {
+      "type": "comments",
+      "id": "4",
+      "attributes": {
+        "body": "Comment4"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "4"
+          }
+        }
+      }
+    },
+    {
+      "type": "comments",
+      "id": "5",
+      "attributes": {
+        "body": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "5"
+          }
+        }
+      }
+    },
+    {
+      "type": "people",
+      "id": "1",
+      "attributes": {
+        "firstName": "Name1",
+        "lastName": "Surname1"
+      }
+    },
+    {
+      "type": "people",
+      "id": "2",
+      "attributes": {
+        "firstName": "Name2",
+        "lastName": "Surname2"
+      }
+    },
+    {
+      "type": "people",
+      "id": "3",
+      "attributes": {
+        "firstName": "Name3",
+        "lastName": "Surname3"
+      }
+    },
+    {
+      "type": "people",
+      "id": "4",
+      "attributes": {
+        "firstName": "Name4",
+        "lastName": "Surname4"
+      }
+    }
+  ]
+}

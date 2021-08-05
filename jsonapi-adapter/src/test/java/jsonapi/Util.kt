@@ -27,7 +27,9 @@ enum class JsonFile(val fileName: String) {
   LINK_OBJECT_SINGLE_HREFLANG("link_object_single_hreflang.json"),
   META("meta.json"),
   JSON_API_OBJECT("json_api_object.json"),
-  ERROR("error.json")
+  ERROR("error.json"),
+  INTEGRATION_DESERIALIZE("integration_deserialize.json"),
+  INTEGRATION_SERIALIZE("integration_serialize.json")
 }
 
 /** Read file defined with [fileName] from resources as UTF8 string. */

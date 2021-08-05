@@ -32,7 +32,7 @@ class LinkObjectAdapterTest {
     val deserialized = adapter.fromJson(read(LINK_OBJECT_FULL)) ?: fail("deserialized == null")
     assertThat(deserialized.href).isEqualTo("href")
     assertThat(deserialized.rel).isEqualTo("rel")
-    assertThat(deserialized.describedby).isInstanceOfSatisfying(LinkObject::class.java) {
+    assertThat(deserialized.describedBy).isInstanceOfSatisfying(LinkObject::class.java) {
       assertThat(it)
         .hasFieldOrPropertyWithValue("href", "href")
         .hasAllNullFieldsOrPropertiesExcept("href")
@@ -80,7 +80,7 @@ class LinkObjectAdapterTest {
     val linkObject = LinkObject(
       href = "href",
       rel = "rel",
-      describedby = LinkObject("href"),
+      describedBy = LinkObject("href"),
       title = "title",
       type = "type",
       hreflang = listOf("en", "es"),

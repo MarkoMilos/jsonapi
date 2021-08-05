@@ -34,7 +34,7 @@ class Links(val members: Map<String, Link?>) {
   fun first() = members["first"]
 
   /** Returns [Link] with name 'previous'. */
-  fun previous() = members["previous"]
+  fun previous() = members["prev"]
 
   /** Returns [Link] with name 'next'. */
   fun next() = members["next"]

@@ -30,7 +30,15 @@ sealed class Relationship {
     val data: ResourceIdentifier? = null,
     override val links: Links? = null,
     override val meta: Meta? = null
-  ) : Relationship()
+  ) : Relationship() {
+    @JvmOverloads
+    constructor(
+      type: String,
+      id: String,
+      links: Links? = null,
+      meta: Meta? = null
+    ) : this(ResourceIdentifier(type, id), links, meta)
+  }
 
   data class ToMany @JvmOverloads constructor(
     /**

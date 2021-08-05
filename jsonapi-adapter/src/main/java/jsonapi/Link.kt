@@ -30,7 +30,7 @@ sealed class Link {
    * @param href String whose value is a URI-reference [RFC3986 Section 4.1](https://tools.ietf.org/html/rfc3986#section-4.1)
    * pointing to the link’s target.
    * @param rel String indicating the link’s relation type. The string MUST be a valid link relation type.
-   * @param describedby Link to a description document (e.g. OpenAPI or JSON Schema) for the link target.
+   * @param describedBy Link to a description document (e.g. OpenAPI or JSON Schema) for the link target.
    * @param title String which serves as a label for the destination of a link such that it can be used
    * as a human-readable identifier (e.g., a menu entry).
    * @param type String indicating the media type of the link’s target.
@@ -47,7 +47,7 @@ sealed class Link {
   data class LinkObject @JvmOverloads constructor(
     val href: String,
     val rel: String? = null,
-    val describedby: Link? = null,
+    val describedBy: Link? = null,
     val title: String? = null,
     val type: String? = null,
     val hreflang: List<String>? = null,
