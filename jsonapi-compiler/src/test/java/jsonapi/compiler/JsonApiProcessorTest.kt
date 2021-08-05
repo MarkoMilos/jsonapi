@@ -1,40 +1,40 @@
-package com.jsonapi.processor
+package jsonapi.compiler
 
 import com.google.common.truth.Truth
 import com.google.testing.compile.JavaFileObjects
 import com.google.testing.compile.JavaSourcesSubjectFactory
 import org.junit.Test
 
-class TypesProcessorTest {
+class JsonApiProcessorTest {
 
   @Test
   fun `processor creates output file for input resources successfully`() {
     val inputFileA = JavaFileObjects.forSourceString(
-      "com.jsonapi.A",
+      "jsonapi.A",
       """
-      package com.jsonapi;
+      package jsonapi;
 
-      @Type(name = "A")
-      public class A extends Resource {
+      @Resource(type = "A")
+      public class A {
       }
       """.trimIndent()
     )
 
     val inputFileB = JavaFileObjects.forSourceString(
-      "com.jsonapi.B",
+      "jsonapi.B",
       """
-      package com.jsonapi;
+      package jsonapi;
 
-      @Type(name = "B")
-      public class B extends Resource {
+      @Resource(type = "B")
+      public class B {
       }
       """.trimIndent()
     )
 
     val outputFile = JavaFileObjects.forSourceString(
-      "com.jsonapi.JsonApi",
+      "jsonapi.JsonApi",
       """
-      package com.jsonapi;
+      package jsonapi;
 
       import com.squareup.moshi.JsonAdapter;
       import java.lang.Class;
@@ -42,8 +42,8 @@ class TypesProcessorTest {
       import java.util.List;
 
       public final class JsonApi {
-        public static List<Class<? extends Resource>> resources() {
-          List<Class<? extends Resource>> types = new ArrayList<>();
+        public static List<Class<?>> resources() {
+          List<Class<?>> types = new ArrayList<>();
           types.add(A.class);
           types.add(B.class);
           return types;
@@ -59,7 +59,7 @@ class TypesProcessorTest {
     Truth.assert_()
       .about(JavaSourcesSubjectFactory.javaSources())
       .that(listOf(inputFileA, inputFileB))
-      .processedWith(TypesProcessor())
+      .processedWith(JsonApiProcessor())
       .compilesWithoutError()
       .and()
       .generatesSources(outputFile)
@@ -68,11 +68,11 @@ class TypesProcessorTest {
   @Test
   fun `processor fails when annotated element is not a class`() {
     val invalidInputFile = JavaFileObjects.forSourceString(
-      "com.jsonapi.A",
+      "jsonapi.A",
       """
-      package com.jsonapi;
+      package jsonapi;
 
-      @Type(name = "A")
+      @Resource(type = "A")
       public enum A {
       }
       """.trimIndent()
@@ -81,27 +81,7 @@ class TypesProcessorTest {
     Truth.assert_()
       .about(JavaSourcesSubjectFactory.javaSources())
       .that(listOf(invalidInputFile))
-      .processedWith(TypesProcessor())
-      .failsToCompile()
-  }
-
-  @Test
-  fun `processor fails when annotated element is not extending from resource`() {
-    val invalidInputFile = JavaFileObjects.forSourceString(
-      "com.jsonapi.A",
-      """
-      package com.jsonapi;
-
-      @Type(name = "A")
-      public class A {
-      }
-      """.trimIndent()
-    )
-
-    Truth.assert_()
-      .about(JavaSourcesSubjectFactory.javaSources())
-      .that(listOf(invalidInputFile))
-      .processedWith(TypesProcessor())
+      .processedWith(JsonApiProcessor())
       .failsToCompile()
   }
 }

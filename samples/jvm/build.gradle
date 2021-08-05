@@ -9,5 +9,5 @@ dependencies {
   implementation deps.moshi_kotlin_reflect
 
   implementation project(':jsonapi-adapter')
-  kapt project(':jsonapi-processor')
+  kapt project(':jsonapi-compiler')
 }
