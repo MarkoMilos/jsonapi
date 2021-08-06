@@ -12,8 +12,6 @@ buildscript {
   ]
 
   ext.deps = [
-    // TODO not used, assert that jdk8 is correct version to be used for library
-    'kotlinStdlib'        : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
     'moshi'               : "com.squareup.moshi:moshi:${versions.moshi}",
     'moshi_kotlin_reflect': "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
     'moshi_kotlin_codegen': "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
@@ -63,17 +61,18 @@ spotless {
     targetExclude "bin/**/*.kt"
     // This should all come from editorconfig which is not currently supported
     // Related issue: https://github.com/diffplug/spotless/issues/142
-    ktlint(versions.ktlint).userData([
+    ktlint("0.41.0").userData([
       "indent_size"             : "2",
       "continuation_indent_size": "2"
     ])
+    indentWithSpaces(2)
     trimTrailingWhitespace()
     endWithNewline()
   }
   java {
     target "**/src/**/*.java"
-    indentWithSpaces(2)
     removeUnusedImports()
+    indentWithSpaces(2)
     trimTrailingWhitespace()
     endWithNewline()
   }
