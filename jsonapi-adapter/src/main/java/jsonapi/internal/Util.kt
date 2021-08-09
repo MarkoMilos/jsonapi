@@ -54,11 +54,11 @@ internal inline fun <reified T> getValueOfAnnotatedField(target: Any, annotation
     return field.getValue(target) as T?
   } catch (cause: ClassCastException) {
     throw ClassCastException(
-      "Cannot cast annotated field."
-        + " For field [${target.javaClass.simpleName}.${field.name}]"
-        + " annotated with [@${annotation.simpleName}]"
-        + " expected type was [${T::class.java.simpleName}]"
-        + " but found [${field.type.simpleName}]"
+      "Cannot cast annotated field." +
+        " For field [${target.javaClass.simpleName}.${field.name}]" +
+        " annotated with [@${annotation.simpleName}]" +
+        " expected type was [${T::class.java.simpleName}]" +
+        " but found [${field.type.simpleName}]"
     )
   }
 }
@@ -69,11 +69,11 @@ internal inline fun <reified T> setValueOfAnnotatedField(target: Any, annotation
     field.setValue(target, value)
   } catch (cause: IllegalArgumentException) {
     throw IllegalArgumentException(
-      "Cannot set annotated field."
-        + " For field [${target.javaClass.simpleName}.${field.name}]"
-        + " annotated with [@${annotation.simpleName}]"
-        + " expected type was [${T::class.java.simpleName}]"
-        + " but found [${field.type.simpleName}]",
+      "Cannot set annotated field." +
+        " For field [${target.javaClass.simpleName}.${field.name}]" +
+        " annotated with [@${annotation.simpleName}]" +
+        " expected type was [${T::class.java.simpleName}]" +
+        " but found [${field.type.simpleName}]",
       cause
     )
   }
@@ -82,19 +82,19 @@ internal inline fun <reified T> setValueOfAnnotatedField(target: Any, annotation
 internal fun Any.fieldWithAnnotation(annotation: Class<out Annotation>): Field? {
   val fields = fieldsWithAnnotation(annotation)
   return when (fields.size) {
-    0 -> null           // No fields found for given annotation
+    0 -> null // No fields found for given annotation
     1 -> fields.first() // Exactly one field found with given annotation
-    else -> {           // Multiple fields found for annotation
+    else -> { // Multiple fields found for annotation
       throw IllegalStateException(
-        "Expected single field annotated with @"
-          + annotation.simpleName
-          + " but found "
-          + fields.size
-          + " annotated fields for class "
-          + this.javaClass.simpleName
-          + "."
-          + "\nFields found:"
-          + fields.joinToString("\n -> ", "\n -> ") { it.name }
+        "Expected single field annotated with @" +
+          annotation.simpleName +
+          " but found " +
+          fields.size +
+          " annotated fields for class " +
+          this.javaClass.simpleName +
+          "." +
+          "\nFields found:" +
+          fields.joinToString("\n -> ", "\n -> ") { it.name }
       )
     }
   }
@@ -115,10 +115,10 @@ internal fun Field.setValue(target: Any, value: Any?) {
     set(target, value)
   } catch (cause: IllegalArgumentException) {
     throw IllegalArgumentException(
-      "Cannot set"
-        + " field [${target.javaClass.simpleName}.$name]"
-        + " of type [${type.simpleName}]"
-        + " to value of type [${value?.javaClass?.name}].",
+      "Cannot set" +
+        " field [${target.javaClass.simpleName}.$name]" +
+        " of type [${type.simpleName}]" +
+        " to value of type [${value?.javaClass?.name}].",
       cause
     )
   }

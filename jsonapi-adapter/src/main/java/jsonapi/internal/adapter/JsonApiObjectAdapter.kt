@@ -29,10 +29,10 @@ internal class JsonApiObjectAdapter(moshi: Moshi) : JsonAdapter<JsonApiObject>()
     // Assert that root of json api object is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Member 'jsonapi' MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Member 'jsonapi' MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 

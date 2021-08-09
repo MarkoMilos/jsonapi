@@ -81,11 +81,11 @@ internal class LinkObjectAdapter(moshi: Moshi) : JsonAdapter<LinkObject>() {
       Token.STRING -> listOf(reader.nextString())
       Token.BEGIN_ARRAY -> listAdapter.fromJson(reader)
       else -> throw JsonFormatException(
-        "Member [hreflang] MUST be a string or an array of strings that indicates the language(s) of the link's target"
-          + " but was "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Member [hreflang] MUST be a string or an array of strings that indicates the language(s) of the link's target" +
+          " but was " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
   }

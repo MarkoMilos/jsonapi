@@ -29,10 +29,10 @@ internal class ErrorAdapter(moshi: Moshi) : JsonAdapter<Error>() {
     // Assert that root of error is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Error MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Error MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 

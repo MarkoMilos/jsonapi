@@ -44,16 +44,16 @@ private fun bindRelationshipFields(
           field.setValue(target, matchedResource)
         } catch (e: IllegalArgumentException) {
           throw IllegalArgumentException(
-            "Cannot bind"
-              + " field [${target.javaClass.simpleName}.${field.name}]"
-              + " of type [${field.type.simpleName}]"
-              + " defined as relationship with name [$name]"
-              + " to matched relationship value of type [${matchedResource.javaClass.simpleName}]."
-              + "\nRelationship found under name [$name]"
-              + " had the resource linkage [$resourceIdentifier]"
-              + " that is matched with value [$matchedResource]."
-              + "\nVerify that relationships are correctly defined"
-              + " and that type [${field.type.simpleName}] is registered."
+            "Cannot bind" +
+              " field [${target.javaClass.simpleName}.${field.name}]" +
+              " of type [${field.type.simpleName}]" +
+              " defined as relationship with name [$name]" +
+              " to matched relationship value of type [${matchedResource.javaClass.simpleName}]." +
+              "\nRelationship found under name [$name]" +
+              " had the resource linkage [$resourceIdentifier]" +
+              " that is matched with value [$matchedResource]." +
+              "\nVerify that relationships are correctly defined" +
+              " and that type [${field.type.simpleName}] is registered."
           )
         }
       }
@@ -78,22 +78,22 @@ private fun bindRelationshipFields(
           } else {
             // There is a resource value with type that is not assignable to declared field type
             throw IllegalArgumentException(
-              "Resources matched for to-many relationship with name [$name]"
-                + " contains value of type [${nonMatchingResource::class.java.simpleName}]"
-                + " that is not assignable to collection of [${fieldElementType.simpleName}]"
-                + " declared for the field [${target.javaClass.simpleName}.${field.name}]."
-                + "\nVerify that relationships are correctly defined"
-                + " and that declared type of field [${target.javaClass.simpleName}.${field.name}] is registered."
+              "Resources matched for to-many relationship with name [$name]" +
+                " contains value of type [${nonMatchingResource::class.java.simpleName}]" +
+                " that is not assignable to collection of [${fieldElementType.simpleName}]" +
+                " declared for the field [${target.javaClass.simpleName}.${field.name}]." +
+                "\nVerify that relationships are correctly defined" +
+                " and that declared type of field [${target.javaClass.simpleName}.${field.name}] is registered."
             )
           }
         } else {
           // Field type is not Collection or List - cannot bind to-many relationship
           throw IllegalArgumentException(
-            "For relationship with name [$name]"
-              + " resolved relationship value is to-many and expected field type is Collection or List"
-              + " but target field [${target.javaClass.simpleName}.${field.name}]"
-              + " is of type [${field.type.simpleName}]."
-              + "\nVerify that relationships are correctly defined."
+            "For relationship with name [$name]" +
+              " resolved relationship value is to-many and expected field type is Collection or List" +
+              " but target field [${target.javaClass.simpleName}.${field.name}]" +
+              " is of type [${field.type.simpleName}]." +
+              "\nVerify that relationships are correctly defined."
           )
         }
       }

@@ -172,8 +172,8 @@ internal class DocumentAdapter(
     writer.name(NAME_INCLUDED).apply {
       // Determine what included should be serialized per document configuration
       val included = when (value.includedSerialization) {
-        NONE -> null                        // Don't serialize included
-        DOCUMENT -> value.included          // Serialize only what is defined with Document
+        NONE -> null // Don't serialize included
+        DOCUMENT -> value.included // Serialize only what is defined with Document
         PROCESSED -> processIncluded(value) // Serialize what is defined with Document and all resource relationships
       }
       if (included == null) {

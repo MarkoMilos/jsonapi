@@ -80,7 +80,8 @@ class ReadResourceObjectTest {
       entry("A", ToOne(ResourceIdentifier("bar", "1"))),
       entry("B", ToOne(ResourceIdentifier("bar", "2"))),
       entry(
-        "C", ToMany(
+        "C",
+        ToMany(
           ResourceIdentifier("bar", "1"),
           ResourceIdentifier("bar", "2"),
           ResourceIdentifier("bar", "3")
@@ -178,7 +179,6 @@ class ReadResourceObjectTest {
     assertThat(resourceObject.id).isNull()
     assertThat(resourceObject.lid).isEqualTo("1")
   }
-
 
   @Test(expected = IllegalArgumentException::class)
   fun `read throws for target with invalid identifier`() {

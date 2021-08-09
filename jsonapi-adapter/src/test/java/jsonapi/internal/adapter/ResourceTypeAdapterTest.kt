@@ -261,9 +261,9 @@ class ResourceTypeAdapterTest {
       type = "articles",
       id = "1",
       title = "Title",
-      author = author1,                      // to-one non-empty
+      author = author1, // to-one non-empty
       comments = listOf(comment1, comment2), // to-many non-empty
-      related = null,                        // to-many empty
+      related = null, // to-many empty
       links = Links("self" to Link.URI("self")),
       meta = Meta("name" to "value")
     )

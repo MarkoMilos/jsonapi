@@ -23,10 +23,10 @@ internal class SourceAdapter(moshi: Moshi) : JsonAdapter<Source>() {
     // Assert that root of source is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Source MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Source MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 

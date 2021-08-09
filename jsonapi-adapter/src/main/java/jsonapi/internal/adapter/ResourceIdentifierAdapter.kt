@@ -25,10 +25,10 @@ internal class ResourceIdentifierAdapter(moshi: Moshi) : JsonAdapter<ResourceIde
     // Assert that resource identifier is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Resource identifier MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Resource identifier MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 

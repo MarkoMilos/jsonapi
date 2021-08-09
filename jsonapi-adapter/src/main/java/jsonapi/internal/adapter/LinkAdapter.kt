@@ -22,13 +22,13 @@ internal class LinkAdapter(moshi: Moshi) : JsonAdapter<Link>() {
       Token.STRING -> URI(reader.nextString())
       Token.BEGIN_OBJECT -> linkObjectAdapter.fromJson(reader)
       else -> throw JsonFormatException(
-        "A link MUST be represented as either:\n"
-          + " * a string whose value is a URI-reference pointing to the link’s target\n"
-          + " * a link object that represents a web link per specification\n"
-          + "but was "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "A link MUST be represented as either:\n" +
+          " * a string whose value is a URI-reference pointing to the link’s target\n" +
+          " * a link object that represents a web link per specification\n" +
+          "but was " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
   }

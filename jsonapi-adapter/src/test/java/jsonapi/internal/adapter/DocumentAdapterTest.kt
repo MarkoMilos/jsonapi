@@ -190,12 +190,12 @@ class DocumentAdapterTest {
     assertThat(article1.related).containsExactly(article2)
 
     // Article 2
-    assertThat(article2.author).isNull()     // not in included
-    assertThat(article2.comments).isEmpty()  // empty relationship
-    assertThat(article2.related).isNull()    // relationship not defined
+    assertThat(article2.author).isNull() // not in included
+    assertThat(article2.comments).isEmpty() // empty relationship
+    assertThat(article2.related).isNull() // relationship not defined
 
     // Comment 1
-    assertThat(comment1.author).isNull()     // not in included
+    assertThat(comment1.author).isNull() // not in included
 
     // Comment 2
     assertThat(comment2.author).isEqualTo(author1)
@@ -225,12 +225,12 @@ class DocumentAdapterTest {
     assertThat(article1Included.related).containsExactly(article2)
 
     // Article 2
-    assertThat(article2.author).isNull()     // not in included
-    assertThat(article2.comments).isEmpty()  // empty relationship
-    assertThat(article2.related).isNull()    // relationship not defined
+    assertThat(article2.author).isNull() // not in included
+    assertThat(article2.comments).isEmpty() // empty relationship
+    assertThat(article2.related).isNull() // relationship not defined
 
     // Comment 1
-    assertThat(comment1.author).isNull()     // not in included
+    assertThat(comment1.author).isNull() // not in included
 
     // Comment 2
     assertThat(comment2.author).isEqualTo(author1)
@@ -345,12 +345,12 @@ class DocumentAdapterTest {
     assertThat(article1.related).containsExactly(article2)
 
     // Article 2
-    assertThat(article2.author).isNull()     // not in included
-    assertThat(article2.comments).isEmpty()  // empty relationship
-    assertThat(article2.related).isNull()    // relationship not defined
+    assertThat(article2.author).isNull() // not in included
+    assertThat(article2.comments).isEmpty() // empty relationship
+    assertThat(article2.related).isNull() // relationship not defined
 
     // Comment 1
-    assertThat(comment1.author).isNull()     // not in included
+    assertThat(comment1.author).isNull() // not in included
 
     // Comment 2
     assertThat(comment2.author).isEqualTo(author1)
@@ -382,12 +382,12 @@ class DocumentAdapterTest {
     assertThat(article1Included.related).containsExactly(article2)
 
     // Article 2
-    assertThat(article2.author).isNull()     // not in included
-    assertThat(article2.comments).isEmpty()  // empty relationship
-    assertThat(article2.related).isNull()    // relationship not defined
+    assertThat(article2.author).isNull() // not in included
+    assertThat(article2.comments).isEmpty() // empty relationship
+    assertThat(article2.related).isNull() // relationship not defined
 
     // Comment 1
-    assertThat(comment1.author).isNull()     // not in included
+    assertThat(comment1.author).isNull() // not in included
 
     // Comment 2
     assertThat(comment2.author).isEqualTo(author1)
@@ -584,9 +584,9 @@ class DocumentAdapterTest {
   @Test
   fun `serialize document configured to serialize only document defined included`() {
     val author = Person("1", "A", "B") // Shouldn't be in included
-    val comment1 = Comment("1", "Comment1")         // Should be in included
-    val comment2 = Comment("2", "Comment2")         // Should be in included
-    val article = Article("1", "Title1", author, listOf(comment1))  // Primary resource
+    val comment1 = Comment("1", "Comment1") // Should be in included
+    val comment2 = Comment("2", "Comment2") // Should be in included
+    val article = Article("1", "Title1", author, listOf(comment1)) // Primary resource
     val document = Document.with(article)
       .included(listOf(comment1, comment2))
       .includedSerialization(IncludedSerialization.DOCUMENT)

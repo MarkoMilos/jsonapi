@@ -157,7 +157,7 @@ class ProcessIncludedTest {
     val article1 = Article("1", author, listOf(comment1, comment1, comment2, comment2), listOf(article2))
     val document = Document
       .with(listOf(article1, article2, article1, article2)) // Duplication for each primary resource
-      .included(listOf(comment1, comment1, comment3))       // Duplication in included resources
+      .included(listOf(comment1, comment1, comment3)) // Duplication in included resources
       .build()
     val included = processIncluded(document)
     assertThat(included).containsExactly(comment1, comment3, author, comment2)

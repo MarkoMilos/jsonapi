@@ -27,10 +27,10 @@ internal class RelationshipAdapter(moshi: Moshi) : JsonAdapter<Relationship>() {
     // Assert that root of relationship is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Relationship MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Relationship MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 

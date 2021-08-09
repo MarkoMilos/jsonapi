@@ -162,17 +162,17 @@ class BindRelationshipsTest {
     bindRelationshipFields(resources)
 
     // Article A
-    assertThat(articleA.author).isEqualTo(author1A)        // First from the list is bound
+    assertThat(articleA.author).isEqualTo(author1A) // First from the list is bound
     assertThat(articleA.comments).containsExactly(comment1, comment2)
     assertThat(articleA.related).containsExactly(articleA) // First from the list is bound
 
     // Article B
-    assertThat(articleB.author).isEqualTo(author1A)        // First from the list is bound
+    assertThat(articleB.author).isEqualTo(author1A) // First from the list is bound
     assertThat(articleB.comments).containsExactly(comment1, comment2)
     assertThat(articleB.related).containsExactly(articleA) // First from the list is bound
 
     // Comments
-    assertThat(comment1.author).isEqualTo(author1A)         // First from the list is bound
+    assertThat(comment1.author).isEqualTo(author1A) // First from the list is bound
     assertThat(comment2.author).isEqualTo(author2)
   }
 
@@ -210,9 +210,9 @@ class BindRelationshipsTest {
 
     bindRelationshipFields(resources)
 
-    assertThat(article.author).isNull()                    // no person matches relationship
+    assertThat(article.author).isNull() // no person matches relationship
     assertThat(article.comments).containsExactly(comment1) // there is only one comment that matches
-    assertThat(article.related).isEmpty()                  // no articles matches
+    assertThat(article.related).isEmpty() // no articles matches
     assertThat(comment1.author).isEqualTo(author1)
     assertThat(comment2.author).isEqualTo(author2)
   }

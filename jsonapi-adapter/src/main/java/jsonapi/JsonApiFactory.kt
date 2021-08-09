@@ -146,9 +146,9 @@ class JsonApiFactory private constructor(
           typeNames.add(typeName)
         } else {
           throw IllegalStateException(
-            "Name [$typeName]"
-              + " for type [$clazz]"
-              + " is already registered for type [${types[typeNames.indexOf(typeName)]}]."
+            "Name [$typeName]" +
+              " for type [$clazz]" +
+              " is already registered for type [${types[typeNames.indexOf(typeName)]}]."
           )
         }
       }

@@ -31,14 +31,14 @@ data class Error @JvmOverloads constructor(
 
   init {
     require(
-      id != null
-        || status != null
-        || code != null
-        || title != null
-        || detail != null
-        || source != null
-        || links != null
-        || meta != null
+      id != null ||
+        status != null ||
+        code != null ||
+        title != null ||
+        detail != null ||
+        source != null ||
+        links != null ||
+        meta != null
     ) {
       "An error object MAY have the following members, and MUST contain at least one of: " +
         "id, status, code, title, detail, source, links, meta."

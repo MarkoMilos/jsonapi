@@ -30,10 +30,10 @@ internal class RelationshipToManyAdapter(moshi: Moshi) : JsonAdapter<ToMany>() {
     // Assert that relationship is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Relationship MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Relationship MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 
@@ -51,13 +51,13 @@ internal class RelationshipToManyAdapter(moshi: Moshi) : JsonAdapter<ToMany>() {
             dataAdapter.fromJson(reader) ?: emptyList()
           } else {
             throw JsonFormatException(
-              "Resource linkage for to-many relationship MUST be represented as one of the following:\n"
-                + " - an empty array ([]) for empty to-many relationships.\n"
-                + " - an array of resource identifier objects for non-empty to-many relationships\n"
-                + " but was "
-                + reader.peek()
-                + " on path "
-                + reader.path
+              "Resource linkage for to-many relationship MUST be represented as one of the following:\n" +
+                " - an empty array ([]) for empty to-many relationships.\n" +
+                " - an array of resource identifier objects for non-empty to-many relationships\n" +
+                " but was " +
+                reader.peek() +
+                " on path " +
+                reader.path
             )
           }
         }

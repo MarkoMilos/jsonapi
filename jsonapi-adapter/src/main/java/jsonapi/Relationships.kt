@@ -105,12 +105,12 @@ class Relationships(val members: Map<String, Relationship>) {
       val replaced = members.put(name, value)
       if (replaced != null) {
         throw IllegalArgumentException(
-          "Multiple relationships defined for a key: "
-            + name
-            + "\nFirst: "
-            + value
-            + "\nSecond: "
-            + replaced
+          "Multiple relationships defined for a key: " +
+            name +
+            "\nFirst: " +
+            value +
+            "\nSecond: " +
+            replaced
         )
       }
     }

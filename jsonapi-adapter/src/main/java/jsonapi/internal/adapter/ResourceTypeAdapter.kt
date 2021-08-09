@@ -33,10 +33,10 @@ internal class ResourceTypeAdapter(
     // Assert that resource is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Resource MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Resource MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 
@@ -69,12 +69,12 @@ internal class ResourceTypeAdapter(
     // When strict types are enabled assert that deserialized type matches value provided with annotation
     if (strictTypes && resourceObject.type != annotatedType) {
       throw AssertionError(
-        "Expected type "
-          + annotatedType
-          + " but found "
-          + resourceObject.type
-          + " on path "
-          + reader.path
+        "Expected type " +
+          annotatedType +
+          " but found " +
+          resourceObject.type +
+          " on path " +
+          reader.path
       )
     }
 
@@ -107,12 +107,12 @@ internal class ResourceTypeAdapter(
     // When strict types are enabled assert that type to be serialized matches value provided with @Resource annotation
     if (strictTypes && resourceObject.type != annotatedType) {
       throw AssertionError(
-        "Expected type "
-          + annotatedType
-          + " but found "
-          + resourceObject.type
-          + " on path "
-          + writer.path
+        "Expected type " +
+          annotatedType +
+          " but found " +
+          resourceObject.type +
+          " on path " +
+          writer.path
       )
     }
 

@@ -46,8 +46,8 @@ internal fun processIncluded(document: Document<*>): List<Any>? {
   // Process included resources which might in turn expand included map and thus
   // require multiple iteration of processing. Repeat until all resources are
   // from included are processed and included map is not expanded
-  var start = 0                     // Start position of processed included values collection
-  var end = includedResources.size  // Last position of included values collection
+  var start = 0 // Start position of processed included values collection
+  var end = includedResources.size // Last position of included values collection
   while (start < end) {
     // Copy included map values and take a sublist of unprocessed values
     val values = includedResources.values.toList().subList(start, end)
@@ -93,15 +93,15 @@ private fun relationshipResources(target: Any): Map<ResourceObject, Any> {
         }
       } else {
         throw IllegalStateException(
-          "Class ["
-            + target.javaClass.simpleName
-            + "] has field ["
-            + field.name
-            + "] annotated with ["
-            + ToMany::class.java.simpleName
-            + "] that is of non-collection type ["
-            + value::class.java.simpleName
-            + "].\nTo-many relationship fields should be of type Collection or List."
+          "Class [" +
+            target.javaClass.simpleName +
+            "] has field [" +
+            field.name +
+            "] annotated with [" +
+            ToMany::class.java.simpleName +
+            "] that is of non-collection type [" +
+            value::class.java.simpleName +
+            "].\nTo-many relationship fields should be of type Collection or List."
         )
       }
     }

@@ -82,7 +82,7 @@ class JsonApiProcessor : AbstractProcessor() {
     val type = TypeSpec.classBuilder("JsonApi")
       .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
       .addMethod(resourcesMethod) // resources() : List<Class<*>>
-      .addMethod(factoryMethod)   // factory() : JsonAdapter.Factory
+      .addMethod(factoryMethod) // factory() : JsonAdapter.Factory
       .build()
 
     // Create a file for defined type and write the java content

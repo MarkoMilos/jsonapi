@@ -29,10 +29,10 @@ internal class RelationshipToOneAdapter(moshi: Moshi) : JsonAdapter<ToOne>() {
     // Assert that relationship is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Relationship MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Relationship MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 

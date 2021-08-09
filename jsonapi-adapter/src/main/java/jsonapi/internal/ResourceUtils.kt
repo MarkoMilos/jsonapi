@@ -68,14 +68,13 @@ private fun relationships(target: Any): Relationships? {
       val replaced = mergedRelationships.put(name, relationship)
       if (replaced != null) {
         throw IllegalStateException(
-          "Class "
-            + target.javaClass.simpleName
-            + " has multiple relationship fields that share the same relationship name "
-            + name
+          "Class " +
+            target.javaClass.simpleName +
+            " has multiple relationship fields that share the same relationship name " +
+            name
         )
       }
     }
-
 
   // ToMany relationship fields
   target
@@ -90,23 +89,23 @@ private fun relationships(target: Any): Relationships? {
         val replaced = mergedRelationships.put(name, relationship)
         if (replaced != null) {
           throw IllegalStateException(
-            "Class "
-              + target.javaClass.simpleName
-              + " has multiple relationship fields that share the same relationship name "
-              + name
+            "Class " +
+              target.javaClass.simpleName +
+              " has multiple relationship fields that share the same relationship name " +
+              name
           )
         }
       } else {
         throw IllegalStateException(
-          "Class ["
-            + target.javaClass.simpleName
-            + "] has field ["
-            + field.name
-            + "] annotated with ["
-            + ToMany::class.java.simpleName
-            + "] that is of non-collection type ["
-            + value::class.java.simpleName
-            + "].\nTo-many relationship fields should be of type Collection or List."
+          "Class [" +
+            target.javaClass.simpleName +
+            "] has field [" +
+            field.name +
+            "] annotated with [" +
+            ToMany::class.java.simpleName +
+            "] that is of non-collection type [" +
+            value::class.java.simpleName +
+            "].\nTo-many relationship fields should be of type Collection or List."
         )
       }
     }

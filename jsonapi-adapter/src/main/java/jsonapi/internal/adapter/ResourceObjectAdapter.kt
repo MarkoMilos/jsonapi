@@ -29,10 +29,10 @@ internal class ResourceObjectAdapter(moshi: Moshi) : JsonAdapter<ResourceObject>
     // Assert that root of resource object is JSON object
     if (reader.peek() != Token.BEGIN_OBJECT) {
       throw JsonFormatException(
-        "Resource object MUST be a JSON object but found "
-          + reader.peek()
-          + " on path "
-          + reader.path
+        "Resource object MUST be a JSON object but found " +
+          reader.peek() +
+          " on path " +
+          reader.path
       )
     }
 
