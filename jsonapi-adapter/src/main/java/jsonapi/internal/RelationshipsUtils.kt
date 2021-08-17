@@ -18,15 +18,15 @@ private fun bindRelationshipFields(
   resourceObject: ResourceObject,
   resources: List<Pair<ResourceObject, Any>>
 ) {
-  // All to-one relationship fields
+  // All to-one relationship fields or properties
   val toOneRelationshipFields = target
-    .fieldsWithAnnotation(ToOne::class.java)
-    .map { it.getAnnotation(ToOne::class.java).name to it }
+    .annotatedFieldsOrProperties(ToOne::class.java)
+    .map { it.getAnnotation(ToOne::class.java).name to it.field }
 
-  // All to-many relationship fields
+  // All to-many relationship fields or properties
   val toManyRelationshipFields = target
-    .fieldsWithAnnotation(ToMany::class.java)
-    .map { it.getAnnotation(ToMany::class.java).name to it }
+    .annotatedFieldsOrProperties(ToMany::class.java)
+    .map { it.getAnnotation(ToMany::class.java).name to it.field }
 
   // Merged relationship fields
   val relationshipFields = toOneRelationshipFields + toManyRelationshipFields

@@ -52,27 +52,35 @@ class Meta(val members: Map<String, Any?>) {
   }
 
   /** Returns [Number] value of member with [name], or null if member is not a [Number] or it is not present */
+  @JvmName("getNumber")
   fun number(name: String): Number? = member(name)
 
   /** Returns [Number] value of member with [name], or [default] if member is not a [Number] or it is not present */
+  @JvmName("getNumber")
   fun number(name: String, default: Number): Number = member(name, default)
 
   /** Returns [String] value of member with [name], or null if member is not a [String] or it is not present */
+  @JvmName("getString")
   fun string(name: String): String? = member(name)
 
   /** Returns [String] value of member with [name], or [default] if member is not a [String] or it is not present */
+  @JvmName("getString")
   fun string(name: String, default: String): String = member(name, default)
 
   /** Returns [Boolean] value of member with [name], or null if member is not a [Boolean] or it is not present */
+  @JvmName("getBoolean")
   fun boolean(name: String): Boolean? = member(name)
 
   /** Returns [Boolean] value of member with [name], or [default] if member is not a [Boolean] or it is not present */
+  @JvmName("getBoolean")
   fun boolean(name: String, default: Boolean): Boolean = member(name, default)
 
   /** Returns [List] value of member with [name], or null if member is not a [List] or it is not present */
+  @JvmName("getList")
   fun <T> list(name: String): List<T>? = member(name)
 
   /** Returns [List] value of member with [name], or [default] if member is not a [List] or it is not present */
+  @JvmName("getList")
   fun <T> list(name: String, default: List<T>): List<T> = member(name, default)
 
   /**

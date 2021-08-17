@@ -1,4 +1,4 @@
-package jsonapi
+package jsonapi.integration
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
@@ -6,9 +6,29 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import jsonapi.Document
 import jsonapi.Document.IncludedSerialization.PROCESSED
+import jsonapi.Id
+import jsonapi.JsonApiFactory
+import jsonapi.JsonApiObject
 import jsonapi.JsonFile.INTEGRATION_DESERIALIZE
 import jsonapi.JsonFile.INTEGRATION_SERIALIZE
+import jsonapi.Lid
+import jsonapi.Link
+import jsonapi.Links
+import jsonapi.LinksObject
+import jsonapi.Meta
+import jsonapi.MetaObject
+import jsonapi.Relationship
+import jsonapi.Relationships
+import jsonapi.RelationshipsObject
+import jsonapi.Resource
+import jsonapi.ResourceIdentifier
+import jsonapi.ToMany
+import jsonapi.ToOne
+import jsonapi.Type
+import jsonapi.read
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Before
@@ -16,70 +36,24 @@ import org.junit.Test
 
 class IntegrationTest {
 
-  @JsonClass(generateAdapter = true)
-  @Resource("people")
-  data class Person(
-    @Type val type: String? = null,
-    @Id val id: String? = null,
-    val name: String,
-    val surname: String,
-    val fullName: String
-  )
-
-  @JsonClass(generateAdapter = true)
-  data class PersonAttributes(
-    val firstName: String,
-    val lastName: String
-  )
-
-  // Example custom adapter that will receive attributes and build full name field for Person object
-  class CustomPersonAdapter {
-    @FromJson
-    fun fromJson(attributes: PersonAttributes): Person {
-      return Person(
-        name = attributes.firstName,
-        surname = attributes.lastName,
-        fullName = "${attributes.firstName}, ${attributes.lastName}"
-      )
-    }
-
-    @ToJson
-    fun toJson(person: Person): PersonAttributes {
-      return PersonAttributes(person.name, person.surname)
-    }
-  }
-
-  @JsonClass(generateAdapter = true)
-  @Resource("comments")
-  data class Comment(
-    @Type val type: String?,
-    @Id val id: String?,
-    val body: String?,
-    @ToOne("author") val author: Person?,
-    @RelationshipsObject var relationships: Relationships?
-  )
-
-  @JsonClass(generateAdapter = true)
-  @Resource("articles")
-  data class Article(
-    @Type val type: String?,
-    @Id val id: String?,
-    @Lid val lid: String?,
-    val title: String?,
-    val promoted: Boolean,
-    val tags: List<String>?,
-    val price: Double?,
-    val source: Source?,
-    @ToOne("author") val author: Person?,
-    @ToMany("comments") val comments: List<Comment>?,
-    @ToMany("related") val related: List<Article>?,
-    @RelationshipsObject var relationships: Relationships?,
-    @LinksObject val links: Links?,
-    @MetaObject val meta: Meta?
-  )
-
-  @JsonClass(generateAdapter = true)
-  data class Source(val name: String)
+  // This integration test validates serialization and deserialization of more complex
+  // document of list of articles (Document<List<Article>>).
+  //
+  // Covered cases:
+  //  - both Kotlin and Java resources handled delegated to ClassJsonAdapter, KotlinJsonAdapter, and generated adapter
+  //  - resources with all and partial resource object elements (type, id, lid, relationships, meta, links)
+  //  - custom type adapter (for Person class) added to chain of adapters
+  //  - meta and links added on document, resource, relationship, and link level
+  //  - to-one and to-many relationships defined as non-empty, empty, and null
+  //  - relationships pointed to resources not included within document as primary or included resource
+  //  - resource with relationship defined both via relationship field (object reference) and relationship object
+  //  - null values for links members, meta members, attributes, and relationships
+  //
+  // Resources are defined as follows:
+  //  - PersonAttributes - kotlin class handled by KotlinJsonAdapter (kotlin reflect)
+  //  - Person - Kotlin class handled by custom adapter (transforms PersonAttributes)
+  //  - Comment - Java class defined in separated file handled by ClassJsonAdapter (java reflect)
+  //  - Article - Kotlin class handled by generated adapter (kotlin codegen)
 
   private val factory = JsonApiFactory.Builder()
     .addType(Person::class.java)
@@ -90,6 +64,7 @@ class IntegrationTest {
   private val moshi = Moshi.Builder()
     .add(factory)
     .add(CustomPersonAdapter())
+    .addLast(KotlinJsonAdapterFactory())
     .build()
 
   private val adapter: JsonAdapter<Document<List<Article>>> = moshi.adapter(
@@ -414,4 +389,57 @@ class IntegrationTest {
 
     assertThat(serialized).isEqualTo(expected)
   }
+
+  data class PersonAttributes(
+    val firstName: String,
+    val lastName: String
+  )
+
+  @Resource("people")
+  data class Person(
+    @Type val type: String? = null,
+    @Id val id: String? = null,
+    val name: String,
+    val surname: String,
+    val fullName: String
+  )
+
+  // Example custom adapter that will receive attributes and build full name field for Person object
+  class CustomPersonAdapter {
+    @FromJson
+    fun fromJson(attributes: PersonAttributes): Person {
+      return Person(
+        name = attributes.firstName,
+        surname = attributes.lastName,
+        fullName = "${attributes.firstName}, ${attributes.lastName}"
+      )
+    }
+
+    @ToJson
+    fun toJson(person: Person): PersonAttributes {
+      return PersonAttributes(person.name, person.surname)
+    }
+  }
+
+  @JsonClass(generateAdapter = true)
+  @Resource("articles")
+  data class Article(
+    @Type val type: String?,
+    @Id val id: String?,
+    @Lid val lid: String?,
+    val title: String?,
+    val promoted: Boolean,
+    val tags: List<String>?,
+    val price: Double?,
+    val source: Source?,
+    @ToOne("author") val author: Person?,
+    @ToMany("comments") val comments: List<Comment>?,
+    @ToMany("related") val related: List<Article>?,
+    @RelationshipsObject var relationships: Relationships?,
+    @LinksObject val links: Links?,
+    @MetaObject val meta: Meta?
+  )
+
+  @JsonClass(generateAdapter = true)
+  data class Source(val name: String)
 }

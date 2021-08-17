@@ -4,9 +4,16 @@ plugins {
 }
 
 dependencies {
+  implementation project(':jsonapi-adapter')
+  implementation project(':jsonapi-retrofit')
+  kapt project(':jsonapi-compiler')
+
   implementation deps.moshi
   implementation deps.moshi_kotlin_reflect
 
-  implementation project(':jsonapi-adapter')
-  kapt project(':jsonapi-compiler')
+  implementation deps.retrofit
+  implementation deps.retrofit_converter_moshi
+
+  implementation deps.okhttp
+  implementation deps.mockwebserver
 }

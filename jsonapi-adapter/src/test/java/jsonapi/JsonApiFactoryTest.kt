@@ -1,5 +1,6 @@
 package jsonapi
 
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -219,23 +220,22 @@ class JsonApiFactoryTest {
 
   @Test
   fun `create transient adapter`() {
-    class TestResource(
-      @ToOne("foo") val resource: ValidResource,
-      @ResourceType val type: String? = null,
-      @Id val id: String? = null,
-      @Lid val lid: String? = null,
-      @RelationshipsObject val relationships: Relationships? = null,
-      @LinksObject val links: Links? = null,
-      @MetaObject val meta: Meta? = null
+    val adapters = listOf<JsonAdapter<Any>>(
+      moshi.adapter(String::class.java, ResourceType::class.java),
+      moshi.adapter(String::class.java, Id::class.java),
+      moshi.adapter(String::class.java, Lid::class.java),
+      moshi.adapter(Relationships::class.java, RelationshipsObject::class.java),
+      moshi.adapter(Links::class.java, LinksObject::class.java),
+      moshi.adapter(Meta::class.java, MetaObject::class.java),
+      moshi.adapter(ValidResource::class.java, setOf(ToOne::class.constructors.first().call("foo"))),
+      moshi.adapter(
+        Types.newParameterizedType(List::class.java, ValidResource::class.java),
+        setOf(ToMany::class.constructors.first().call("foo"))
+      )
     )
 
-    val clazz = TestResource::class.java
-    val adapters = clazz.declaredFields.map { field ->
-      moshi.adapter<Any>(field.type, Types.getFieldJsonQualifierAnnotations(clazz, field.name))
-    }
-
     assertThat(adapters)
-      .hasSize(7)
+      .hasSize(8)
       .hasOnlyElementsOfType(TransientAdapter::class.java)
   }
 

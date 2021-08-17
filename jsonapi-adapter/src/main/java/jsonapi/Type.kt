@@ -3,6 +3,7 @@ package jsonapi
 import com.squareup.moshi.JsonQualifier
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FIELD
+import kotlin.annotation.AnnotationTarget.PROPERTY
 
 /**
  * Annotation for resource `type` member field.
@@ -10,6 +11,6 @@ import kotlin.annotation.AnnotationTarget.FIELD
  * Target field should be of type [String].
  */
 @JsonQualifier
-@Target(FIELD)
+@Target(FIELD, PROPERTY)
 @Retention(RUNTIME)
 annotation class Type

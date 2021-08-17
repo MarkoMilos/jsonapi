@@ -74,19 +74,19 @@ internal fun processIncluded(document: Document<*>): List<Any>? {
 private fun relationshipResources(target: Any): Map<ResourceObject, Any> {
   val relationships = mutableMapOf<ResourceObject, Any>()
 
-  // ToOne field relationships
+  // ToOne relationships fields or properties
   target
-    .fieldsWithAnnotation(ToOne::class.java)
-    .forEach { field ->
-      val value = field.getValue(target) ?: return@forEach
+    .annotatedFieldsOrProperties(ToOne::class.java)
+    .forEach { annotatedTarget ->
+      val value = annotatedTarget.field.getValue(target) ?: return@forEach
       relationships[readResourceObject(value)] = value
     }
 
-  // ToMany field relationships
+  // ToMany relationships fields or properties
   target
-    .fieldsWithAnnotation(ToMany::class.java)
-    .forEach { field ->
-      val value = field.getValue(target) ?: return@forEach
+    .annotatedFieldsOrProperties(ToMany::class.java)
+    .forEach { annotatedTarget ->
+      val value = annotatedTarget.field.getValue(target) ?: return@forEach
       if (value is Collection<*>) {
         value.forEach { element ->
           if (element != null) relationships[readResourceObject(element)] = element
@@ -96,7 +96,7 @@ private fun relationshipResources(target: Any): Map<ResourceObject, Any> {
           "Class [" +
             target.javaClass.simpleName +
             "] has field [" +
-            field.name +
+            annotatedTarget.field.name +
             "] annotated with [" +
             ToMany::class.java.simpleName +
             "] that is of non-collection type [" +

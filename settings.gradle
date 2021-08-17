@@ -2,4 +2,5 @@ rootProject.name = 'jsonapi'
 
 include ':jsonapi-adapter'
 include ':jsonapi-compiler'
+include ':jsonapi-retrofit'
 include ':samples:jvm'

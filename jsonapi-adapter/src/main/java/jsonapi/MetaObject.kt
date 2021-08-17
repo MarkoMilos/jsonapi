@@ -3,6 +3,7 @@ package jsonapi
 import com.squareup.moshi.JsonQualifier
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FIELD
+import kotlin.annotation.AnnotationTarget.PROPERTY
 
 /**
  * Annotation for meta object field.
@@ -19,6 +20,6 @@ import kotlin.annotation.AnnotationTarget.FIELD
  * @see Meta
  */
 @JsonQualifier
-@Target(FIELD)
+@Target(FIELD, PROPERTY)
 @Retention(RUNTIME)
 annotation class MetaObject

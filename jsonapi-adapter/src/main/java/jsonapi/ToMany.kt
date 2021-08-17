@@ -1,6 +1,9 @@
 package jsonapi
 
 import com.squareup.moshi.JsonQualifier
+import kotlin.annotation.AnnotationRetention.RUNTIME
+import kotlin.annotation.AnnotationTarget.FIELD
+import kotlin.annotation.AnnotationTarget.PROPERTY
 
 /**
  * Annotation for to-many relationship fields.
@@ -28,6 +31,6 @@ import com.squareup.moshi.JsonQualifier
  * @see ToOne
  */
 @JsonQualifier
-@Target(AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.RUNTIME)
+@Target(FIELD, PROPERTY)
+@Retention(RUNTIME)
 annotation class ToMany(val name: String)

@@ -287,7 +287,7 @@ class BindRelationshipsTest {
     bindRelationshipFields(resources)
   }
 
-  // TODO add test when RO and RI API is added for field binding e.g @ToOne("foo") val foo: ResourceObject
+  // Add test when RO and RI API is added for field binding e.g @ToOne("foo") val foo: ResourceObject
   // assign resource object when field type is RO
   // assign resource identifier when field type is RI
   // -||- above tests but for to-many relationship

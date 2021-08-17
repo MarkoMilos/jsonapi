@@ -5,9 +5,11 @@ plugins {
 }
 
 dependencies {
-  implementation deps.moshi
+  api deps.moshi
+  api deps.kotlin_reflect
 
   kaptTest deps.moshi_kotlin_codegen
+  testImplementation deps.moshi_kotlin_reflect
   testImplementation deps.junit
   testImplementation deps.assertj
 }
