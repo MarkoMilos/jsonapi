@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-  implementation project(':jsonapi-adapter')
+  implementation project(':jsonapi-adapters')
   implementation deps.moshi
   implementation deps.javapoet
   implementation deps.autoservice

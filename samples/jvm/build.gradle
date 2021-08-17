@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  implementation project(':jsonapi-adapter')
+  implementation project(':jsonapi-adapters')
   implementation project(':jsonapi-retrofit')
   kapt project(':jsonapi-compiler')
 
