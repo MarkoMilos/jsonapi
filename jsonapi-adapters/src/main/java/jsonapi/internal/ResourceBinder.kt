@@ -1,4 +1,4 @@
-@file:JvmName("ResourceUtils")
+@file:JvmName("ResourceBinder")
 
 package jsonapi.internal
 

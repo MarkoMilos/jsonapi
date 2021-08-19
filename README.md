@@ -16,3 +16,12 @@ servers. This efficiency is achieved without compromising readability, flexibili
 
 - Extensions as specified in specification v1.1 [here](https://jsonapi.org/format/1.1/#extensions)
 - Profiles as specified in specification v1.1 [here](https://jsonapi.org/format/1.1/#profiles)
+
+# R8 / ProGuard
+Library keeps classes having json api annotations on fields and properties. 
+Also, library keeps names of fields for kept classes annotated with @Resource annotation since these are meant for
+serialization and thus should not be obfuscated.
+
+If you are using R8 the shrinking and obfuscation rules are included automatically.
+
+ProGuard users must manually add the options from [jsonapi-adapters.pro](https://github.com/MarkoMilos/jsonapi/blob/master/jsonapi-adapters/src/main/resources/META-INF/proguard/jsonapi-adapters.pro).

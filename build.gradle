@@ -6,12 +6,12 @@ buildscript {
     'autoservice'    : '1.0',
     'retrofit'       : '2.9.0',
     'okhttp'         : '3.14.9',
+    'jsr305'         : '3.0.2',
     'junit'          : '4.13.2',
     'assertj'        : '3.19.0',
     'compile_testing': '0.19',
     'spotless'       : '5.7.0',
-    'ktlint'         : '0.41.0',
-    'jsr305'         : '3.0.2'
+    'agp'            : '4.2.2'
   ]
 
   ext.deps = [
@@ -33,11 +33,13 @@ buildscript {
 
   repositories {
     mavenCentral()
+    google()
     gradlePluginPortal()
   }
 
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+    classpath "com.android.tools.build:gradle:${versions.agp}"
     classpath "com.diffplug.spotless:spotless-plugin-gradle:${versions.spotless}"
   }
 }
@@ -45,6 +47,7 @@ buildscript {
 allprojects {
   repositories {
     mavenCentral()
+    google()
   }
 }
 

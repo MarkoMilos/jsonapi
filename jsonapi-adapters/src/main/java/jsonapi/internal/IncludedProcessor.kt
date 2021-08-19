@@ -1,4 +1,4 @@
-@file:JvmName("IncludedUtils")
+@file:JvmName("IncludedProcessor")
 
 package jsonapi.internal
 

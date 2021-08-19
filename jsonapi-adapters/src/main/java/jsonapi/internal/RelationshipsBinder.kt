@@ -1,4 +1,4 @@
-@file:JvmName("RelationshipsUtils")
+@file:JvmName("RelationshipsBinder")
 
 package jsonapi.internal
 
