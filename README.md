@@ -1,11 +1,11 @@
-# JSON:API Moshi adapters
+# JSON:API - Moshi adapters
 
 Library for streamlined use of JSON:API using Kotlin and Java built on top of a modern json
 library [Moshi](https://github.com/square/moshi).
 
 The library contains both models defined per JSON:API specification and adapters for converting these models to/from json.
 
-# About JSON:API
+## About JSON:API
 
 JSON:API is a specification for how a client should request that resources be fetched or modified, and how a server
 should respond to those requests.
@@ -15,7 +15,7 @@ servers. This efficiency is achieved without compromising readability, flexibili
 
 Read more about JSON:API specification [here](https://jsonapi.org/).
 
-# Usage
+## Usage
 
 Define resources:
 
@@ -88,7 +88,7 @@ val document = Document.with(article)
 val json = adapter.toJson(document)
 ```
 
-# Relationships
+## Relationships
 
 To define related resource fields use `ToOne` and `ToMany` annotations.
 
@@ -113,7 +113,7 @@ Library uses this annotation info during serialization/deserialization to:
 - **Serialization** - generate proper `relationships` member based on the value of the annotated field and add the value
   to `included` resources if not already there or within primary resources
 
-# Resource object members
+## Resource object members
 
 Library handles conversion for the
 following [standard resource object members](https://jsonapi.org/format/#document-resource-objects):
@@ -151,21 +151,21 @@ class Article(
 )
 ```
 
-# Annotations summary
+## Annotations summary
 
-| Annotation          | Target element    | Target type                             | Description                                                                  |
-|---------------------|-------------------|-----------------------------------------|------------------------------------------------------------------------------|
-| @Resource           | class             | -                                       | Defines resource class            |
-| @Type               | field or property | String                                  | Binds `type` member to field. For serialization value from this field will be used for `type` member. If this is not defined value from @Resource annotation is used for `type` member.            |
-| @Id                 | field or property | String                                  | Bind `id` member to field. For serialization `id`  or `lid` is required.            |
-| @Lid                | field or property | String                                  | Bind `lid` member to field. For serialization `id`  or `lid` is required. |
-| @RelationshipObject | field or property | Relationships                           | Bind values from `relationships` member to field. For serialization relationships defined with this field will override ones generated from `ToOne` and `ToMany` field values.           |
-| @LinksObject        | field or property | Links                                   | Bind `links` member to field.            |
-| @MetaObject         | field or property | Meta                                    | Bind `meta` member to field.            |
-| @ToOne              | field or property | @Resource class                         | Bind relationship from/to document `included` member. For serialization value for `relationships` member is generated for this field. | 
-| @ToMany             | field or property | Collection or List of @Resource classes | Bind relationship from/to document `included` member. For serialization value for `relationships` member is generated for this field. |
+| Annotation            | Target element    | Target type                                   | Description                                                                  |
+|-----------------------|-------------------|-----------------------------------------------|------------------------------------------------------------------------------|
+| `@Resource`           | class             | -                                             | Defines resource class            |
+| `@Type`               | field or property | `String`                                      | Binds `type` member to field. For serialization value from this field will be used for `type` member. If this is not defined value from @Resource annotation is used for `type` member.            |
+| `@Id`                 | field or property | `String`                                      | Bind `id` member to field. For serialization `id`  or `lid` is required.            |
+| `@Lid`                | field or property | `String`                                      | Bind `lid` member to field. For serialization `id`  or `lid` is required. |
+| `@RelationshipObject` | field or property | `Relationships`                               | Bind values from `relationships` member to field. For serialization relationships defined with this field will override ones generated from `ToOne` and `ToMany` field values.           |
+| `@LinksObject`        | field or property | `Links`                                       | Bind `links` member to field.            |
+| `@MetaObject`         | field or property | `Meta`                                        | Bind `meta` member to field.            |
+| `@ToOne`              | field or property | `@Resource` class                             | Bind relationship from/to document `included` member. For serialization value for `relationships` member is generated for this field. | 
+| `@ToMany`             | field or property | `Collection` or `List` of `@Resource` classes | Bind relationship from/to document `included` member. For serialization value for `relationships` member is generated for this field. |
 
-# Custom adapters
+## Custom adapters
 
 You can register a custom adapter for a resource type. Make sure to register adapter after `JsonApiFactory` since Moshi
 respects registration order.
