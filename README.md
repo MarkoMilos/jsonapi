@@ -1,3 +1,10 @@
+# JSON:API Moshi adapters
+
+Library for streamlined use of JSON:API using Kotlin and Java built on top of a modern json
+library [Moshi](https://github.com/square/moshi).
+
+The library contains both models defined per JSON:API specification and adapters for converting these models to/from json.
+
 # About JSON:API
 
 JSON:API is a specification for how a client should request that resources be fetched or modified, and how a server
@@ -6,22 +13,321 @@ should respond to those requests.
 JSON:API is designed to minimize both the number of requests and the amount of data transmitted between clients and
 servers. This efficiency is achieved without compromising readability, flexibility, or discoverability.
 
-# Deviation from specification
+Read more about JSON:API specification [here](https://jsonapi.org/).
 
-- `hreflang` is specified as string or an array of strings indicating the language(s) of the link’s target. This library
-  implements `hreflang` as array of strings only. Deserialization and serialization will work properly since string
-  values will be deserialized as array with size 1 and arrays with size equal to 1 will be serialized as string.
+# Usage
 
-# Unsupported features
+Define resources:
 
-- Extensions as specified in specification v1.1 [here](https://jsonapi.org/format/1.1/#extensions)
-- Profiles as specified in specification v1.1 [here](https://jsonapi.org/format/1.1/#profiles)
+```kotlin
+@Resource("people")
+class Person(
+  @Id val id: String?,
+  val name: String
+)
+
+@Resource("comments")
+class Comment(
+  @Id val id: String?,
+  val body: String,
+  @ToOne("author") val author: Person?
+)
+
+@Resource("articles")
+class Article(
+  @Id val id: String?,
+  val title: String,
+  @ToOne("author") val author: Person?,
+  @ToMany("comments") val comments: List<Comment>?
+)
+```
+
+Create `JsonApiFactory` with registered resources:
+
+```kotlin
+val factory = JsonApiFactory.Builder()
+  .addType(Person::class.java)
+  .addType(Comment::class.java)
+  .addType(Article::class.java)
+  .build()
+```
+
+*Alternatively you can use the annotation processor to avoid manually registering each resource (see the section below).*
+
+Add created `JsonApiFactory` as first in factory chain to `Moshi`:
+
+```kotlin
+val moshi = Moshi.Builder()
+  .add(factory)
+  .build()
+```
+
+Create adapter for `Document` type:
+
+```kotlin
+val adapter = moshi.adapter<Document<Article>>(...)
+```
+
+Deserialization:
+
+```kotlin
+val document = adapter.fromJson("{....}")
+val article = document.dataOrNull()
+```
+
+Serialization:
+
+```kotlin
+val article = Article("1", "They're taking the hobbits to Isengard!")
+
+val document = Document.with(article)
+  .links(Links("self" to "http://example.com/articles/1"))
+  .meta(Meta("copyright" to "Copyright 2015 Example Corp."))
+  .build()
+
+val json = adapter.toJson(document)
+```
+
+# Relationships
+
+To define related resource fields use `ToOne` and `ToMany` annotations.
+
+- `ToOne` - defines to-one relationship and should target field of resource type (e.g. `Article`)
+- `ToMany` - defines to-many relationship and should target field whose type is a `List` or `Collection` of resources (
+  e.g. `List<Article>`)
+
+Example:
+
+```kotlin
+@Resource("articles")
+class Article(
+  @ToOne("author") val author: Person?,
+  @ToMany("comments") val comments: List<Comment>?
+)
+```
+
+Library uses this annotation info during serialization/deserialization to:
+
+- **Deserialization** - perform a lookup on resource relationships object for relationships with th given name and, if found,
+  will bind matching resource from `included` (if any) to target field
+- **Serialization** - generate proper `relationships` member based on the value of the annotated field and add the value
+  to `included` resources if not already there or within primary resources
+
+# Resource object members
+
+Library handles conversion for the
+following [standard resource object members](https://jsonapi.org/format/#document-resource-objects):
+`type`, `id`, `lid`, `relationships`, `links`, and `meta`.
+
+Member `attributes` (containing resource data) is converted using a delegate adapter down the chain. Depending on your
+configuration of `Moshi` and definition of resource class these could be (in this order):
+
+- your custom adapter for the given type (if any)
+- codegen adapter (if kotlin codegen module is used)
+- reflection adapter (either for Java or Kotlin)
+
+Resource object members can be bound to a resource with annotations as shown in the example below also showing the 
+full api of this library for defining resources.
+
+```kotlin
+@Resource("articles")
+class Article(
+  // Standard resource object members
+  @Type val type: String?,
+  @Id val id: String?,
+  @Lid val lid: String?,
+  @RelationshipsObject val relationships: Relationships?,
+  @LinksObject val links: Links?,
+  @MetaObject val meta: Meta?,
+  
+  // Attributes
+  var title: String?,
+  // ... 
+  
+  // Relationships
+  @ToOne("author") val author: Person?,
+  @ToMany("comments") val comments: List<Comment>?
+  // ...
+)
+```
+
+# Annotations summary
+
+| Annotation          | Target element    | Target type                             | Description                                                                  |
+|---------------------|-------------------|-----------------------------------------|------------------------------------------------------------------------------|
+| @Resource           | class             | -                                       | Defines resource class            |
+| @Type               | field or property | String                                  | Binds `type` member to field. For serialization value from this field will be used for `type` member. If this is not defined value from @Resource annotation is used for `type` member.            |
+| @Id                 | field or property | String                                  | Bind `id` member to field. For serialization `id`  or `lid` is required.            |
+| @Lid                | field or property | String                                  | Bind `lid` member to field. For serialization `id`  or `lid` is required. |
+| @RelationshipObject | field or property | Relationships                           | Bind values from `relationships` member to field. For serialization relationships defined with this field will override ones generated from `ToOne` and `ToMany` field values.           |
+| @LinksObject        | field or property | Links                                   | Bind `links` member to field.            |
+| @MetaObject         | field or property | Meta                                    | Bind `meta` member to field.            |
+| @ToOne              | field or property | @Resource class                         | Bind relationship from/to document `included` member. For serialization value for `relationships` member is generated for this field. | 
+| @ToMany             | field or property | Collection or List of @Resource classes | Bind relationship from/to document `included` member. For serialization value for `relationships` member is generated for this field. |
+
+# Custom adapters
+
+You can register a custom adapter for a resource type. Make sure to register adapter after `JsonApiFactory` since Moshi
+respects registration order.
+
+```kotlin
+Moshi.Builder()
+  .add(factory)
+  .add(MyCustomArticleAdapter())
+  .build()
+```
+
+For deserialization library will delegate `attributes` member conversion to the adapter down the chain meaning that the
+registered adapter will receive only `attributes` json.
+
+Example: for resource
+
+```json
+{
+  "type": "articles",
+  "id": "1",
+  "attributes": {
+    "title": "Some Title",
+    "slug": "slug",
+    "likes": 10
+  }
+}
+```
+
+custom adapter receives the following `attributes` object for conversion
+
+```json
+{
+  "title": "Some Title",
+  "slug": "slug",
+  "likes": 10
+}
+```
+
+For serialization library will delegate resource value to the registered custom adapter. The custom adapter should serialize
+only values relevant for `attributes` member since all other members are handled by the library.
+
+# Annotation processor
+
+As mentioned in the section above, resources need to be registered with `JsonApiFactory`.
+
+```kotlin
+JsonApiFactory.Builder()
+  .addType(Article::class.java)
+  .addType(Comment::class.java)
+  .addType(Person::class.java)
+  // ... many other resources ...
+  .build()
+```
+
+Registering resources manually as shown in the example above is a boilerplate that can be avoided with the annotation processor
+artifact. Annotation processor will scan source for all classes annotated with `@Resource` and will generate `JsonApi`
+class with the following static methods:
+
+```Java
+public final class JsonApi {
+  public static List<Class<?>> resources(); // List of all resource types
+  public static JsonAdapter.Factory factory(); // Default factory built with all resources
+}
+```
+
+You can then use `JsonApiFactory` without building it manually:
+
+```kotlin
+Moshi.Builder()
+  .add(JsonApi.factory())
+  .build()
+```
+
+# Retrofit
+
+When used with Retrofit definition of service could look something like the following:
+
+```kotlin
+interface Service {
+  @GET("/")
+  suspend fun article(): Document<Article>
+}
+```
+
+Resource(s) needs to be unwrapped from `Document` when returned as a result.
+
+```kotlin
+val document = service.article()
+if (!document.hasErrors()) {
+  // Document does not have errors, handle result
+  val article = document.data
+  // ....
+} else {
+  // Document has errors throw or process errors
+  throw Exception()
+}
+```
+
+If you don't want/need to work with `Document` class and you want to send/receive resources directly you can use
+the retrofit converter from `jsonapi.retrofit` artifact. 
+
+Adding `@Document` annotation to service definition like in the example below will unwrap the document and return 
+`Article` resource. In case of errors, an `ErrorsException` is thrown containing `errors` from the `Document`.
+
+```kotlin
+interface Service {
+  @Document
+  @GET("/")
+  fun article(): Article
+}
+```
+
+`@Document` annotation works for body parameters wrapping the target resource to `Document` before serialization. 
+Example:
+```kotlin
+interface Service {
+  @POST("/")
+  fun createArticle(@Document @Body article: Article)
+}
+```
+
+# Download
+
+Download the latest JAR or depend via Maven:
+
+```xml
+
+<dependency>
+    <groupId>TODO</groupId>
+    <artifactId>jsonapi</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+or Gradle:
+
+```groovy
+implementation("TODO")
+```
+
+Snapshots of the development version are available in Sonatype's snapshots repository.
 
 # R8 / ProGuard
-Library keeps classes having json api annotations on fields and properties. 
-Also, library keeps names of fields for kept classes annotated with @Resource annotation since these are meant for
-serialization and thus should not be obfuscated.
+
+Library keeps classes having json api annotations on fields and properties. Also, library keeps names of fields for kept
+classes annotated with @Resource annotation since these are meant for serialization and thus should not be obfuscated.
 
 If you are using R8 the shrinking and obfuscation rules are included automatically.
 
-ProGuard users must manually add the options from [jsonapi-adapters.pro](https://github.com/MarkoMilos/jsonapi/blob/master/jsonapi-adapters/src/main/resources/META-INF/proguard/jsonapi-adapters.pro).
+ProGuard users must manually add the options
+from [jsonapi-adapters.pro](https://github.com/MarkoMilos/jsonapi/blob/master/jsonapi-adapters/src/main/resources/META-INF/proguard/jsonapi-adapters.pro)
+.
+
+# License
+
+Copyright 2021 Marko Milos.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "
+AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.
