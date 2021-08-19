@@ -1,0 +1,18 @@
+{
+  "id": "id",
+  "status": "status",
+  "code": "code",
+  "title": "title",
+  "detail": "detail",
+  "source": {
+    "pointer": "pointer",
+    "parameter": "parameter",
+    "header": "header"
+  },
+  "links": {
+    "link": "link"
+  },
+  "meta": {
+    "name": "value"
+  }
+}

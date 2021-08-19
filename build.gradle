@@ -1,35 +1,45 @@
 buildscript {
   ext.versions = [
-    'kotlin'         : '1.4.32',
+    'kotlin'         : '1.5.10',
     'moshi'          : '1.12.0',
     'javapoet'       : '1.13.0',
     'autoservice'    : '1.0',
+    'retrofit'       : '2.9.0',
+    'okhttp'         : '3.14.9',
+    'jsr305'         : '3.0.2',
     'junit'          : '4.13.2',
     'assertj'        : '3.19.0',
     'compile_testing': '0.19',
     'spotless'       : '5.7.0',
-    'ktlint'         : '0.41.0'
+    'agp'            : '4.2.2'
   ]
 
   ext.deps = [
-    'kotlinStdlib'        : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
-    'moshi'               : "com.squareup.moshi:moshi:${versions.moshi}",
-    'moshi_kotlin_reflect': "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
-    'moshi_kotlin_codegen': "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
-    'javapoet'            : "com.squareup:javapoet:${versions.javapoet}",
-    'autoservice'         : "com.google.auto.service:auto-service:${versions.autoservice}",
-    'junit'               : "junit:junit:${versions.junit}",
-    'assertj'             : "org.assertj:assertj-core:${versions.assertj}",
-    'compile_testing'     : "com.google.testing.compile:compile-testing:${versions.compile_testing}"
+    'kotlin_reflect'          : "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}",
+    'moshi'                   : "com.squareup.moshi:moshi:${versions.moshi}",
+    'moshi_kotlin_reflect'    : "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
+    'moshi_kotlin_codegen'    : "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
+    'javapoet'                : "com.squareup:javapoet:${versions.javapoet}",
+    'autoservice'             : "com.google.auto.service:auto-service:${versions.autoservice}",
+    'retrofit'                : "com.squareup.retrofit2:retrofit:${versions.retrofit}",
+    'retrofit_converter_moshi': "com.squareup.retrofit2:converter-moshi:${versions.retrofit}",
+    'okhttp'                  : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
+    'mockwebserver'           : "com.squareup.okhttp3:mockwebserver:${versions.okhttp}",
+    'jsr305'                  : "com.google.code.findbugs:jsr305:${versions.jsr305}",
+    'junit'                   : "junit:junit:${versions.junit}",
+    'assertj'                 : "org.assertj:assertj-core:${versions.assertj}",
+    'compile_testing'         : "com.google.testing.compile:compile-testing:${versions.compile_testing}"
   ]
 
   repositories {
     mavenCentral()
+    google()
     gradlePluginPortal()
   }
 
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+    classpath "com.android.tools.build:gradle:${versions.agp}"
     classpath "com.diffplug.spotless:spotless-plugin-gradle:${versions.spotless}"
   }
 }
@@ -37,6 +47,7 @@ buildscript {
 allprojects {
   repositories {
     mavenCentral()
+    google()
   }
 }
 
@@ -62,17 +73,18 @@ spotless {
     targetExclude "bin/**/*.kt"
     // This should all come from editorconfig which is not currently supported
     // Related issue: https://github.com/diffplug/spotless/issues/142
-    ktlint(versions.ktlint).userData([
+    ktlint("0.41.0").userData([
       "indent_size"             : "2",
       "continuation_indent_size": "2"
     ])
+    indentWithSpaces(2)
     trimTrailingWhitespace()
     endWithNewline()
   }
   java {
     target "**/src/**/*.java"
-    indentWithSpaces(2)
     removeUnusedImports()
+    indentWithSpaces(2)
     trimTrailingWhitespace()
     endWithNewline()
   }

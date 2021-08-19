@@ -1,0 +1,130 @@
+{
+  "data": {
+    "type": "articles",
+    "id": "1",
+    "attributes": {
+      "title": "Title1"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "type": "people",
+          "id": "1"
+        }
+      },
+      "comments": {
+        "data": [
+          {
+            "type": "comments",
+            "id": "1"
+          },
+          {
+            "type": "comments",
+            "id": "2"
+          }
+        ]
+      },
+      "related": {
+        "data": [
+          {
+            "type": "articles",
+            "id": "2"
+          }
+        ]
+      }
+    }
+  },
+  "included": [
+    {
+      "type": "articles",
+      "id": "1",
+      "attributes": {
+        "title": "Title1"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "1"
+          }
+        },
+        "comments": {
+          "data": [
+            {
+              "type": "comments",
+              "id": "1"
+            },
+            {
+              "type": "comments",
+              "id": "2"
+            }
+          ]
+        },
+        "related": {
+          "data": [
+            {
+              "type": "articles",
+              "id": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "articles",
+      "id": "2",
+      "attributes": {
+        "title": "Title2"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "2"
+          }
+        },
+        "comments": {
+          "data": []
+        }
+      }
+    },
+    {
+      "type": "comments",
+      "id": "1",
+      "attributes": {
+        "body": "Comment1"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "2"
+          }
+        }
+      }
+    },
+    {
+      "type": "comments",
+      "id": "2",
+      "attributes": {
+        "body": "Comment2"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "type": "people",
+            "id": "1"
+          }
+        }
+      }
+    },
+    {
+      "type": "people",
+      "id": "1",
+      "attributes": {
+        "firstName": "Name1",
+        "lastName": "Surname1"
+      }
+    }
+  ]
+}

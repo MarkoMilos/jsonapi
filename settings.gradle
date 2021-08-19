@@ -1,5 +1,7 @@
 rootProject.name = 'jsonapi'
 
-include ':jsonapi-adapter'
-include ':jsonapi-processor'
+include ':jsonapi-adapters'
+include ':jsonapi-compiler'
+include ':jsonapi-retrofit'
 include ':samples:jvm'
+include ':samples:android'

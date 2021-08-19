@@ -1,0 +1,24 @@
+plugins {
+  id 'java-library'
+  id 'org.jetbrains.kotlin.jvm'
+  id 'kotlin-kapt'
+}
+
+dependencies {
+  api project(':jsonapi-adapters')
+  api deps.retrofit
+
+  compileOnly deps.jsr305
+
+  testImplementation deps.junit
+  testImplementation deps.assertj
+
+  testImplementation deps.okhttp
+  testImplementation deps.mockwebserver
+
+  testImplementation deps.moshi_kotlin_reflect
+  testImplementation deps.moshi_kotlin_codegen
+  kaptTest deps.moshi_kotlin_codegen
+
+  testImplementation deps.retrofit_converter_moshi
+}

@@ -1,0 +1,41 @@
+{
+  "data": {
+    "type": "articles",
+    "id": "1",
+    "relationships": {
+      "author": {
+        "data": {
+          "type": "people",
+          "id": "1"
+        }
+      },
+      "comments": {
+        "data": [
+          {
+            "type": "comments",
+            "id": "1"
+          }
+        ]
+      }
+    },
+    "attributes": {
+      "title": "Title1"
+    }
+  },
+  "included": [
+    {
+      "type": "comments",
+      "id": "1",
+      "attributes": {
+        "body": "Comment1"
+      }
+    },
+    {
+      "type": "comments",
+      "id": "2",
+      "attributes": {
+        "body": "Comment2"
+      }
+    }
+  ]
+}

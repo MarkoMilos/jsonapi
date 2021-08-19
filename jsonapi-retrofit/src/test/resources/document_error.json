@@ -1,0 +1,28 @@
+{
+  "errors": [
+    {
+      "id": "1",
+      "status": "500",
+      "code": "10",
+      "title": "title",
+      "detail": "detail"
+    },
+    {
+      "id": "2",
+      "links": null,
+      "status": null,
+      "code": null,
+      "title": null,
+      "detail": null,
+      "source": null,
+      "meta": null
+    },
+    {
+      "id": "3",
+      "links": {
+        "about": null,
+        "type": null
+      }
+    }
+  ]
+}

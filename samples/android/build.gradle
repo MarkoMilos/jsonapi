@@ -1,0 +1,40 @@
+plugins {
+  id 'com.android.application'
+  id 'kotlin-android'
+  id 'kotlin-kapt'
+}
+
+android {
+  compileSdkVersion 30
+
+  defaultConfig {
+    applicationId "com.example.jsonapi"
+    minSdkVersion 21
+    targetSdkVersion 30
+    versionCode 1
+    versionName "1.0"
+  }
+
+  buildTypes {
+    debug {
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+  }
+}
+
+dependencies {
+  implementation project(':jsonapi-adapters')
+  implementation project(':jsonapi-retrofit')
+  kapt project(':jsonapi-compiler')
+
+  implementation deps.moshi
+  implementation deps.moshi_kotlin_reflect
+  kapt deps.moshi_kotlin_codegen
+
+  implementation deps.retrofit
+  implementation deps.retrofit_converter_moshi
+
+  implementation deps.okhttp
+  implementation deps.mockwebserver
+}

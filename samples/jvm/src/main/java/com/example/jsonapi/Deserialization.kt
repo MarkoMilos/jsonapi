@@ -1,13 +1,13 @@
 package com.example.jsonapi
 
 import com.example.jsonapi.resource.Article
-import com.jsonapi.Document
-import com.jsonapi.JsonApi
-import com.jsonapi.JsonApiFactory
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import jsonapi.Document
+import jsonapi.JsonApi
+import jsonapi.JsonApiFactory
 
 fun main() {
   val factory = JsonApiFactory.Builder()
@@ -23,7 +23,7 @@ fun main() {
     Types.newParameterizedType(Document::class.java, Article::class.java)
   )
 
-  val document = adapter.fromJson(json)
+  val document = adapter.fromJson(JSON)
 
   println("DATA:\n${document?.data}\n")
   println("INCLUDED:\n${document?.included?.joinToString("\n")}}\n")
@@ -33,7 +33,7 @@ fun main() {
   println("JSONAPI: ${document?.jsonapi}\n")
 }
 
-private val json = """
+private val JSON = """
   {
     "jsonapi": {
       "version": "1.1",
