@@ -9,9 +9,7 @@ buildscript {
     'jsr305'         : '3.0.2',
     'junit'          : '4.13.2',
     'assertj'        : '3.19.0',
-    'compile_testing': '0.19',
-    'spotless'       : '5.7.0',
-    'agp'            : '4.2.2'
+    'compile_testing': '0.19'
   ]
 
   ext.deps = [
@@ -39,8 +37,10 @@ buildscript {
 
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
-    classpath "com.android.tools.build:gradle:${versions.agp}"
-    classpath "com.diffplug.spotless:spotless-plugin-gradle:${versions.spotless}"
+    classpath "com.android.tools.build:gradle:4.2.2"
+    classpath "com.diffplug.spotless:spotless-plugin-gradle:5.7.0"
+    classpath "com.vanniktech:gradle-maven-publish-plugin:0.17.0"
+    classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.32"
   }
 }
 
@@ -48,6 +48,12 @@ allprojects {
   repositories {
     mavenCentral()
     google()
+  }
+
+  plugins.withId("com.vanniktech.maven.publish") {
+    mavenPublish {
+      sonatypeHost = "S01"
+    }
   }
 }
 

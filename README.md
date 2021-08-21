@@ -1,11 +1,14 @@
-# JSON:API - Moshi adapters
+# JSON:API for Java & Kotlin
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.markomilos.jsonapi/jsonapi-adapters/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.markomilos.jsonapi/jsonapi-adapters)
 
 Library for streamlined use of JSON:API using Kotlin and Java built on top of a modern json
 library [Moshi](https://github.com/square/moshi).
 
-The library contains both models defined per JSON:API specification and adapters for converting these models to/from json.
+The library contains both models defined per JSON:API specification and adapters for converting these models to/from
+json.
 
-## About JSON:API
+### About JSON:API
 
 JSON:API is a specification for how a client should request that resources be fetched or modified, and how a server
 should respond to those requests.
@@ -14,6 +17,8 @@ JSON:API is designed to minimize both the number of requests and the amount of d
 servers. This efficiency is achieved without compromising readability, flexibility, or discoverability.
 
 Read more about JSON:API specification [here](https://jsonapi.org/).
+
+# Adapters
 
 ## Usage
 
@@ -25,14 +30,18 @@ class Person(
   @Id val id: String?,
   val name: String
 )
+```
 
+```kotlin
 @Resource("comments")
 class Comment(
   @Id val id: String?,
   val body: String,
   @ToOne("author") val author: Person?
 )
+```
 
+```kotlin
 @Resource("articles")
 class Article(
   @Id val id: String?,
@@ -65,30 +74,92 @@ val moshi = Moshi.Builder()
 Create adapter for `Document` type:
 
 ```kotlin
-val adapter = moshi.adapter<Document<Article>>(...)
+val adapter = moshi.adapter<Document<Article>>(type)
 ```
 
 Deserialization:
 
 ```kotlin
-val document = adapter.fromJson("{....}")
+// Deserialize document from json
+val document = adapter.fromJson("{...}")
+
+// Get primary resource(s) from document
 val article = document.dataOrNull()
+
+// Relationship values from included are bound to field
+val author = article.author  
 ```
 
 Serialization:
 
 ```kotlin
-val article = Article("1", "They're taking the hobbits to Isengard!")
+// Create resource
+val article = Article("1", "They're taking the hobbits to Isengard!", author, comments)
 
+// Create document with resource, also add links and meta
 val document = Document.with(article)
   .links(Links("self" to "http://example.com/articles/1"))
   .meta(Meta("copyright" to "Copyright 2015 Example Corp."))
   .build()
 
+// Serialize document to json string
 val json = adapter.toJson(document)
 ```
 
-## Relationships
+## Document
+`Document` defines top level entity for JSON:API. It is a generic class accepting type of primary resource e.g. `Document<Article>`.
+
+Create document with resource
+```kotlin
+Document.with(resource)
+  .included(resource1, resource2)
+  .links(links)
+  .meta(meta)
+  .build()
+```
+
+Configure how included are serialized (*by default included are processed from primary resource relationships*):
+```kotlin
+Document.with(resource)
+  .includedSerialization(NONE) // Don't serialize included
+  .build()
+```
+
+Create error document
+```kotlin
+Document.from(errors)
+```
+
+Document api
+```
+data: T?
+included: List<Any>?
+errors: List<Error>?
+links: Links?
+meta: Meta?
+jsonapi: JsonApiObject?
+
+hasData(): Boolean
+hasErrors(): Boolean
+hasMeta(): Boolean
+
+dataOrNull(): T?
+dataOrThrow(): T?
+requireData(): T
+dataOrDefault(data: T) : T
+dataOrElse(block: (List<Error>?) -> T): T
+
+errorsOrEmpty(): List<Error>
+throwIfErrors()
+```
+
+Allowed document types are one of:
+- single resource (e.g. `Article`) or collection of resources (e.g. `List<Article>`)
+- single resource object (`ResourceObject`) or collection of resource objects (`List<ResourceObject>`)
+- single resource identifier (`ResourceIdentifire`) or collection of resource identifiers (`List<ResourceIdentifier>`)
+- `Void`/`Nothing` for empty documents without primary resource such are error documents or meta only documents
+
+## Resource relationships
 
 To define related resource fields use `ToOne` and `ToMany` annotations.
 
@@ -108,12 +179,12 @@ class Article(
 
 Library uses this annotation info during serialization/deserialization to:
 
-- **Deserialization** - perform a lookup on resource relationships object for relationships with th given name and, if found,
-  will bind matching resource from `included` (if any) to target field
+- **Deserialization** - perform a lookup on resource relationships object for relationships with th given name and, if
+  found, will bind matching resource from `included` (if any) to target field
 - **Serialization** - generate proper `relationships` member based on the value of the annotated field and add the value
   to `included` resources if not already there or within primary resources
 
-## Resource object members
+## Resource standard members
 
 Library handles conversion for the
 following [standard resource object members](https://jsonapi.org/format/#document-resource-objects):
@@ -126,8 +197,8 @@ configuration of `Moshi` and definition of resource class these could be (in thi
 - codegen adapter (if kotlin codegen module is used)
 - reflection adapter (either for Java or Kotlin)
 
-Resource object members can be bound to a resource with annotations as shown in the example below also showing the 
-full api of this library for defining resources.
+Resource object members can be bound to a resource with annotations as shown in the example below also showing the full
+api of this library for defining resources.
 
 ```kotlin
 @Resource("articles")
@@ -151,12 +222,12 @@ class Article(
 )
 ```
 
-## Annotations summary
+## Annotations
 
 | Annotation            | Target element    | Target type                                   | Description                                                                  |
 |-----------------------|-------------------|-----------------------------------------------|------------------------------------------------------------------------------|
 | `@Resource`           | class             | -                                             | Defines resource class            |
-| `@Type`               | field or property | `String`                                      | Binds `type` member to field. For serialization value from this field will be used for `type` member. If this is not defined value from @Resource annotation is used for `type` member.            |
+| `@Type`               | field or property | `String`                                      | Binds `type` member to field. For serialization value from this field will be used for `type` member. If this is not defined value from `@Resource` annotation is used for `type` member.            |
 | `@Id`                 | field or property | `String`                                      | Bind `id` member to field. For serialization `id`  or `lid` is required.            |
 | `@Lid`                | field or property | `String`                                      | Bind `lid` member to field. For serialization `id`  or `lid` is required. |
 | `@RelationshipObject` | field or property | `Relationships`                               | Bind values from `relationships` member to field. For serialization relationships defined with this field will override ones generated from `ToOne` and `ToMany` field values.           |
@@ -177,10 +248,8 @@ Moshi.Builder()
   .build()
 ```
 
-For deserialization library will delegate `attributes` member conversion to the adapter down the chain meaning that the
-registered adapter will receive only `attributes` json.
-
-Example: for resource
+For deserialization library will delegate `attributes` object conversion to the adapter down the chain meaning that the
+registered adapter will receive only `attributes` json - e.g. for the following resource
 
 ```json
 {
@@ -204,12 +273,31 @@ custom adapter receives the following `attributes` object for conversion
 }
 ```
 
-For serialization library will delegate resource value to the registered custom adapter. The custom adapter should serialize
-only values relevant for `attributes` member since all other members are handled by the library.
+For serialization library will delegate resource value to the registered custom adapter. The custom adapter should
+serialize only values relevant for `attributes` object since all other members are handled by the library.
+
+## Download
+
+Download the latest JAR or depend via Maven:
+```xml
+<dependency>
+    <groupId>com.markomilos.jsonapi</groupId>
+    <artifactId>jsonapi-adapters</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+or Gradle:
+```groovy
+implementation("com.markomilos.jsonapi:jsonapi-adapters:1.0.0")
+```
 
 # Annotation processor
 
-As mentioned in the section above, resources need to be registered with `JsonApiFactory`.
+Document `included` members is defined as an array of resource objects that are related to the primary data and/or each
+other (“included resources”). Library will try to deserialize each resource form that array to correct type based on
+resource object `type` member. In order for library to know which class should be deserialized all resources are
+required to be registered with `JsonApiFactory`:
 
 ```kotlin
 JsonApiFactory.Builder()
@@ -220,14 +308,17 @@ JsonApiFactory.Builder()
   .build()
 ```
 
-Registering resources manually as shown in the example above is a boilerplate that can be avoided with the annotation processor
-artifact. Annotation processor will scan source for all classes annotated with `@Resource` and will generate `JsonApi`
-class with the following static methods:
+Registering resources manually as shown in the example above is a boilerplate that can be avoided with the annotation
+processor artifact. Annotation processor will scan source for all classes annotated with `@Resource` and will
+generate `JsonApi` class with the following static methods:
 
 ```Java
 public final class JsonApi {
-  public static List<Class<?>> resources(); // List of all resource types
-  public static JsonAdapter.Factory factory(); // Default factory built with all resources
+  // List of all resource types
+  public static List<Class<?>> resources();
+
+  // Default factory built with all resources
+  public static JsonAdapter.Factory factory();
 }
 ```
 
@@ -237,6 +328,23 @@ You can then use `JsonApiFactory` without building it manually:
 Moshi.Builder()
   .add(JsonApi.factory())
   .build()
+```
+
+## Download
+
+Download the latest JAR or depend via Maven:
+```xml
+<dependency>
+    <groupId>com.markomilos.jsonapi</groupId>
+    <artifactId>jsonapi-compiler</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+or Gradle:
+
+```groovy
+implementation("com.markomilos.jsonapi:jsonapi-compiler:1.0.0")
 ```
 
 # Retrofit
@@ -264,10 +372,10 @@ if (!document.hasErrors()) {
 }
 ```
 
-If you don't want/need to work with `Document` class and you want to send/receive resources directly you can use
-the retrofit converter from `jsonapi.retrofit` artifact. 
+If you don't want/need to work with `Document` class and you want to send/receive resources directly you can use the
+retrofit converter from `jsonapi.retrofit` artifact.
 
-Adding `@Document` annotation to service definition like in the example below will unwrap the document and return 
+Adding `@Document` annotation to service definition like in the example below will unwrap the document and return
 `Article` resource. In case of errors, an `ErrorsException` is thrown containing `errors` from the `Document`.
 
 ```kotlin
@@ -278,8 +386,9 @@ interface Service {
 }
 ```
 
-`@Document` annotation works for body parameters wrapping the target resource to `Document` before serialization. 
+`@Document` annotation works for body parameters wrapping the target resource to `Document` before serialization.
 Example:
+
 ```kotlin
 interface Service {
   @POST("/")
@@ -287,26 +396,21 @@ interface Service {
 }
 ```
 
-# Download
+## Download
 
 Download the latest JAR or depend via Maven:
-
 ```xml
-
 <dependency>
-    <groupId>TODO</groupId>
-    <artifactId>jsonapi</artifactId>
+    <groupId>com.markomilos.jsonapi</groupId>
+    <artifactId>jsonapi-retrofit</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
 
 or Gradle:
-
 ```groovy
-implementation("TODO")
+implementation("com.markomilos.jsonapi:jsonapi-retrofit:1.0.0")
 ```
-
-Snapshots of the development version are available in Sonatype's snapshots repository.
 
 # R8 / ProGuard
 
@@ -315,9 +419,8 @@ classes annotated with @Resource annotation since these are meant for serializat
 
 If you are using R8 the shrinking and obfuscation rules are included automatically.
 
-ProGuard users must manually add the options
-from [jsonapi-adapters.pro](https://github.com/MarkoMilos/jsonapi/blob/master/jsonapi-adapters/src/main/resources/META-INF/proguard/jsonapi-adapters.pro)
-.
+ProGuard users must manually add the options from 
+[jsonapi-adapters.pro](https://github.com/MarkoMilos/jsonapi/blob/master/jsonapi-adapters/src/main/resources/META-INF/proguard/jsonapi-adapters.pro).
 
 # License
 
