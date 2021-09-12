@@ -344,7 +344,7 @@ Download the latest JAR or depend via Maven:
 or Gradle:
 
 ```groovy
-implementation("com.markomilos.jsonapi:jsonapi-compiler:1.0.0")
+kapt("com.markomilos.jsonapi:jsonapi-compiler:1.0.0")
 ```
 
 # Retrofit
