@@ -30,9 +30,6 @@ class ResourceIdentifier @JvmOverloads constructor(
     require(type.isNotBlank()) {
       "A resource identifier MUST contain a type member but was blank."
     }
-    require(!id.isNullOrBlank() || !lid.isNullOrBlank()) {
-      "A resource identifier MUST contain an 'id' or 'lid' member but both were null or blank."
-    }
   }
 
   override fun equals(other: Any?): Boolean {

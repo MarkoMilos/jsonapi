@@ -68,7 +68,7 @@ class ReadResourceObjectTest {
 
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
+      @Id val id = null
       @jsonapi.ToOne("A") val a = Bar("1")
       @jsonapi.ToOne("B") val b = Bar("2")
       @jsonapi.ToMany("C") val c = listOf(Bar("1"), Bar("2"), Bar("3"))
@@ -180,15 +180,17 @@ class ReadResourceObjectTest {
     assertThat(resourceObject.lid).isEqualTo("1")
   }
 
-  @Test(expected = IllegalArgumentException::class)
-  fun `read throws for target with invalid identifier`() {
+  fun `read from target without id or lid`() {
     @Resource("foo")
-    class Foo {
-      @Id val id = ""
-      @Lid val lid = ""
-    }
+    class Foo(
+      @Lid val lid: String? = null,
+      @Id val id: String? = null
+    )
 
-    readResourceObject(Foo())
+    val resourceObject = readResourceObject(Foo())
+
+    assertThat(resourceObject.id).isNull()
+    assertThat(resourceObject.lid).isNull()
   }
 
   @Test(expected = IllegalStateException::class)

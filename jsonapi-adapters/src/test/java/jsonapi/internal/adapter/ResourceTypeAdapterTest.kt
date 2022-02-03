@@ -307,27 +307,17 @@ class ResourceTypeAdapterTest {
     assertThat(serialized).isEqualTo("""{"type":"articles","id":"1","attributes":{"title":"Title"}}""")
   }
 
+  @Test
+  fun `serialize resource without id or lid`() {
+    val article = Article(id = null, lid = null, title = "Title")
+    val adapter = moshi.adapter(Article::class.java)
+    val serialized = adapter.toJson(article)
+    assertThat(serialized).isEqualTo("""{"type":"articles","attributes":{"title":"Title"}}""")
+  }
+
   @Test(expected = IllegalArgumentException::class)
   fun `throw when serializing resource with invalid type`() {
     val article = Article(type = "", id = "1")
-    adapter.toJson(article)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when serializing resource without id or lid`() {
-    val article = Article(type = "articles", id = null, lid = null)
-    adapter.toJson(article)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when serializing resource with invalid id`() {
-    val article = Article(type = "articles", id = "", lid = null)
-    adapter.toJson(article)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when serializing resource with invalid lid`() {
-    val article = Article(type = "articles", id = null, lid = "")
     adapter.toJson(article)
   }
 

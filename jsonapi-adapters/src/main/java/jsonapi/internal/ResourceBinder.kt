@@ -48,9 +48,6 @@ private fun resourceIdentifier(target: Any): ResourceIdentifier {
 
   val id = getValueOfAnnotatedFieldOrProperty<String>(target, Id::class.java)
   val lid = getValueOfAnnotatedFieldOrProperty<String>(target, Lid::class.java)
-  if (id.isNullOrBlank() && lid.isNullOrBlank()) {
-    throw IllegalArgumentException("A resource MUST contain an 'id' or 'lid' but both were null or blank.")
-  }
 
   return ResourceIdentifier(type, id, lid)
 }

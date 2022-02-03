@@ -31,9 +31,6 @@ class ResourceObject @JvmOverloads constructor(
     require(type.isNotBlank()) {
       "A resource object MUST contain a type member but was blank."
     }
-    require(!id.isNullOrBlank() || !lid.isNullOrBlank()) {
-      "A resource object MUST contain an 'id' or 'lid' member but both were null or blank."
-    }
   }
 
   /** Creates [ResourceIdentifier] from this resource. */
