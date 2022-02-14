@@ -38,6 +38,17 @@ internal fun readResourceObject(target: Any): ResourceObject {
   return ResourceObject(identifier.type, identifier.id, identifier.lid, relationships, links, meta)
 }
 
+private fun relationshipResourceIdentifier(target: Any): ResourceIdentifier {
+  val resourceIdentifier = resourceIdentifier(target)
+  if (resourceIdentifier.id.isNullOrBlank() && resourceIdentifier.lid.isNullOrBlank()) {
+    throw IllegalArgumentException(
+      "A relationship resource identifier MUST contain an 'id' " +
+        "or 'lid' member but both were null or blank."
+    )
+  }
+  return resourceIdentifier
+}
+
 private fun resourceIdentifier(target: Any): ResourceIdentifier {
   // When no field annotations are declared for member type use the value from class annotation
   val classLevelType = target::class.java.getAnnotation(Resource::class.java)?.type
@@ -61,7 +72,7 @@ private fun relationships(target: Any): Relationships? {
     .forEach { annotatedTarget ->
       val name = annotatedTarget.getAnnotation(ToOne::class.java).name
       val value = annotatedTarget.field.getValue(target) ?: return@forEach
-      val relationship = Relationship.ToOne(resourceIdentifier(value))
+      val relationship = Relationship.ToOne(relationshipResourceIdentifier(value))
       val replaced = mergedRelationships.put(name, relationship)
       if (replaced != null) {
         throw IllegalStateException(
@@ -82,7 +93,9 @@ private fun relationships(target: Any): Relationships? {
       // Expected to have collection value for ToMany relationship field
       if (value is Collection<*>) {
         // Create to-many relationship by mapping all non-null values from collection to resource identifiers
-        val relationship = Relationship.ToMany(value.filterNotNull().map { item -> resourceIdentifier(item) })
+        val relationship = Relationship.ToMany(
+          value.filterNotNull().map { item -> relationshipResourceIdentifier(item) }
+        )
         val replaced = mergedRelationships.put(name, relationship)
         if (replaced != null) {
           throw IllegalStateException(

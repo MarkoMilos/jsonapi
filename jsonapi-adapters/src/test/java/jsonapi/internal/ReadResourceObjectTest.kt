@@ -90,6 +90,22 @@ class ReadResourceObjectTest {
     )
   }
 
+  @Test(expected = IllegalArgumentException::class)
+  fun `read throws if target has relationships without identifier`() {
+    @Resource("bar")
+    class Bar(@Id val id: String?, @Lid val lid: String? = null)
+
+    @Resource("foo")
+    class Foo {
+      @Id val id = null
+      @jsonapi.ToOne("A") val a = Bar(null)
+      @jsonapi.ToOne("B") val b = Bar("2")
+      @jsonapi.ToMany("C") val c = listOf(Bar("1"), Bar("2"), Bar("3"))
+    }
+
+    readResourceObject(Foo())
+  }
+
   @Test(expected = IllegalStateException::class)
   fun `read throws if multiple relationship fields are defined for the same name`() {
     @Resource("bar")
@@ -180,6 +196,7 @@ class ReadResourceObjectTest {
     assertThat(resourceObject.lid).isEqualTo("1")
   }
 
+  @Test
   fun `read from target without id or lid`() {
     @Resource("foo")
     class Foo(
