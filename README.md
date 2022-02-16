@@ -1,6 +1,6 @@
 # JSON:API for Java & Kotlin
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.markomilos.jsonapi/jsonapi-adapters/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.markomilos.jsonapi/jsonapi-adapters)
+![Maven Central](https://img.shields.io/maven-central/v/com.markomilos.jsonapi/jsonapi-adapters)
 
 Library for streamlined use of JSON:API using Kotlin and Java built on top of a modern json
 library [Moshi](https://github.com/square/moshi).
