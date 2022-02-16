@@ -40,6 +40,13 @@ class ResourceObjectAdapterTest {
   }
 
   @Test
+  fun `deserialize resource without identifier`() {
+    val deserialized = adapter.fromJson("""{"type":"articles"}""") ?: fail("deserialized == null")
+    assertThat(deserialized.type).isEqualTo("articles")
+    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type")
+  }
+
+  @Test
   fun `deserialize resource with local identifier`() {
     val deserialized = adapter.fromJson("""{"type":"articles", "lid":"1"}""") ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
@@ -69,21 +76,6 @@ class ResourceObjectAdapterTest {
   }
 
   @Test(expected = JsonFormatException::class)
-  fun `throw on deserializing resource without id or lid`() {
-    adapter.fromJson("""{"type":"articles"}""")
-  }
-
-  @Test(expected = JsonFormatException::class)
-  fun `throw on deserializing resource with invalid id`() {
-    adapter.fromJson("""{"type":"articles", "id":""}""")
-  }
-
-  @Test(expected = JsonFormatException::class)
-  fun `throw on deserializing resource with invalid lid`() {
-    adapter.fromJson("""{"type":"articles", "lid":""}""")
-  }
-
-  @Test(expected = JsonFormatException::class)
   fun `throw when deserializing resource that is not an json object`() {
     adapter.fromJson("[]")
   }
@@ -107,6 +99,13 @@ class ResourceObjectAdapterTest {
     val resource = ResourceObject("articles", "1", null)
     val serialized = adapter.toJson(resource)
     assertThat(serialized).isEqualTo("""{"type":"articles","id":"1"}""")
+  }
+
+  @Test
+  fun `serialize resource without identifier`() {
+    val resource = ResourceObject("articles", null, null)
+    val serialized = adapter.toJson(resource)
+    assertThat(serialized).isEqualTo("""{"type":"articles"}""")
   }
 
   @Test

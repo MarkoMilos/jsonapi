@@ -60,6 +60,13 @@ class ResourceTypeAdapterTest {
   }
 
   @Test
+  fun `deserialize resource without identifier`() {
+    val deserialized = adapter.fromJson("""{"type":"articles"}""") ?: fail("deserialized == null")
+    assertThat(deserialized.type).isEqualTo("articles")
+    assertThat(deserialized).hasAllNullFieldsOrPropertiesExcept("type")
+  }
+
+  @Test
   fun `deserialize resource with local identifier`() {
     val deserialized = adapter.fromJson("""{"type":"articles","lid":"1"}""") ?: fail("deserialized == null")
     assertThat(deserialized.type).isEqualTo("articles")
@@ -105,21 +112,6 @@ class ResourceTypeAdapterTest {
   @Test(expected = JsonFormatException::class)
   fun `throw on deserializing resource with invalid type`() {
     adapter.fromJson("""{"type":null,"id":"1"}""")
-  }
-
-  @Test(expected = JsonFormatException::class)
-  fun `throw on deserializing resource without id or lid`() {
-    adapter.fromJson("""{"type":"articles"}""")
-  }
-
-  @Test(expected = JsonFormatException::class)
-  fun `throw on deserializing resource with invalid id`() {
-    adapter.fromJson("""{"type":"articles","id":""}""")
-  }
-
-  @Test(expected = JsonFormatException::class)
-  fun `throw on deserializing resource with invalid lid`() {
-    adapter.fromJson("""{"type":"articles","lid":""}""")
   }
 
   @Test(expected = JsonFormatException::class)
@@ -236,6 +228,13 @@ class ResourceTypeAdapterTest {
   }
 
   @Test
+  fun `serialize resource without identifier`() {
+    val article = Article(type = "articles", id = null, lid = null)
+    val serialized = adapter.toJson(article)
+    assertThat(serialized).isEqualTo("""{"type":"articles"}""")
+  }
+
+  @Test
   fun `serialize resource with local identifier`() {
     val article = Article("articles", lid = "1")
     val serialized = adapter.toJson(article)
@@ -310,24 +309,6 @@ class ResourceTypeAdapterTest {
   @Test(expected = IllegalArgumentException::class)
   fun `throw when serializing resource with invalid type`() {
     val article = Article(type = "", id = "1")
-    adapter.toJson(article)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when serializing resource without id or lid`() {
-    val article = Article(type = "articles", id = null, lid = null)
-    adapter.toJson(article)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when serializing resource with invalid id`() {
-    val article = Article(type = "articles", id = "", lid = null)
-    adapter.toJson(article)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `throw when serializing resource with invalid lid`() {
-    val article = Article(type = "articles", id = null, lid = "")
     adapter.toJson(article)
   }
 

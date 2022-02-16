@@ -67,13 +67,6 @@ internal class ResourceObjectAdapter(moshi: Moshi) : JsonAdapter<ResourceObject>
       )
     }
 
-    // Identifier is required so id or lid should not be empty
-    if (id.isNullOrBlank() && lid.isNullOrBlank()) {
-      throw JsonFormatException(
-        "A resource identifier MUST contain an 'id' or 'lid' member but both were null or blank on path ${reader.path}"
-      )
-    }
-
     // Create and return resource object with deserialized members
     return ResourceObject(type, id, lid, relationships, links, meta)
   }

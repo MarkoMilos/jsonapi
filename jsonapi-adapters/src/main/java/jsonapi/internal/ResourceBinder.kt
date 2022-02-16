@@ -31,28 +31,30 @@ internal fun bindResourceObject(target: Any, resourceObject: ResourceObject) {
 
 /** Reads [ResourceObject] from [target] annotated fields via reflection. */
 internal fun readResourceObject(target: Any): ResourceObject {
-  val identifier = resourceIdentifier(target)
+  val type = readType(target)
+  val id = getValueOfAnnotatedFieldOrProperty<String>(target, Id::class.java)
+  val lid = getValueOfAnnotatedFieldOrProperty<String>(target, Lid::class.java)
   val relationships = relationships(target)
   val links = getValueOfAnnotatedFieldOrProperty<Links>(target, LinksObject::class.java)
   val meta = getValueOfAnnotatedFieldOrProperty<Meta>(target, MetaObject::class.java)
-  return ResourceObject(identifier.type, identifier.id, identifier.lid, relationships, links, meta)
+  return ResourceObject(type, id, lid, relationships, links, meta)
 }
 
 private fun resourceIdentifier(target: Any): ResourceIdentifier {
+  val type = readType(target)
+  val id = getValueOfAnnotatedFieldOrProperty<String>(target, Id::class.java)
+  val lid = getValueOfAnnotatedFieldOrProperty<String>(target, Lid::class.java)
+  return ResourceIdentifier(type, id, lid)
+}
+
+private fun readType(target: Any): String {
   // When no field annotations are declared for member type use the value from class annotation
   val classLevelType = target::class.java.getAnnotation(Resource::class.java)?.type
   val type = getValueOfAnnotatedFieldOrProperty(target, Type::class.java) ?: classLevelType
-  if (type.isNullOrEmpty()) {
+  if (type == null || type.isEmpty()) {
     throw IllegalArgumentException("A resource MUST contain non-null, non-empty type.")
   }
-
-  val id = getValueOfAnnotatedFieldOrProperty<String>(target, Id::class.java)
-  val lid = getValueOfAnnotatedFieldOrProperty<String>(target, Lid::class.java)
-  if (id.isNullOrBlank() && lid.isNullOrBlank()) {
-    throw IllegalArgumentException("A resource MUST contain an 'id' or 'lid' but both were null or blank.")
-  }
-
-  return ResourceIdentifier(type, id, lid)
+  return type
 }
 
 private fun relationships(target: Any): Relationships? {

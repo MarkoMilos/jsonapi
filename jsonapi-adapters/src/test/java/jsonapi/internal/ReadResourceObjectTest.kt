@@ -35,6 +35,29 @@ class ReadResourceObjectTest {
   }
 
   @Test
+  fun `read from target with local identifier`() {
+    @Resource("foo")
+    class Foo(@Lid val lid: String = "1")
+
+    val resourceObject = readResourceObject(Foo())
+
+    assertThat(resourceObject.id).isNull()
+    assertThat(resourceObject.lid).isEqualTo("1")
+    assertThat(resourceObject).hasAllNullFieldsOrPropertiesExcept("type", "lid")
+  }
+
+  @Test
+  fun `read from target without identifiers`() {
+    @Resource("foo")
+    class Foo
+
+    val resourceObject = readResourceObject(Foo())
+
+    assertThat(resourceObject.type).isEqualTo("foo")
+    assertThat(resourceObject).hasAllNullFieldsOrPropertiesExcept("type")
+  }
+
+  @Test
   fun `read from target with all resource object annotations`() {
     class Foo {
       @Type val type = "foo"
@@ -68,7 +91,6 @@ class ReadResourceObjectTest {
 
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @jsonapi.ToOne("A") val a = Bar("1")
       @jsonapi.ToOne("B") val b = Bar("2")
       @jsonapi.ToMany("C") val c = listOf(Bar("1"), Bar("2"), Bar("3"))
@@ -97,9 +119,23 @@ class ReadResourceObjectTest {
 
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @jsonapi.ToOne("A") val first = Bar("1")
       @jsonapi.ToOne("A") val second = Bar("1")
+    }
+
+    readResourceObject(Foo())
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `read throws if target has relationships without identifier`() {
+    @Resource("bar")
+    class Bar(@Id val id: String?, @Lid val lid: String? = null)
+
+    @Resource("foo")
+    class Foo {
+      @jsonapi.ToOne("A") val a = Bar(null)
+      @jsonapi.ToOne("B") val b = Bar("2")
+      @jsonapi.ToMany("C") val c = listOf(Bar("1"), Bar("2"), Bar("3"))
     }
 
     readResourceObject(Foo())
@@ -112,7 +148,6 @@ class ReadResourceObjectTest {
 
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @jsonapi.ToMany("A") val first = Bar("1") // ToMany annotation on non-collection field
     }
 
@@ -126,7 +161,6 @@ class ReadResourceObjectTest {
 
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @jsonapi.ToOne("bar") val bar = Bar("1")
       @RelationshipsObject val relationships = Relationships(
         "bar" to ToOne(ResourceIdentifier("bar", "2"))
@@ -144,7 +178,7 @@ class ReadResourceObjectTest {
   fun `read from target without type field`() {
     // Type field omitted and type defined with @Resource annotation
     @Resource("foo")
-    class Foo(@Id val id: String = "1")
+    class Foo
 
     val resourceObject = readResourceObject(Foo())
 
@@ -154,7 +188,7 @@ class ReadResourceObjectTest {
   @Test(expected = IllegalArgumentException::class)
   fun `read throws for target without defined type`() {
     // Does not define type neither with class or field annotation
-    class Foo(@Id val id: String = "1")
+    class Foo
     readResourceObject(Foo())
   }
 
@@ -163,29 +197,6 @@ class ReadResourceObjectTest {
     @Resource("foo")
     class Foo {
       @Type val type = "" // Invalid and has priority
-      @Id val id = "1"
-    }
-
-    readResourceObject(Foo())
-  }
-
-  @Test
-  fun `read from target with local identifier`() {
-    @Resource("foo")
-    class Foo(@Lid val lid: String = "1")
-
-    val resourceObject = readResourceObject(Foo())
-
-    assertThat(resourceObject.id).isNull()
-    assertThat(resourceObject.lid).isEqualTo("1")
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `read throws for target with invalid identifier`() {
-    @Resource("foo")
-    class Foo {
-      @Id val id = ""
-      @Lid val lid = ""
     }
 
     readResourceObject(Foo())
@@ -227,7 +238,6 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple relationships object annotated fields`() {
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @RelationshipsObject val field1: Relationships? = null
       @RelationshipsObject val field2: Relationships? = null
     }
@@ -239,7 +249,6 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple links annotated fields`() {
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @LinksObject val field1: Links? = null
       @LinksObject val field2: Links? = null
     }
@@ -251,7 +260,6 @@ class ReadResourceObjectTest {
   fun `read throws for target with multiple meta annotated fields`() {
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @MetaObject val field1: Meta? = null
       @MetaObject val field2: Meta? = null
     }
@@ -263,7 +271,6 @@ class ReadResourceObjectTest {
   fun `read throws for target with type field of incorrect type`() {
     class Foo {
       @Type val type: Int = 1
-      @Id val id = "1"
     }
 
     readResourceObject(Foo())
@@ -293,7 +300,6 @@ class ReadResourceObjectTest {
   fun `read throws for target with relationships object field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @RelationshipsObject val relationships: String = ""
     }
 
@@ -304,7 +310,6 @@ class ReadResourceObjectTest {
   fun `read throws for target with links field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @LinksObject val links: String = ""
     }
 
@@ -315,7 +320,6 @@ class ReadResourceObjectTest {
   fun `read throws for target with meta field of incorrect type`() {
     @Resource("foo")
     class Foo {
-      @Id val id = "1"
       @MetaObject val meta: String = ""
     }
 
