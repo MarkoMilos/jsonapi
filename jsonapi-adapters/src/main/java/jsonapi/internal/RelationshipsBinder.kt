@@ -38,6 +38,10 @@ private fun bindRelationshipFields(
     when (relationship) {
       is Relationship.ToOne -> {
         val resourceIdentifier = relationship.data ?: return@forEach
+        if (field.type == String::class.java) {
+          field.setValue(target, resourceIdentifier.id)
+          return@forEach
+        }
         val matchedPair = resources.find { it.first.identifier() == resourceIdentifier }
         val matchedResource = matchedPair?.second ?: return@forEach
         try {
@@ -71,6 +75,11 @@ private fun bindRelationshipFields(
         if (field.type == Collection::class.java || field.type == List::class.java) {
           // Assert that matched resources are assignable to field
           val fieldElementType = field.genericType.collectionElementType(Collection::class.java).rawType()
+          if (fieldElementType == String::class.java) {
+            field.setValue(target, relationship.data.map { it.id })
+            return@forEach
+          }
+
           val nonMatchingResource = matchedResources.find { !fieldElementType.isAssignableFrom(it::class.java) }
           if (nonMatchingResource == null) {
             // All resources are assignable to declared field type - set field via reflection
