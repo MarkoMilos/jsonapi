@@ -283,13 +283,13 @@ Download the latest JAR or depend via Maven:
 <dependency>
     <groupId>com.markomilos.jsonapi</groupId>
     <artifactId>jsonapi-adapters</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 or Gradle:
 ```groovy
-implementation("com.markomilos.jsonapi:jsonapi-adapters:1.0.0")
+implementation("com.markomilos.jsonapi:jsonapi-adapters:1.1.0")
 ```
 
 # Annotation processor
@@ -337,14 +337,14 @@ Download the latest JAR or depend via Maven:
 <dependency>
     <groupId>com.markomilos.jsonapi</groupId>
     <artifactId>jsonapi-compiler</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 or Gradle:
 
 ```groovy
-kapt("com.markomilos.jsonapi:jsonapi-compiler:1.0.0")
+kapt("com.markomilos.jsonapi:jsonapi-compiler:1.1.0")
 ```
 
 # Retrofit
@@ -403,13 +403,13 @@ Download the latest JAR or depend via Maven:
 <dependency>
     <groupId>com.markomilos.jsonapi</groupId>
     <artifactId>jsonapi-retrofit</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 or Gradle:
 ```groovy
-implementation("com.markomilos.jsonapi:jsonapi-retrofit:1.0.0")
+implementation("com.markomilos.jsonapi:jsonapi-retrofit:1.1.0")
 ```
 
 # R8 / ProGuard
