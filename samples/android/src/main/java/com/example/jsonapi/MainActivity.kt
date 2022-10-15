@@ -115,5 +115,5 @@ class MainActivity : Activity() {
       }
     ]
   }
-""".trimIndent()
+  """.trimIndent()
 }

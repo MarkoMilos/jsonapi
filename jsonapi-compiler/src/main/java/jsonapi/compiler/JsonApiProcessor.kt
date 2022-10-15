@@ -9,6 +9,8 @@ import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
 import com.squareup.moshi.JsonAdapter
 import jsonapi.Resource
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType.AGGREGATING
 import java.io.IOException
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -20,6 +22,7 @@ import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
 @AutoService(Processor::class)
+@IncrementalAnnotationProcessor(AGGREGATING)
 class JsonApiProcessor : AbstractProcessor() {
 
   private var firstProcessingPass = true
@@ -83,6 +86,8 @@ class JsonApiProcessor : AbstractProcessor() {
       .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
       .addMethod(resourcesMethod) // resources() : List<Class<*>>
       .addMethod(factoryMethod) // factory() : JsonAdapter.Factory
+      // add elements that annotation processor is using to generate the class
+      .apply { resourceElements.forEach { addOriginatingElement(it) } }
       .build()
 
     // Create a file for defined type and write the java content

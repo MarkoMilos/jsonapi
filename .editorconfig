@@ -3,7 +3,7 @@
 # top-most EditorConfig file
 root = true
 
-[*.{kt, kts, java}]
+[*.{kt, kts, java, gradle}]
 indent_size = 2
 continuation_indent_size = 2
 end_of_line = lf

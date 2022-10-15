@@ -11,6 +11,8 @@ dependencies {
   implementation deps.javapoet
   implementation deps.autoservice
   kapt deps.autoservice
+  implementation deps.incapRuntime
+  kapt deps.incapProcessor
 
   testImplementation deps.junit
   testImplementation deps.compile_testing
